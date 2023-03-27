@@ -2,13 +2,11 @@ metadata:
   name: "{{ .ClusterName }}"
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
-
+providerSpecific:
+  location: "westeurope"
+  subscriptionId: 6b1f6e4a-6d0e-4aa4-9a5a-fbaca65a23b3
 nodePools:
-  pool0:
-    name: pool0
-    instanceType: Standard_D2s_v3
-    replicas: 3
-    rootVolumeSizeGB: 50
-connectivity:
-  bastion:
-    enabled: false
+- name: md00
+  instanceType: Standard_D2s_v5
+  replicas: 3
+  rootVolumeSizeGB: 50

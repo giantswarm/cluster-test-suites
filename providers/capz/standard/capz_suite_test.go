@@ -35,6 +35,7 @@ func TestCAPZStandard(t *testing.T) {
 	}
 
 	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAzure).
+		WithAppVersions("", "v0.0.13"). // TODO: Remove when default-apps-azure is made public
 		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
 
 	BeforeSuite(func() {
