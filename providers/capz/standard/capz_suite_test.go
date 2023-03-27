@@ -18,6 +18,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 )
 
+const KubeContext = "capz"
+
 var (
 	framework *clustertest.Framework
 	cluster   *application.Cluster
@@ -29,7 +31,7 @@ func TestCAPZStandard(t *testing.T) {
 
 	logger.LogWriter = GinkgoWriter
 
-	framework, err = clustertest.New()
+	framework, err = clustertest.New(KubeContext)
 	if err != nil {
 		panic(err)
 	}

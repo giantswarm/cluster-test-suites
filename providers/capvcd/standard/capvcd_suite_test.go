@@ -19,6 +19,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 )
 
+const KubeContext = "capvcd"
+
 var (
 	framework *clustertest.Framework
 	cluster   *application.Cluster
@@ -30,7 +32,7 @@ func TestCAPVCDStandard(t *testing.T) {
 
 	logger.LogWriter = GinkgoWriter
 
-	framework, err = clustertest.New()
+	framework, err = clustertest.New(KubeContext)
 	if err != nil {
 		panic(err)
 	}
