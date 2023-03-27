@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/organization"
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
 )
@@ -35,6 +36,7 @@ func TestCAPVCDStandard(t *testing.T) {
 	}
 
 	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderCloudDirector).
+		WithOrg(organization.New("giantswarm")). // Uses the `giantswarm` org (and namespace) as it requires a credentials secret to exist already
 		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
 
 	BeforeSuite(func() {
