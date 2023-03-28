@@ -46,7 +46,7 @@ func TestCAPAStandard(t *testing.T) {
 		defer cancelApplyCtx()
 
 		client, err := framework.ApplyCluster(applyCtx, cluster)
-		Expect(err).ToNot(HaveOccurred())
+		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(
 			wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
