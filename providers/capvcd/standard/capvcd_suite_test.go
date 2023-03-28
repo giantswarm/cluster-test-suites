@@ -48,7 +48,7 @@ func TestCAPVCDStandard(t *testing.T) {
 		defer cancelApplyCtx()
 
 		client, err := framework.ApplyCluster(applyCtx, cluster)
-		Expect(err).To(BeNil())
+		Expect(err).ToNot(HaveOccurred())
 
 		Eventually(
 			wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
@@ -57,7 +57,7 @@ func TestCAPVCDStandard(t *testing.T) {
 	})
 
 	AfterSuite(func() {
-		Expect(framework.DeleteCluster(ctx, cluster)).To(BeNil())
+		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
 	})
 
 	RegisterFailHandler(Fail)

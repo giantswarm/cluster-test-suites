@@ -22,10 +22,10 @@ func Run(framework *clustertest.Framework, cluster *application.Cluster) {
 	})
 
 	It("should be able to connect to MC cluster", func() {
-		Expect(framework.MC().CheckConnection()).To(BeNil())
+		Expect(framework.MC().CheckConnection()).To(Succeed())
 	})
 
 	It("should be able to connect to WC cluster", func() {
-		Expect(wcClient.CheckConnection()).To(BeNil())
+		Expect(wcClient.CheckConnection()).To(Succeed())
 	})
 }
