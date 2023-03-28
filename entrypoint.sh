@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if [ "$1" == "" ]; then
-  echo "Test suite needs to be provided"
+if [ "${E2E_KUBECONFIG}" == "" ]; then
+  echo "The env var 'E2E_KUBECONFIG' must be provided"
   exit 1
 fi
 
-ginkgo -v $1
+ginkgo -v $@
