@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2023-03-31
+
 ### Added
 
 - Prebuild the test suites in the Docker image to speed up starting the tests
@@ -27,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/giantswarm/cluster-test-suites/releases/tag/v1.0.0
