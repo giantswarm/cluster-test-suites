@@ -8,4 +8,6 @@ ADD . .
 
 RUN go mod tidy
 
+RUN ginkgo build -r ./
+
 ENTRYPOINT ["/app/entrypoint.sh"]
