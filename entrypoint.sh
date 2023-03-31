@@ -5,4 +5,7 @@ if [ "${E2E_KUBECONFIG}" == "" ]; then
   exit 1
 fi
 
-ginkgo -v $@
+SUITES_TO_RUN=$(find $1 -name '*.test' | xargs)
+shift
+
+ginkgo -v -r $@ ${SUITES_TO_RUN}
