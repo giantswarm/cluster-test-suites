@@ -1,0 +1,5 @@
+clusterName: "{{ .ClusterName }}"
+clusterDescription: "E2E Test cluster"
+organization: "{{ .Organization }}"
+
+# TODO: Populate with valid default values
