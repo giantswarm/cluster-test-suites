@@ -2,8 +2,6 @@ package standard
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"path"
 	"testing"
 	"time"
@@ -17,13 +15,11 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/common"
 )
 
-const (
-	KubeContext                 = "capa"
-	EnvWorkloadClusterName      = "E2E_WC_NAME"
-	EnvWorkloadClusterNamespace = "E2E_WC_NAMESPACE"
-)
+const KubeContext = "capa"
 
 var (
 	ctx       context.Context
@@ -32,54 +28,53 @@ var (
 )
 
 func TestCAPAStandard(t *testing.T) {
-	ctx := context.Background()
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CAPA Standard Suite")
+}
 
-	workloadClusterName := os.Getenv(EnvWorkloadClusterName)
-	workloadClusterNamespace := os.Getenv(EnvWorkloadClusterNamespace)
+var _ = BeforeSuite(func() {
+	ctx = context.Background()
+	logger.LogWriter = GinkgoWriter
 
 	var err error
 	framework, err = clustertest.New(KubeContext)
-	if err != nil {
-		Fail(fmt.Sprintf("Failed to initialize clustertest framework: %v", err))
+	Expect(err).NotTo(HaveOccurred())
+
+	cluster = setUpWorkloadCluster()
+
+	common.Framework = framework
+	common.Cluster = cluster
+})
+
+func setUpWorkloadCluster() *application.Cluster {
+	cluster, err := framework.LoadCluster()
+	Expect(err).NotTo(HaveOccurred())
+	if cluster != nil {
+		return cluster
 	}
 
-	if workloadClusterName != "" && workloadClusterNamespace != "" {
-		cluster, err = framework.LoadCluster(workloadClusterName, workloadClusterNamespace)
-		if err != nil {
-			Fail(fmt.Sprintf("Failed to initialize clustertest framework: %v", err))
-		}
-	} else {
-		cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAWS).
-			WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
-		logger.Log("Workload cluster name: %s", cluster.Name)
-	}
+	return createCluster()
+}
 
-	BeforeSuite(func() {
-		logger.LogWriter = GinkgoWriter
+func createCluster() *application.Cluster {
+	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAWS).
+		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
+	logger.Log("Workload cluster name: %s", cluster.Name)
 
-		if workloadClusterName != "" && workloadClusterNamespace != "" {
-			return
-		}
+	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
+	defer cancelApplyCtx()
 
-		applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
-		defer cancelApplyCtx()
+	client, err := framework.ApplyCluster(applyCtx, cluster)
+	Expect(err).NotTo(HaveOccurred())
 
-		client, err := framework.ApplyCluster(applyCtx, cluster)
-		Expect(err).NotTo(HaveOccurred())
+	Eventually(
+		wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		20*time.Minute, 15*time.Second,
+	).Should(BeTrue())
 
-		Eventually(
-			wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
-			20*time.Minute, 15*time.Second,
-		).Should(BeTrue())
-	})
-
-	AfterSuite(func() {
-		if workloadClusterName != "" && workloadClusterNamespace != "" {
-			return
-		}
+	DeferCleanup(func(g Gomega) {
 		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
 	})
 
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "CAPA Standard Suite")
+	return cluster
 }
