@@ -14,7 +14,7 @@ var (
 	Cluster   *application.Cluster
 )
 
-var _ = Describe("Common tests", func() {
+func Run() {
 	var wcClient *client.Client
 
 	BeforeEach(func() {
@@ -33,4 +33,4 @@ var _ = Describe("Common tests", func() {
 	It("should be able to connect to WC cluster", func() {
 		Expect(wcClient.CheckConnection()).To(Succeed())
 	})
-})
+}
