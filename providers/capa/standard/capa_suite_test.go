@@ -50,6 +50,7 @@ func setUpWorkloadCluster() *application.Cluster {
 	cluster, err := framework.LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
 		return cluster
 	}
 
