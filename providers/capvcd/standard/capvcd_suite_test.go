@@ -76,7 +76,7 @@ func createCluster() *application.Cluster {
 		20*time.Minute, 15*time.Second,
 	).Should(BeTrue())
 
-	DeferCleanup(func(g Gomega) {
+	DeferCleanup(func() {
 		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
 	})
 
