@@ -7,5 +7,5 @@ import (
 )
 
 var _ = Describe("Common tests", func() {
-	common.Run(framework, cluster)
+	common.Run()
 })

@@ -9,20 +9,25 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func Run(framework *clustertest.Framework, cluster *application.Cluster) {
+var (
+	Framework *clustertest.Framework
+	Cluster   *application.Cluster
+)
+
+func Run() {
 	var wcClient *client.Client
 
 	BeforeEach(func() {
 		var err error
 
-		wcClient, err = framework.WC(cluster.Name)
+		wcClient, err = Framework.WC(Cluster.Name)
 		if err != nil {
 			Fail(err.Error())
 		}
 	})
 
 	It("should be able to connect to MC cluster", func() {
-		Expect(framework.MC().CheckConnection()).To(Succeed())
+		Expect(Framework.MC().CheckConnection()).To(Succeed())
 	})
 
 	It("should be able to connect to WC cluster", func() {

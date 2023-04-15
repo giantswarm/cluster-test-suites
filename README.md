@@ -9,6 +9,7 @@
   * `capz` pointing to a valid CAPZ MC
   * `capvcd` pointing to a valid CAPVCD MC
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
+* When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
 
 Example kubeconfig:
 

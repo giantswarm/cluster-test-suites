@@ -16,48 +16,67 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/common"
 )
 
 const KubeContext = "capz"
 
 var (
+	ctx       context.Context
 	framework *clustertest.Framework
 	cluster   *application.Cluster
 )
 
 func TestCAPZStandard(t *testing.T) {
-	var err error
-	ctx := context.Background()
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CAPZ Standard Suite")
+}
 
+var _ = BeforeSuite(func() {
+	ctx = context.Background()
 	logger.LogWriter = GinkgoWriter
 
+	var err error
 	framework, err = clustertest.New(KubeContext)
-	if err != nil {
-		panic(err)
+	Expect(err).NotTo(HaveOccurred())
+
+	cluster = setUpWorkloadCluster()
+
+	common.Framework = framework
+	common.Cluster = cluster
+})
+
+func setUpWorkloadCluster() *application.Cluster {
+	cluster, err := framework.LoadCluster()
+	Expect(err).NotTo(HaveOccurred())
+	if cluster != nil {
+		return cluster
 	}
 
+	return createCluster()
+}
+
+func createCluster() *application.Cluster {
 	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAzure).
 		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
 
-	BeforeSuite(func() {
-		logger.Log("Workload cluster name: %s", cluster.Name)
+	logger.Log("Workload cluster name: %s", cluster.Name)
 
-		applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
-		defer cancelApplyCtx()
+	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
+	defer cancelApplyCtx()
 
-		client, err := framework.ApplyCluster(applyCtx, cluster)
-		Expect(err).NotTo(HaveOccurred())
+	client, err := framework.ApplyCluster(applyCtx, cluster)
+	Expect(err).NotTo(HaveOccurred())
 
-		Eventually(
-			wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
-			20*time.Minute, 15*time.Second,
-		).Should(BeTrue())
-	})
+	Eventually(
+		wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		20*time.Minute, 15*time.Second,
+	).Should(BeTrue())
 
-	AfterSuite(func() {
+	DeferCleanup(func() {
 		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
 	})
 
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "CAPZ Standard Suite")
+	return cluster
 }

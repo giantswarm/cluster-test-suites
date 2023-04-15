@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme with instructions on adding tests
 
+## Added
+
+- Ability to run tests against an existing WC. To do this export E2E_WC_NAME and E2E_WC_NAMESPACE
+
 ## [1.0.2] - 2023-03-31
 
 ### Added
