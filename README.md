@@ -7,6 +7,7 @@
 * A valid Kubeconfig with the following context available:
   * `capa` pointing to a valid CAPA MC
   * `capz` pointing to a valid CAPZ MC
+  * `capv` pointing to a valid CAPV MC
   * `capvcd` pointing to a valid CAPVCD MC
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
@@ -26,6 +27,10 @@ contexts:
     user: grizzly-admin
   name: capa
 - context:
+    cluster: gcapeverde
+    user: gcapeverde-admin
+  name: capv
+- context:
     cluster: guppy
     user: guppy-admin
   name: capvcd
@@ -41,6 +46,10 @@ clusters:
 - cluster:
     certificate-authority-data: [REDACTED]
     server: https://[REDACTED]:6443
+  name: gcapeverde
+- cluster:
+    certificate-authority-data: [REDACTED]
+    server: https://[REDACTED]:6443
   name: guppy
 current-context: grizzly
 preferences: {}
@@ -50,6 +59,10 @@ users:
     client-certificate-data: [REDACTED]
     client-key-data: [REDACTED]
 - name: grizzly-admin
+  user:
+    client-certificate-data: [REDACTED]
+    client-key-data: [REDACTED]
+- name: gcapeverde-admin
   user:
     client-certificate-data: [REDACTED]
     client-key-data: [REDACTED]
