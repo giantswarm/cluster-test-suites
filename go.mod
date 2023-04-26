@@ -3,7 +3,7 @@ module github.com/giantswarm/cluster-test-suites
 go 1.18
 
 require (
-	github.com/giantswarm/clustertest v0.0.8
+	github.com/giantswarm/clustertest v0.0.9
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
 	sigs.k8s.io/controller-runtime v0.14.5

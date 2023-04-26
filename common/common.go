@@ -40,36 +40,18 @@ func Run() {
 		Expect(wcClient.CheckConnection()).To(Succeed())
 	})
 
-	It("has all of it's pods in the Running state", func() {
-		Eventually(Consistent(checkPodSuccessfulPhase(wcClient), 10, time.Second)).
+	It("has all of it's Pods in the Running state", func() {
+		Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 			WithTimeout(wait.DefaultTimeout).
 			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
 	})
+
+	It("has all it's Nodes in the Ready state", func() {
+	})
 }
 
-func Consistent(action func() error, attempts int, pollInterval time.Duration) func() error {
-	return func() error {
-		ticker := time.NewTicker(pollInterval)
-		for range ticker.C {
-			if attempts <= 0 {
-				ticker.Stop()
-				break
-			}
-
-			err := action()
-			if err != nil {
-				return err
-			}
-
-			attempts--
-		}
-
-		return nil
-	}
-}
-
-func checkPodSuccessfulPhase(wcClient *client.Client) func() error {
+func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 	return func() error {
 		podList := &corev1.PodList{}
 		err := wcClient.List(context.Background(), podList)
