@@ -46,9 +46,6 @@ func Run() {
 			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
 	})
-
-	It("has all it's Nodes in the Ready state", func() {
-	})
 }
 
 func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
