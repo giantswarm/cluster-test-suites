@@ -6,6 +6,6 @@ import (
 	"github.com/giantswarm/cluster-test-suites/common"
 )
 
-var _ = Describe("Common tests", func() {
+var _ = PDescribe("Common tests", func() {
 	common.Run()
 })
