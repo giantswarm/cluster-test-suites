@@ -88,6 +88,12 @@ func checkWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 	minNodes := 0
 	maxNodes := 0
 	for _, pool := range values.NodePools {
+		if pool.Replicas > 0 {
+			minNodes += pool.Replicas
+			maxNodes += pool.Replicas
+			continue
+		}
+
 		minNodes += pool.MinSize
 		maxNodes += pool.MaxSize
 	}
