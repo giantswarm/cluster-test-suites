@@ -73,7 +73,7 @@ func Run() {
 
 func checkControlPlaneNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
 	expectedNodes := values.ControlPlane.Replicas
-	controlPlaneFunc := wait.IsNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
+	controlPlaneFunc := wait.AreNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
 
 	return func() error {
 		ok, err := controlPlaneFunc()
@@ -102,7 +102,7 @@ func checkWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 		Max: maxNodes,
 	}
 
-	workersFunc := wait.AreNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""})
+	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""})
 
 	return func() error {
 		ok, err := workersFunc()
