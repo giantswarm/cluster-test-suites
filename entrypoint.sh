@@ -8,4 +8,4 @@ fi
 SUITES_TO_RUN=$(find $1 -name '*.test' | xargs)
 shift
 
-ginkgo -v -r $@ ${SUITES_TO_RUN}
+ginkgo --timeout 4h --keep-going -v -r $@ ${SUITES_TO_RUN}
