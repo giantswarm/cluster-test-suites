@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Wait for Org to finish deleting when deleting cluster
+- Increased Ginkgo suite timeout to 4 hour
+- Continue running other remaining test suites when a suite fails
 
 ## [1.1.0] - 2023-04-19
 
