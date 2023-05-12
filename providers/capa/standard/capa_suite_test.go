@@ -69,7 +69,7 @@ func createCluster() *application.Cluster {
 	Expect(err).NotTo(HaveOccurred())
 
 	Eventually(
-		wait.IsNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		wait.AreNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
 		20*time.Minute, 15*time.Second,
 	).Should(BeTrue())
 
