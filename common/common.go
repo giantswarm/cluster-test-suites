@@ -28,9 +28,7 @@ func Run() {
 		var err error
 
 		wcClient, err = Framework.WC(Cluster.Name)
-		if err != nil {
-			Fail(err.Error())
-		}
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	It("should be able to connect to MC cluster", func() {
@@ -47,32 +45,10 @@ func Run() {
 			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
 	})
-
-	It("has all the control-plane nodes running", func() {
-		values := &application.ClusterValues{}
-		err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
-		Expect(err).NotTo(HaveOccurred())
-
-		Eventually(wait.Consistent(checkControlPlaneNodesReady(wcClient, values), 12, 5*time.Second)).
-			WithTimeout(wait.DefaultTimeout).
-			WithPolling(wait.DefaultInterval).
-			Should(Succeed())
-	})
-
-	It("has all the worker nodes running", func() {
-		values := &application.ClusterValues{}
-		err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
-		Expect(err).NotTo(HaveOccurred())
-
-		Eventually(wait.Consistent(checkWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-			WithTimeout(wait.DefaultTimeout).
-			WithPolling(wait.DefaultInterval).
-			Should(Succeed())
-	})
 }
 
-func checkControlPlaneNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
-	expectedNodes := values.ControlPlane.Replicas
+func CheckControlPlaneNodesReady(wcClient *client.Client, values application.ControlPlane) func() error {
+	expectedNodes := values.Replicas
 	controlPlaneFunc := wait.AreNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
 
 	return func() error {
@@ -84,7 +60,7 @@ func checkControlPlaneNodesReady(wcClient *client.Client, values *application.Cl
 	}
 }
 
-func checkWorkerNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
+func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
 	minNodes := 0
 	maxNodes := 0
 	for _, pool := range values.NodePools {
