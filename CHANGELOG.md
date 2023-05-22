@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2023-05-12
+
+### Changed
+
+- Wait for Org to finish deleting when deleting cluster
+- Increased Ginkgo suite timeout to 4 hour
+- Continue running other remaining test suites when a suite fails
+
 ## [1.1.0] - 2023-04-19
 
 ### Docs
@@ -39,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.0.0...v1.0.1
