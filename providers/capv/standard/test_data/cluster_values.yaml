@@ -3,32 +3,37 @@ organization: "{{ .Organization }}"
 
 baseDomain: test.gigantic.io
 cluster:
-  kubernetesVersion: v1.22.5+vmware.1
+  kubernetesVersion: "v1.24.11"
 
 controlPlane:
-      replicas: 1
-      catalog: "giantswarm"
-      machineTemplate:
-        template: ubuntu-2004-kube-v1.22.5+vmware.1
-        cloneMode: "linkedClone"
-        diskGiB: 50
-        numCPUs: 4
-        memoryMiB: 8096
-        resourcePool: "grasshopper"
-        network:
-          devices:
-          - networkName: 'grasshopper-capv'
-            dhcp4: true
+  replicas: 1
+  catalog: "giantswarm"
+  image:
+    repository: registry.k8s.io
+  machineTemplate:
+    template: ubuntu-2004-kube-v1.24.11
+    cloneMode: "linkedClone"
+    diskGiB: 50
+    numCPUs: 4
+    memoryMiB: 8096
+    resourcePool: "grasshopper"
+    network:
+      devices:
+      - networkName: 'grasshopper-capv'
+        dhcp4: true
 
-network:
-  controlPlaneEndpoint:
-    host: "10.10.222.231"  # [string] Manually select an IP for kube API.
-    port: "6443"
-  loadBalancersCidrBlocks:
-  - "10.10.222.232/30"
+connectivity:
+  network:
+    controlPlaneEndpoint:
+      host: "10.10.222.231"  # [string] Manually select an IP for kube API.
+      port: 6443
+    loadBalancers:
+      cidrBlocks:
+      - "10.10.222.232/30"
+
 nodeClasses:
   default:
-    template: ubuntu-2004-kube-v1.22.5+vmware.1
+    template: ubuntu-2004-kube-v1.24.11
     cloneMode: "linkedClone"
     diskGiB: 50
     numCPUs: 6
@@ -38,6 +43,7 @@ nodeClasses:
       devices:
       - networkName: 'grasshopper-capv'
         dhcp4: true
+
 nodePools:
   worker:
     class: "default"

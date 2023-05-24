@@ -22,9 +22,7 @@ import (
 )
 
 const (
-	KubeContext       = "capv"
-	clusterAppVersion = "0.3.1-689cef7898e90f8184ac526369dddf119d9a0af2"
-	defaultAppVersion = "0.8.0-5b825f54f13188ea0c024b3b757e1c253a80924c"
+	KubeContext = "capv"
 )
 
 var (
@@ -67,8 +65,7 @@ func createCluster() *application.Cluster {
 	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderVSphere).
 		WithOrg(organization.New("giantswarm")). // Uses the `giantswarm` org (and namespace) as it requires a credentials secret to exist already
 		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml")).
-		WithUserConfigSecret("vsphere-credentials").
-		WithAppVersions(clusterAppVersion, defaultAppVersion)
+		WithUserConfigSecret("vsphere-credentials")
 
 	logger.Log("Workload cluster name: %s", cluster.Name)
 
