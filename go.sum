@@ -191,6 +191,8 @@ github.com/giantswarm/apiextensions-application v0.6.0 h1:ZPIiq27zJ2VatrWH21/dK6
 github.com/giantswarm/apiextensions-application v0.6.0/go.mod h1:O6mg+EdXC9CyTLgi0d3rf6QTXrQX/79iw4kjMJRinig=
 github.com/giantswarm/clustertest v0.0.11 h1:gzncjcH3m/e1Qxl1inmoq+8j7SS6Km5YYAATYZxR+yI=
 github.com/giantswarm/clustertest v0.0.11/go.mod h1:EwYCw9qUoNHdZTUM3knSecaIU3J2m650K7/6/1Y3Yo8=
+github.com/giantswarm/clustertest v0.0.13 h1:v1pfVW5C6SmGEEmBS220lhPlXxHMDa4TlO7lFozS1Ys=
+github.com/giantswarm/clustertest v0.0.13/go.mod h1:EwYCw9qUoNHdZTUM3knSecaIU3J2m650K7/6/1Y3Yo8=
 github.com/giantswarm/k8smetadata v0.19.0 h1:wLzAwpuEW0FaOmR3EqaIpGpoRTg80aHFm5/cQKdn+DY=
 github.com/giantswarm/k8smetadata v0.19.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubectl-gs/v2 v2.32.0 h1:OluPX8ofpCgcEDqZa+MCftYA4Nhwd3bjU/UgMTy39SM=
