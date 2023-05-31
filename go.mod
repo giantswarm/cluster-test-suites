@@ -3,8 +3,9 @@ module github.com/giantswarm/cluster-test-suites
 go 1.18
 
 require (
+	github.com/giantswarm/apiextensions-application v0.6.0
 	github.com/giantswarm/clustertest v0.0.13
-	github.com/onsi/ginkgo/v2 v2.9.2
+	github.com/onsi/ginkgo/v2 v2.9.4
 	github.com/onsi/gomega v1.27.6
 	k8s.io/api v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.5
@@ -41,7 +42,6 @@ require (
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/giantswarm/apiextensions-application v0.6.0 // indirect
 	github.com/giantswarm/k8smetadata v0.19.0 // indirect
 	github.com/giantswarm/kubectl-gs/v2 v2.32.0 // indirect
 	github.com/giantswarm/microerror v0.4.0 // indirect

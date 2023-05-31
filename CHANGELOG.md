@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] - 2023-05-30
 
+## Added
+
+- CAPV standard test suite
+
 ## [1.2.0] - 2023-05-12
 
 ### Changed
