@@ -71,7 +71,9 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *ClusterValues) func(
 		Max: maxNodes,
 	}
 
-	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""})
+	// On providers like CAPZ the worker nodes are not labeled. To work around
+	// this we need to check that the control-plane label is NOT applied.
+	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"!node-role.kubernetes.io/control-plane": ""})
 
 	return func() error {
 		ok, err := workersFunc()
