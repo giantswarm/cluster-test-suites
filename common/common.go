@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,14 +79,18 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 		Max: maxNodes,
 	}
 
-	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""})
+	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
 
 	return func() error {
 		ok, err := workersFunc()
+		if err != nil {
+			logger.Log("failed to get nodes: %s", err)
+			return err
+		}
 		if !ok {
 			return fmt.Errorf("unexpected number of nodes")
 		}
-		return err
+		return nil
 	}
 }
 

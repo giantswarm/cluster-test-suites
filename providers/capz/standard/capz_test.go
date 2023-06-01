@@ -8,7 +8,6 @@ import (
 	"github.com/giantswarm/clustertest/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/wait"
@@ -71,9 +70,7 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *ClusterValues) func(
 		Max: maxNodes,
 	}
 
-	// On providers like CAPZ the worker nodes are not labeled. To work around
-	// this we need to check that the control-plane label is NOT applied.
-	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"!node-role.kubernetes.io/control-plane": ""})
+	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
 
 	return func() error {
 		ok, err := workersFunc()
