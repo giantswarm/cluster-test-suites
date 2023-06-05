@@ -4,7 +4,7 @@
 .PHONY: ginkgo-run
 ginkgo-run: ## Runs ginkgo against the test suites.
 	@echo "====> $@"
-	ginkgo -v ./...
+	ginkgo --skip-package /X -v ./...
 
 .PHONY: ginkgo-lint
 ginkgo-lint: ## Runs ginkgolinter.

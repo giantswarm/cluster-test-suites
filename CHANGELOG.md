@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support marking test suites as skipped / ignored by prefixing the directory with `X`
+
+### Changed
+
+- Marked CAPV standard test suite as skipped until it can reliably run the tests.
+
 ## [1.3.0] - 2023-05-30
 
 ## Added
