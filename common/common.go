@@ -8,8 +8,10 @@ import (
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -27,9 +29,7 @@ func Run() {
 		var err error
 
 		wcClient, err = Framework.WC(Cluster.Name)
-		if err != nil {
-			Fail(err.Error())
-		}
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	It("should be able to connect to MC cluster", func() {
@@ -46,6 +46,52 @@ func Run() {
 			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
 	})
+}
+
+func CheckControlPlaneNodesReady(wcClient *client.Client, values application.ControlPlane) func() error {
+	expectedNodes := values.Replicas
+	controlPlaneFunc := wait.AreNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
+
+	return func() error {
+		ok, err := controlPlaneFunc()
+		if !ok {
+			return fmt.Errorf("unexpected number of nodes")
+		}
+		return err
+	}
+}
+
+func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
+	minNodes := 0
+	maxNodes := 0
+	for _, pool := range values.NodePools {
+		if pool.Replicas > 0 {
+			minNodes += pool.Replicas
+			maxNodes += pool.Replicas
+			continue
+		}
+
+		minNodes += pool.MinSize
+		maxNodes += pool.MaxSize
+	}
+	expectedNodes := wait.Range{
+		Min: minNodes,
+		Max: maxNodes,
+	}
+
+	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+
+	return func() error {
+		ok, err := workersFunc()
+		if err != nil {
+			logger.Log("failed to get nodes: %s", err)
+			return err
+		}
+		if !ok {
+			return fmt.Errorf("unexpected number of nodes")
+		}
+		return nil
+	}
 }
 
 func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
