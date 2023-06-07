@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/wait"
+	"github.com/miekg/dns"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -20,7 +22,8 @@ func runDNS() {
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
-			err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
+			defaultAppsName := fmt.Sprintf("%s-default-apps", Cluster.Name)
+			err := Framework.MC().GetHelmValues(defaultAppsName, Cluster.Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
@@ -42,7 +45,9 @@ func runDNS() {
 				var err error
 				records, err = resolver.LookupIP(context.Background(), "ip", apiDomain)
 				return err
-			}).Should(Succeed())
+			}).WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 			Expect(records).ToNot(BeEmpty())
 		})
 
@@ -53,7 +58,9 @@ func runDNS() {
 				var err error
 				records, err = resolver.LookupIP(context.Background(), "ip", bastionDomain)
 				return err
-			}).Should(Succeed())
+			}).WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 			Expect(records).ToNot(BeEmpty())
 		})
 
@@ -72,7 +79,9 @@ func runDNS() {
 				var err error
 				dnsResponse, _, err = dnsClient.Exchange(dnsMessage, "8.8.8.8:53")
 				return err
-			}).Should(Succeed())
+			}).WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 
 			Expect(dnsResponse.Answer[0].(*dns.CNAME).Target).To(Equal(ingressDomain))
 		})
