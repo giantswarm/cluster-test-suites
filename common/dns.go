@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/giantswarm/clustertest/pkg/application"
-	"github.com/miekg/dns"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -21,8 +20,7 @@ func runDNS() {
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
-			defaultAppsName := fmt.Sprintf("%s-default-apps", Cluster.Name)
-			err := Framework.MC().GetHelmValues(defaultAppsName, Cluster.Namespace, values)
+			err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
