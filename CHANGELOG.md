@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Marked CAPV standard test suite as skipped until it can reliably run the tests.
+- Changed parameters for CAPVCD tests by applying latest schema changes.
 
 ## [1.3.0] - 2023-05-30
 
