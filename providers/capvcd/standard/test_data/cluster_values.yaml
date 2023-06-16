@@ -10,14 +10,23 @@ cloudDirector:
   ovdc: vDC 73640
   site: https://vmware.ikoula.com
   ovdcNetwork: capvcd-192.168.52.0
+
+cloudProvider:
+  enableVirtualServiceSharedIP: false
+  oneArm:
+    enabled: true
+        
 controlPlane:
   catalog: giantswarm
   replicas: 3
   sizingPolicy: m1.large
   template: ubuntu-2004-kube-v1.22.9
-network:
-  loadBalancer:
-    vipSubnet: 178.170.32.1/24
+
+connectivity:
+  network:
+    loadBalancers:
+      vipSubnet: "178.170.32.1/24"
+
 nodeClasses:
   default:
     catalog: giantswarm
