@@ -43,8 +43,6 @@ func Run() {
 	})
 	It("has created a pod with a pvc and the pvc is bound", func() {
 		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
-			WithTimeout(wait.DefaultTimeout).
-			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
 	})
 
