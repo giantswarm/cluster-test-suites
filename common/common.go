@@ -123,7 +123,8 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 	return func() error {
 		pvc := &corev1.PersistentVolumeClaim{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-pvc",
+				Name:      "test-pvc",
+				Namespace: "default",
 			},
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{
@@ -144,7 +145,8 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		pod := &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "pvc-test-pod",
+				Name:      "pvc-test-pod",
+				Namespace: "default",
 			},
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
