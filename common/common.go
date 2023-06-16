@@ -11,6 +11,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,8 +42,9 @@ func Run() {
 	It("should be able to connect to WC cluster", func() {
 		Expect(wcClient.CheckConnection()).To(Succeed())
 	})
+
 	It("has created a pod with a pvc and the pvc is bound", func() {
-		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
+		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, 5*time.Second)).
 			Should(Succeed())
 	})
 
@@ -121,6 +123,17 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 
 func createPodWithPVC(wcClient *client.Client) func() error {
 	return func() error {
+
+		// ensure we have at least one storage class available
+		storageClasses := &storagev1.StorageClassList{}
+		err := wcClient.List(context.Background(), storageClasses)
+		if err != nil {
+			return err
+		}
+		if len(storageClasses.Items) == 0 {
+			return fmt.Errorf("no storage classes found")
+		}
+
 		pvc := &corev1.PersistentVolumeClaim{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-pvc",
@@ -138,7 +151,7 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 			},
 		}
 
-		err := wcClient.Create(context.Background(), pvc)
+		err = wcClient.Create(context.Background(), pvc)
 		if err != nil {
 			return err
 		}
