@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,7 +45,7 @@ func Run() {
 	})
 
 	It("has created a pod with a pvc and the pvc is bound", func() {
-		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, 5*time.Second)).
+		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
 			Should(Succeed())
 	})
 
@@ -123,7 +124,6 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 
 func createPodWithPVC(wcClient *client.Client) func() error {
 	return func() error {
-
 		// ensure we have at least one storage class available
 		storageClasses := &storagev1.StorageClassList{}
 		err := wcClient.List(context.Background(), storageClasses)
@@ -153,6 +153,9 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		err = wcClient.Create(context.Background(), pvc)
 		if err != nil {
+			if apierrors.IsAlreadyExists(err) {
+				return nil
+			}
 			return err
 		}
 
@@ -189,6 +192,9 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		err = wcClient.Create(context.Background(), pod)
 		if err != nil {
+			if apierrors.IsAlreadyExists(err) {
+				return nil
+			}
 			// if pod creation fails, delete the PVC to avoid leaving a dangling PVC
 			if deleteErr := wcClient.Delete(context.Background(), pvc); deleteErr != nil {
 				return fmt.Errorf("failed to delete PVC after Pod creation failed: %v", deleteErr)
