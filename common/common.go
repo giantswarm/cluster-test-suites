@@ -17,4 +17,5 @@ var (
 func Run(cfg *TestConfig) {
 	runBasic()
 	runDNS(cfg.BastionSupported)
+	runStorage()
 }
