@@ -11,6 +11,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -38,6 +40,12 @@ func Run() {
 
 	It("should be able to connect to WC cluster", func() {
 		Expect(wcClient.CheckConnection()).To(Succeed())
+	})
+	It("has created a pod with a pvc and the pvc is bound", func() {
+		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
+			WithTimeout(wait.DefaultTimeout).
+			WithPolling(wait.DefaultInterval).
+			Should(Succeed())
 	})
 
 	It("has all of it's Pods in the Running state", func() {
@@ -107,6 +115,72 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 			if phase != corev1.PodRunning && phase != corev1.PodSucceeded {
 				return fmt.Errorf("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
 			}
+		}
+
+		return nil
+	}
+}
+
+func createPodWithPVC(wcClient *client.Client) func() error {
+	return func() error {
+		pvc := &corev1.PersistentVolumeClaim{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "test-pvc",
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				AccessModes: []corev1.PersistentVolumeAccessMode{
+					corev1.ReadWriteOnce,
+				},
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceStorage: resource.MustParse("1Gi"),
+					},
+				},
+			},
+		}
+
+		err := wcClient.Create(context.Background(), pvc)
+		if err != nil {
+			return err
+		}
+
+		pod := &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "pvc-test-pod",
+			},
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
+					{
+						Name:  "pvc-test-container",
+						Image: "nginx",
+						VolumeMounts: []corev1.VolumeMount{
+							{
+								Name:      "test-volume",
+								MountPath: "/data",
+							},
+						},
+					},
+				},
+				Volumes: []corev1.Volume{
+					{
+						Name: "test-volume",
+						VolumeSource: corev1.VolumeSource{
+							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+								ClaimName: "test-pvc",
+							},
+						},
+					},
+				},
+			},
+		}
+
+		err = wcClient.Create(context.Background(), pod)
+		if err != nil {
+			// if pod creation fails, delete the PVC to avoid leaving a dangling PVC
+			if deleteErr := wcClient.Delete(context.Background(), pvc); deleteErr != nil {
+				return fmt.Errorf("failed to delete PVC after Pod creation failed: %v", deleteErr)
+			}
+			return err
 		}
 
 		return nil
