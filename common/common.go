@@ -15,6 +15,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -24,6 +25,9 @@ import (
 var (
 	Framework *clustertest.Framework
 	Cluster   *application.Cluster
+
+	pvcName    = "pvc-test"
+	pvcPodName = "pvc-test-pod"
 )
 
 func Run() {
@@ -53,6 +57,13 @@ func Run() {
 
 	It("has all of it's Pods in the Running state", func() {
 		Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
+			WithTimeout(wait.DefaultTimeout).
+			WithPolling(wait.DefaultInterval).
+			Should(Succeed())
+	})
+
+	It("has deleted a pod with a pvc", func() {
+		Eventually(wait.Consistent(deletePodWithPVC(wcClient), 10, time.Second)).
 			WithTimeout(wait.DefaultTimeout).
 			WithPolling(wait.DefaultInterval).
 			Should(Succeed())
@@ -138,8 +149,8 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		pvc := &corev1.PersistentVolumeClaim{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-pvc",
-				Namespace: "default",
+				Name:      pvcName,
+				Namespace: corev1.NamespaceDefault,
 			},
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{
@@ -163,17 +174,17 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		pod := &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "pvc-test-pod",
-				Namespace: "default",
+				Name:      pvcPodName,
+				Namespace: corev1.NamespaceDefault,
 			},
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{
 					{
-						Name:  "pvc-test-container",
+						Name:  pvcName,
 						Image: "nginx",
 						VolumeMounts: []corev1.VolumeMount{
 							{
-								Name:      "test-volume",
+								Name:      pvcName,
 								MountPath: "/data",
 							},
 						},
@@ -181,10 +192,10 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 				},
 				Volumes: []corev1.Volume{
 					{
-						Name: "test-volume",
+						Name: pvcName,
 						VolumeSource: corev1.VolumeSource{
 							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-								ClaimName: "test-pvc",
+								ClaimName: pvcName,
 							},
 						},
 					},
@@ -201,6 +212,42 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 			if deleteErr := wcClient.Delete(context.Background(), pvc); deleteErr != nil {
 				return fmt.Errorf("failed to delete PVC after Pod creation failed: %v", deleteErr)
 			}
+			return err
+		}
+
+		return nil
+	}
+}
+
+func deletePodWithPVC(wcClient *client.Client) func() error {
+	return func() error {
+
+		pod := &corev1.Pod{}
+		err := wcClient.Get(context.Background(), types.NamespacedName{Name: pvcPodName, Namespace: corev1.NamespaceDefault}, pod)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				return nil
+			}
+			return err
+		}
+
+		err = wcClient.Delete(context.Background(), pod)
+		if err != nil {
+			return err
+		}
+
+		pvc := &corev1.PersistentVolumeClaim{}
+		err = wcClient.Get(context.Background(), types.NamespacedName{Name: pvcName, Namespace: corev1.NamespaceDefault}, pvc)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				// If the PVC doesn't exist, return nil
+				return nil
+			}
+			return err
+		}
+
+		err = wcClient.Delete(context.Background(), pvc)
+		if err != nil {
 			return err
 		}
 
