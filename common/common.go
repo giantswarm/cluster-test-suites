@@ -52,6 +52,13 @@ func Run() {
 		Expect(wcClient.CheckConnection()).To(Succeed())
 	})
 
+	It("has a at least one storage class available", func() {
+		Eventually(wait.Consistent(checkStorageClassExists(wcClient), 10, time.Second)).
+			WithTimeout(wait.DefaultTimeout).
+			WithPolling(wait.DefaultInterval).
+			Should(Succeed())
+	})
+
 	It("has created a pod with a pvc and the pvc is bound", func() {
 		Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
 			WithTimeout(wait.DefaultTimeout).
@@ -139,7 +146,7 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 	}
 }
 
-func createPodWithPVC(wcClient *client.Client) func() error {
+func checkStorageClassExists(wcClient *client.Client) func() error {
 	return func() error {
 		// ensure we have at least one storage class available
 		storageClasses := &storagev1.StorageClassList{}
@@ -151,6 +158,12 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 			return fmt.Errorf("no storage classes found")
 		}
 
+		return nil
+	}
+}
+
+func createPodWithPVC(wcClient *client.Client) func() error {
+	return func() error {
 		pvc := &corev1.PersistentVolumeClaim{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      pvcName,
@@ -168,7 +181,7 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 			},
 		}
 
-		err = wcClient.Create(context.Background(), pvc)
+		err := wcClient.Create(context.Background(), pvc)
 		if err != nil {
 			if apierrors.IsAlreadyExists(err) {
 				return nil
