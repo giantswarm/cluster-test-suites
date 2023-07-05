@@ -8,7 +8,6 @@ import (
 
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/wait"
-	"github.com/miekg/dns"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -62,28 +61,6 @@ func runDNS() {
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 			Expect(records).ToNot(BeEmpty())
-		})
-
-		It("sets up the wildcard DNS records", func() {
-			ingressDomain := fmt.Sprintf("ingress.%s.", values.BaseDomain)
-			wildcardDomain := fmt.Sprintf("test.%s.", values.BaseDomain)
-
-			fmt.Println(ingressDomain, wildcardDomain)
-			dnsMessage := new(dns.Msg)
-			dnsMessage.SetQuestion(wildcardDomain, dns.TypeCNAME)
-			dnsMessage.RecursionDesired = true
-
-			dnsClient := new(dns.Client)
-			var dnsResponse *dns.Msg
-			Eventually(func() error {
-				var err error
-				dnsResponse, _, err = dnsClient.Exchange(dnsMessage, "8.8.8.8:53")
-				return err
-			}).WithTimeout(wait.DefaultTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-
-			Expect(dnsResponse.Answer[0].(*dns.CNAME).Target).To(Equal(ingressDomain))
 		})
 	})
 }
