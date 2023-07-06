@@ -21,8 +21,7 @@ func runDNS() {
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
-			defaultAppsName := fmt.Sprintf("%s-default-apps", Cluster.Name)
-			err := Framework.MC().GetHelmValues(defaultAppsName, Cluster.Namespace, values)
+			err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
