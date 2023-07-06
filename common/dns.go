@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -18,6 +19,16 @@ func runDNS() {
 			resolver *net.Resolver
 			values   *application.DefaultAppsValues
 		)
+		getARecords := func(domain string) ([]net.IP, error) {
+			records, err := resolver.LookupIP(context.Background(), "ip", domain)
+			if err != nil {
+				logger.Log("domain %s still not available", domain)
+				return nil, err
+			}
+
+			logger.Log("resolved domain %s to %+v", domain, records)
+			return records, nil
+		}
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
@@ -37,11 +48,11 @@ func runDNS() {
 		})
 
 		It("sets up the api DNS records", func() {
-			apiDomain := fmt.Sprintf("api.%s", values.BaseDomain)
+			apiDomain := fmt.Sprintf("api.%s.%s", Cluster.Name, values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
 				var err error
-				records, err = resolver.LookupIP(context.Background(), "ip", apiDomain)
+				records, err = getARecords(apiDomain)
 				return err
 			}).WithTimeout(wait.DefaultTimeout).
 				WithPolling(wait.DefaultInterval).
@@ -54,7 +65,7 @@ func runDNS() {
 			var records []net.IP
 			Eventually(func() error {
 				var err error
-				records, err = resolver.LookupIP(context.Background(), "ip", bastionDomain)
+				records, err = getARecords(bastionDomain)
 				return err
 			}).WithTimeout(wait.DefaultTimeout).
 				WithPolling(wait.DefaultInterval).
