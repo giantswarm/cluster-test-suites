@@ -61,7 +61,7 @@ func runDNS() {
 		})
 
 		It("sets up the bastion DNS records", func() {
-			bastionDomain := fmt.Sprintf("bastion1.%s", values.BaseDomain)
+			bastionDomain := fmt.Sprintf("bastion1.%s.%s", Cluster.Name, values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
 				var err error
