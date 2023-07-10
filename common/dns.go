@@ -17,7 +17,7 @@ func runDNS() {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
-			values   *application.DefaultAppsValues
+			values   *application.ClusterValues
 		)
 		getARecords := func(domain string) ([]net.IP, error) {
 			records, err := resolver.LookupIP(context.Background(), "ip", domain)
@@ -31,7 +31,7 @@ func runDNS() {
 		}
 
 		BeforeEach(func() {
-			values = &application.DefaultAppsValues{}
+			values = &application.ClusterValues{}
 			err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
