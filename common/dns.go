@@ -17,7 +17,7 @@ func runDNS() {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
-			values   *application.ClusterValues
+			values   *application.DefaultAppsValues
 		)
 		getARecords := func(domain string) ([]net.IP, error) {
 			records, err := resolver.LookupIP(context.Background(), "ip", domain)
@@ -31,8 +31,9 @@ func runDNS() {
 		}
 
 		BeforeEach(func() {
-			values = &application.ClusterValues{}
-			err := Framework.MC().GetHelmValues(Cluster.Name, Cluster.Namespace, values)
+			values = &application.DefaultAppsValues{}
+			defaultAppsName := fmt.Sprintf("%s-default-apps", Cluster.Name)
+			err := Framework.MC().GetHelmValues(defaultAppsName, Cluster.Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
@@ -48,7 +49,7 @@ func runDNS() {
 		})
 
 		It("sets up the api DNS records", func() {
-			apiDomain := fmt.Sprintf("api.%s.%s", Cluster.Name, values.BaseDomain)
+			apiDomain := fmt.Sprintf("api.%s", values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
 				var err error
@@ -61,7 +62,7 @@ func runDNS() {
 		})
 
 		It("sets up the bastion DNS records", func() {
-			bastionDomain := fmt.Sprintf("bastion1.%s.%s", Cluster.Name, values.BaseDomain)
+			bastionDomain := fmt.Sprintf("bastion1.%s", values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
 				var err error
