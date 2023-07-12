@@ -10,3 +10,6 @@ nodePools:
   instanceType: Standard_D2s_v5
   replicas: 3
   rootVolumeSizeGB: 50
+connectivity:
+  bastion:
+    enabled: true

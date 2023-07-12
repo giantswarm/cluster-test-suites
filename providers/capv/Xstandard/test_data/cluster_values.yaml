@@ -23,6 +23,8 @@ controlPlane:
         dhcp4: true
 
 connectivity:
+  bastion:
+    enabled: true
   network:
     controlPlaneEndpoint:
       host: "10.10.222.231"  # [string] Manually select an IP for kube API.

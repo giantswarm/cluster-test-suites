@@ -14,4 +14,4 @@ nodePools:
 connectivity:
   availabilityZoneUsageLimit: 3
   bastion:
-    enabled: false
+    enabled: true
