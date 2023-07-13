@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support marking test suites as skipped / ignored by prefixing the directory with `X`
+- Tests verifying control plane nodes and worker nodes are consistently Running
+- Tests that verify cross-provider DNS records
 
 ### Changed
 

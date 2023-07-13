@@ -5,6 +5,8 @@ controlPlane:
   sizingPolicy: m1.large
   template: ubuntu-2004-kube-v1.22.9
 connectivity:
+  bastion:
+    enabled: true
   network:
     loadBalancers:
       vipSubnet: "178.170.32.1/24"
