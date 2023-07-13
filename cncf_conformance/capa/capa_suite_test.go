@@ -1,0 +1,87 @@
+package capa
+
+import (
+	"context"
+	"os"
+	"path"
+	"testing"
+	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/cluster-test-suites/cncf_conformance/internal/conformance"
+	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/clustertest"
+	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/utils"
+	"github.com/giantswarm/clustertest/pkg/wait"
+)
+
+const KubeContext = "capa"
+
+var (
+	ctx       context.Context
+	framework *clustertest.Framework
+	cluster   *application.Cluster
+)
+
+func TestCAPAConformance(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CAPA Conformance Suite")
+}
+
+var _ = BeforeSuite(func() {
+	var err error
+	ctx = context.Background()
+	logger.LogWriter = GinkgoWriter
+
+	Expect(os.Getenv("RESULTS_DIRECTORY")).ToNot(BeEmpty())
+
+	framework, err = clustertest.New(KubeContext)
+	Expect(err).NotTo(HaveOccurred())
+
+	cluster = setUpWorkloadCluster()
+
+	common.Framework = framework
+	common.Cluster = cluster
+
+	conformance.Framework = framework
+	conformance.Cluster = cluster
+})
+
+func setUpWorkloadCluster() *application.Cluster {
+	cluster, err := framework.LoadCluster()
+	Expect(err).NotTo(HaveOccurred())
+	if cluster != nil {
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
+		return cluster
+	}
+
+	return createCluster()
+}
+
+func createCluster() *application.Cluster {
+	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAWS).
+		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
+	logger.Log("Workload cluster name: %s", cluster.Name)
+
+	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
+	defer cancelApplyCtx()
+
+	client, err := framework.ApplyCluster(applyCtx, cluster)
+	Expect(err).NotTo(HaveOccurred())
+
+	Eventually(
+		wait.AreNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		20*time.Minute, 15*time.Second,
+	).Should(BeTrue())
+
+	DeferCleanup(func() {
+		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
+	})
+
+	return cluster
+}
