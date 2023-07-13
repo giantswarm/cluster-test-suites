@@ -30,7 +30,10 @@ connectivity:
     controlPlaneEndpoint:
       host: ""  # [string] Manually select an IP for kube API. "" for auto selection from the ipPoolName pool.
       port: 6443
-      ipPoolName: "wc-cp-ips"  # [string] Ip for control plane will be drawn from this GlobalInClusterIPPool.
+      ipPoolName: "wc-cp-ips"  # [string] Ip for control plane will be drawn from this GlobalInClusterIPPool (for gcapeverde it's 10.10.222.232 - 10.10.222.238 inclusive)
+    loadBalancers:
+      cidrBlocks:
+      - "10.10.222.239/32"
 
 nodeClasses:
   default:
