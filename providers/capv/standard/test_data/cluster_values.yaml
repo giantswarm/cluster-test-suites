@@ -26,12 +26,13 @@ connectivity:
   bastion:
     enabled: true
   network:
+    allowAllEgress: true
     controlPlaneEndpoint:
-      host: "10.10.222.231"  # [string] Manually select an IP for kube API.
+      host: ""  # [string] Manually select an IP for kube API. "" for auto selection from the ipPoolName pool.
       port: 6443
+      ipPoolName: "wc-cp-ips"  # [string] Ip for control plane will be drawn from this GlobalInClusterIPPool.
     loadBalancers:
-      cidrBlocks:
-      - "10.10.222.232/30"
+      cidrBlocks: []
 
 nodeClasses:
   default:
