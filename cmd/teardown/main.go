@@ -44,11 +44,13 @@ func init() {
 
 func main() {
 	if err := teardownCmd.Execute(); err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	ctx := context.Background()
 
 	// Load cluster details from previous standup results

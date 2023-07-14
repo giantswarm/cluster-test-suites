@@ -56,11 +56,13 @@ func init() {
 
 func main() {
 	if err := standupCmd.Execute(); err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	cmd.SilenceUsage = true
+
 	ctx := context.Background()
 
 	framework, err := clustertest.New(kubeContext)
