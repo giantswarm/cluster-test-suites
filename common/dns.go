@@ -13,7 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func runDNS() {
+func runDNS(bastionSuppoted bool) {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
@@ -62,6 +62,9 @@ func runDNS() {
 		})
 
 		It("sets up the bastion DNS records", func() {
+			if !bastionSuppoted {
+				Skip("Bastion is not supported.")
+			}
 			bastionDomain := fmt.Sprintf("bastion1.%s", values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
