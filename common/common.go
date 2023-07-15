@@ -5,12 +5,16 @@ import (
 	"github.com/giantswarm/clustertest/pkg/application"
 )
 
+type TestConfig struct {
+	BastionSupported bool
+}
+
 var (
 	Framework *clustertest.Framework
 	Cluster   *application.Cluster
 )
 
-func Run() {
+func Run(cfg *TestConfig) {
 	runBasic()
-	runDNS()
+	runDNS(cfg.BastionSupported)
 }

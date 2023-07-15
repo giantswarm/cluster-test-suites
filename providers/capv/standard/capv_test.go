@@ -7,5 +7,7 @@ import (
 )
 
 var _ = Describe("Common tests", func() {
-	common.Run()
+	common.Run(&common.TestConfig{
+		BastionSupported: false,
+	})
 })
