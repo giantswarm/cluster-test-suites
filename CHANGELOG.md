@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CLI tool `standup` for creating test clusters outside of the test suite
+- CLI tool `teardown` for deleting test clusters previously created
+
 ## [1.4.0] - 2023-07-14
 
 ### Added
