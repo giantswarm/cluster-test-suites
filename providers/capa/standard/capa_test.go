@@ -13,7 +13,9 @@ import (
 )
 
 var _ = Describe("Common tests", func() {
-	common.Run()
+	common.Run(&common.TestConfig{
+		BastionSupported: true,
+	})
 
 	It("has all the control-plane nodes running", func() {
 		values := &application.ClusterValues{}
