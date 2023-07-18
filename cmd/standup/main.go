@@ -28,11 +28,13 @@ var (
 		RunE:    run,
 	}
 
-	provider         string
-	kubeContext      string
-	clusterValues    string
-	defaultAppValues string
-	outputDirectory  string
+	provider          string
+	kubeContext       string
+	clusterValues     string
+	defaultAppValues  string
+	clusterVersion    string
+	defaultAppVersion string
+	outputDirectory   string
 
 	controlPlaneNodes int
 	workerNodes       int
@@ -47,6 +49,8 @@ func init() {
 	standupCmd.Flags().IntVar(&controlPlaneNodes, "control-plane-nodes", 1, "The number of control plane nodes to wait for being ready")
 	standupCmd.Flags().IntVar(&workerNodes, "worker-nodes", 1, "The number of worker nodes to wait for being ready")
 	standupCmd.Flags().StringVar(&outputDirectory, "output", "./", "The directory to store the results.json and kubeconfig in")
+	standupCmd.Flags().StringVar(&clusterVersion, "cluster-version", "latest", "The version of the cluster app to install")
+	standupCmd.Flags().StringVar(&defaultAppVersion, "default-apps-version", "latest", "The version of the default-apps app to install")
 
 	standupCmd.MarkFlagRequired("provider")
 	standupCmd.MarkFlagRequired("context")
@@ -77,6 +81,7 @@ func run(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Standing up cluster...\n\nProvider:\t\t%s\nCluster Name:\t\t%s\nOrg Name:\t\t%s\nResults Directory:\t%s\n\n", provider, clusterName, orgName, outputDirectory)
 
 	cluster := application.NewClusterApp(clusterName, provider).
+		WithAppVersions(clusterVersion, defaultAppVersion).
 		WithOrg(organization.New(orgName)).
 		WithAppValuesFile(path.Clean(clusterValues), path.Clean(defaultAppValues))
 

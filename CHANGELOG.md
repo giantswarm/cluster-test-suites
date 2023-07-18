@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `standup` now supports specifying cluster app and default-apps app versions as arguments, defaulting to latest
+
 ## [1.5.0] - 2023-07-17
 
 ### Added
