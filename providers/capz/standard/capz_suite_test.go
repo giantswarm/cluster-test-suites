@@ -2,7 +2,6 @@ package standard
 
 import (
 	"context"
-	"path"
 	"testing"
 	"time"
 
@@ -14,10 +13,10 @@ import (
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
-	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/cluster-test-suites/providers/capz"
 )
 
 const KubeContext = "capz"
@@ -58,9 +57,7 @@ func setUpWorkloadCluster() *application.Cluster {
 }
 
 func createCluster() *application.Cluster {
-	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderAzure).
-		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml"))
-
+	cluster = capz.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
 	logger.Log("Workload cluster name: %s", cluster.Name)
 
 	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)

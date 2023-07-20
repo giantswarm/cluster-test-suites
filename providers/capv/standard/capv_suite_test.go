@@ -2,7 +2,6 @@ package standard
 
 import (
 	"context"
-	"path"
 	"testing"
 	"time"
 
@@ -11,13 +10,11 @@ import (
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	applicationv1alpha1 "github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/cluster-test-suites/providers/capv"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
-	"github.com/giantswarm/clustertest/pkg/organization"
-	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
 )
 
@@ -64,18 +61,7 @@ func setUpWorkloadCluster() *application.Cluster {
 }
 
 func createCluster() *application.Cluster {
-	cluster = application.NewClusterApp(utils.GenerateRandomName("t"), application.ProviderVSphere).
-		WithOrg(organization.New(defaultNamespace)). // Uses the `giantswarm` org (and namespace) as it requires a credentials secret to exist already
-		WithAppValuesFile(path.Clean("./test_data/cluster_values.yaml"), path.Clean("./test_data/default-apps_values.yaml")).
-		WithUserConfigSecret("vsphere-credentials").
-		WithExtraConfigs([]applicationv1alpha1.AppExtraConfig{
-			{
-				Kind:      "secret",
-				Name:      RegcredSecretName,
-				Namespace: defaultNamespace,
-				Priority:  25,
-			},
-		})
+	cluster = capv.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
 
 	logger.Log("Workload cluster name: %s", cluster.Name)
 
