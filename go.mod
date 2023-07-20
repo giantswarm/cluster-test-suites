@@ -7,7 +7,7 @@ require (
 	github.com/giantswarm/clustertest v0.0.16
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.8
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	k8s.io/api v0.26.3
 	sigs.k8s.io/controller-runtime v0.14.5
 )
@@ -77,7 +77,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
