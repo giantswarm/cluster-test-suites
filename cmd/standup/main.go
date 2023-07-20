@@ -9,6 +9,10 @@ import (
 	"time"
 
 	"github.com/giantswarm/cluster-test-suites/cmd/standup/types"
+	"github.com/giantswarm/cluster-test-suites/providers/capa"
+	"github.com/giantswarm/cluster-test-suites/providers/capv"
+	"github.com/giantswarm/cluster-test-suites/providers/capvcd"
+	"github.com/giantswarm/cluster-test-suites/providers/capz"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
@@ -80,10 +84,22 @@ func run(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Standing up cluster...\n\nProvider:\t\t%s\nCluster Name:\t\t%s\nOrg Name:\t\t%s\nResults Directory:\t%s\n\n", provider, clusterName, orgName, outputDirectory)
 
-	cluster := application.NewClusterApp(clusterName, provider).
-		WithAppVersions(clusterVersion, defaultAppVersion).
-		WithOrg(organization.New(orgName)).
-		WithAppValuesFile(path.Clean(clusterValues), path.Clean(defaultAppValues))
+	var cluster *application.Cluster
+	switch provider {
+	case application.ProviderVSphere:
+		cluster = capv.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+	case application.ProviderCloudDirector:
+		cluster = capvcd.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+	case application.ProviderAWS:
+		cluster = capa.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+	case application.ProviderAzure:
+		cluster = capz.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+	default:
+		cluster = application.NewClusterApp(clusterName, provider).
+			WithAppVersions(clusterVersion, defaultAppVersion).
+			WithOrg(organization.New(orgName)).
+			WithAppValuesFile(path.Clean(clusterValues), path.Clean(defaultAppValues))
+	}
 
 	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
 	defer cancelApplyCtx()
