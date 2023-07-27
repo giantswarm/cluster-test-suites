@@ -3,6 +3,7 @@ package upgrade
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -34,7 +35,7 @@ func TestCAPAUpgrade(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	if os.Getenv("E2E_OVERRIDE_VERSIONS") == "" {
+	if strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
 		Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
 		return
 	}
