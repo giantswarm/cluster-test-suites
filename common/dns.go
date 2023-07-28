@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
@@ -32,8 +33,8 @@ func runDNS(bastionSuppoted bool) {
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
-			defaultAppsName := fmt.Sprintf("%s-default-apps", Cluster.Name)
-			err := Framework.MC().GetHelmValues(defaultAppsName, Cluster.Namespace, values)
+			defaultAppsName := fmt.Sprintf("%s-default-apps", state.Get().GetCluster().Name)
+			err := state.Get().GetFramework().MC().GetHelmValues(defaultAppsName, state.Get().GetCluster().Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{

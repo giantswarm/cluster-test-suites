@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
@@ -23,14 +24,14 @@ func runBasic() {
 		BeforeEach(func() {
 			var err error
 
-			wcClient, err = Framework.WC(Cluster.Name)
+			wcClient, err = state.Get().GetFramework().WC(state.Get().GetCluster().Name)
 			if err != nil {
 				Fail(err.Error())
 			}
 		})
 
 		It("should be able to connect to MC cluster", func() {
-			Expect(Framework.MC().CheckConnection()).To(Succeed())
+			Expect(state.Get().GetFramework().MC().CheckConnection()).To(Succeed())
 		})
 
 		It("should be able to connect to WC cluster", func() {
