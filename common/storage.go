@@ -24,7 +24,7 @@ var (
 )
 
 func runStorage() {
-	Context("basic", func() {
+	Context("storage", func() {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
