@@ -13,6 +13,7 @@ import (
 	storagev1 "k8s.io/api/storage/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -49,6 +50,12 @@ func runStorage() {
 				Should(Succeed())
 		})
 
+		It("has verified the pod is state running", func() {
+			Eventually(wait.Consistent(verifyPodState(wcClient, "pvc-test-pod", "test-storage"), 10, time.Second)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
 	})
 }
 
@@ -136,8 +143,26 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 	}
 }
 
+func verifyPodState(wcClient *client.Client, podName, podNamespace string) func() error {
+	return func() error {
+
+		pod := &corev1.Pod{}
+
+		err := wcClient.Get(context.Background(), cr.ObjectKey{Name: podName, Namespace: podNamespace}, pod)
+		if err != nil {
+			return err
+		}
+
+		if pod.Status.Phase != corev1.PodRunning {
+			return fmt.Errorf("pod %s in namespace %s is not running", podName, podNamespace)
+		}
+
+		return nil
+	}
+}
+
 func deleteStorage(wcClient *client.Client, namespace string) func() error {
 	return func() error {
-		return wcClient.DeleteAllOf(context.Background(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}})
+		return wcClient.Delete(context.Background(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}})
 	}
 }
