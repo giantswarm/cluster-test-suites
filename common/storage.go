@@ -3,15 +3,16 @@ package common
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/giantswarm/cluster-test-suites/assets/storage"
+	"github.com/giantswarm/cluster-test-suites/helper"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/kubectl/pkg/scheme"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -92,35 +93,41 @@ func checkStorageClassExists(wcClient *client.Client) func() error {
 func createPodWithPVC(wcClient *client.Client) func() error {
 	return func() error {
 
-		decode := scheme.Codecs.UniversalDeserializer().Decode
+		namespaceObj, err := helper.Deserialize(storage.Namespace)
+		if err != nil {
+			return err
+		}
+		namespace := namespaceObj.(*corev1.Namespace)
+		err = wcClient.Create(context.Background(), namespace)
+		if err != nil {
+			if apierror.IsAlreadyExists(err) {
+				// fall through
+			}
+			return nil
+		}
 
-		base := "assets/storage"
-
-		files, err := os.ReadDir(base)
+		pvcObj, err := helper.Deserialize(storage.PVC)
+		if err != nil {
+			if apierror.IsAlreadyExists(err) {
+				// fall through
+			}
+			return err
+		}
+		pvc := pvcObj.(*corev1.PersistentVolumeClaim)
+		err = wcClient.Create(context.Background(), pvc)
 		if err != nil {
 			return err
 		}
 
-		for _, file := range files {
-			podPVCYAML, err := os.ReadFile(fmt.Sprintf("%s/%s", base, file.Name()))
-			if err != nil {
-				return err
+		podObj, err := helper.Deserialize(storage.Pod)
+		if err != nil {
+			if apierror.IsAlreadyExists(err) {
+				// fall through
 			}
-			obj, groupVersion, _ := decode(podPVCYAML, nil, nil)
-			switch groupVersion.Kind {
-			case "Namespace":
-				namespace := obj.(*corev1.Namespace)
-				return wcClient.Create(context.Background(), namespace)
-			case "PersistentVolumeClaim":
-				pvc := obj.(*corev1.PersistentVolumeClaim)
-				return wcClient.Create(context.Background(), pvc)
-
-			case "Pod":
-				pod := obj.(*corev1.Pod)
-				return wcClient.Create(context.Background(), pod)
-			}
-
+			return err
 		}
+		pod := podObj.(*corev1.Pod)
+		err = wcClient.Create(context.Background(), pod)
 		if err != nil {
 			return err
 		}
