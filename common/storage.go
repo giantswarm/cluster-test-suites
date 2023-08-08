@@ -108,27 +108,27 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 
 		pvcObj, err := helper.Deserialize(storage.PVC)
 		if err != nil {
-			if apierror.IsAlreadyExists(err) {
-				// fall through
-			}
 			return err
 		}
 		pvc := pvcObj.(*corev1.PersistentVolumeClaim)
 		err = wcClient.Create(context.Background(), pvc)
 		if err != nil {
-			return err
-		}
-
-		podObj, err := helper.Deserialize(storage.Pod)
-		if err != nil {
 			if apierror.IsAlreadyExists(err) {
 				// fall through
 			}
 			return err
 		}
+
+		podObj, err := helper.Deserialize(storage.Pod)
+		if err != nil {
+			return err
+		}
 		pod := podObj.(*corev1.Pod)
 		err = wcClient.Create(context.Background(), pod)
 		if err != nil {
+			if apierror.IsAlreadyExists(err) {
+				// fall through
+			}
 			return err
 		}
 
