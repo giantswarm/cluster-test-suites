@@ -3,24 +3,22 @@ package common
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/kubectl/pkg/scheme"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var (
-	pvcName    = "pvc-test"
-	pvcPodName = "pvc-test-pod"
+	namespace = "test-storage"
 )
 
 func runStorage() {
@@ -50,8 +48,24 @@ func runStorage() {
 				Should(Succeed())
 		})
 
-		It("has deleted a pod with a pvc", func() {
-			Eventually(wait.Consistent(deletePodWithPVC(wcClient), 10, time.Second)).
+	})
+}
+
+func cleanupStorage() {
+	Context("storage", func() {
+		var wcClient *client.Client
+
+		BeforeEach(func() {
+			var err error
+
+			wcClient, err = Framework.WC(Cluster.Name)
+			if err != nil {
+				Fail(err.Error())
+			}
+		})
+
+		It("has deleted all objects in namespace test-storage", func() {
+			Eventually(wait.Consistent(deleteStorage(wcClient, namespace), 10, time.Second)).
 				WithTimeout(wait.DefaultTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -77,63 +91,37 @@ func checkStorageClassExists(wcClient *client.Client) func() error {
 
 func createPodWithPVC(wcClient *client.Client) func() error {
 	return func() error {
-		pvc := &corev1.PersistentVolumeClaim{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-pvc",
-			},
-			Spec: corev1.PersistentVolumeClaimSpec{
-				AccessModes: []corev1.PersistentVolumeAccessMode{
-					corev1.ReadWriteOnce,
-				},
-				Resources: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{
-						corev1.ResourceStorage: resource.MustParse("1Gi"),
-					},
-				},
-			},
-		}
 
-		err := wcClient.Create(context.Background(), pvc)
+		decode := scheme.Codecs.UniversalDeserializer().Decode
+
+		base := "assets/storage"
+
+		files, err := os.ReadDir(base)
 		if err != nil {
 			return err
 		}
 
-		pod := &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "pvc-test-pod",
-			},
-			Spec: corev1.PodSpec{
-				Containers: []corev1.Container{
-					{
-						Name:  "pvc-test-container",
-						Image: "nginx",
-						VolumeMounts: []corev1.VolumeMount{
-							{
-								Name:      "test-volume",
-								MountPath: "/data",
-							},
-						},
-					},
-				},
-				Volumes: []corev1.Volume{
-					{
-						Name: "test-volume",
-						VolumeSource: corev1.VolumeSource{
-							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-								ClaimName: "test-pvc",
-							},
-						},
-					},
-				},
-			},
-		}
-
-		err = wcClient.Create(context.Background(), pod)
-		if err != nil {
-			// if pod creation fails, delete the PVC to avoid leaving a dangling PVC
-			if deleteErr := wcClient.Delete(context.Background(), pvc); deleteErr != nil {
-				return fmt.Errorf("failed to delete PVC after Pod creation failed: %v", deleteErr)
+		for _, file := range files {
+			podPVCYAML, err := os.ReadFile(fmt.Sprintf("%s/%s", base, file.Name()))
+			if err != nil {
+				return err
 			}
+			obj, groupVersion, _ := decode(podPVCYAML, nil, nil)
+			switch groupVersion.Kind {
+			case "Namespace":
+				namespace := obj.(*corev1.Namespace)
+				return wcClient.Create(context.Background(), namespace)
+			case "PersistentVolumeClaim":
+				pvc := obj.(*corev1.PersistentVolumeClaim)
+				return wcClient.Create(context.Background(), pvc)
+
+			case "Pod":
+				pod := obj.(*corev1.Pod)
+				return wcClient.Create(context.Background(), pod)
+			}
+
+		}
+		if err != nil {
 			return err
 		}
 
@@ -141,38 +129,8 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 	}
 }
 
-func deletePodWithPVC(wcClient *client.Client) func() error {
+func deleteStorage(wcClient *client.Client, namespace string) func() error {
 	return func() error {
-
-		pod := &corev1.Pod{}
-		err := wcClient.Get(context.Background(), types.NamespacedName{Name: pvcPodName, Namespace: corev1.NamespaceDefault}, pod)
-		if err != nil {
-			if apierrors.IsNotFound(err) {
-				return nil
-			}
-			return err
-		}
-
-		err = wcClient.Delete(context.Background(), pod)
-		if err != nil {
-			return err
-		}
-
-		pvc := &corev1.PersistentVolumeClaim{}
-		err = wcClient.Get(context.Background(), types.NamespacedName{Name: pvcName, Namespace: corev1.NamespaceDefault}, pvc)
-		if err != nil {
-			if apierrors.IsNotFound(err) {
-				// If the PVC doesn't exist, return nil
-				return nil
-			}
-			return err
-		}
-
-		err = wcClient.Delete(context.Background(), pvc)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return wcClient.DeleteAllOf(context.Background(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}})
 	}
 }
