@@ -50,7 +50,7 @@ func runStorage() {
 				Should(Succeed())
 		})
 
-		It("has verified the pod is state running", func() {
+		It("has verified the pod is in state running", func() {
 			Eventually(wait.Consistent(verifyPodState(wcClient, "pvc-test-pod", "test-storage"), 10, time.Second)).
 				WithTimeout(wait.DefaultTimeout).
 				WithPolling(wait.DefaultInterval).
