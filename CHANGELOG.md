@@ -12,14 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add common test to make sure all default apps are marked as `deployed`.
+- Upgrade cluster tests
 
 ### Changed
 
 - Bumped clustertest to `v0.1.1` to fix `GITHUB_TOKEN` issue
-
-### Added
-
-- Upgrade cluster tests
 
 ## [1.7.0] - 2023-07-20
 
