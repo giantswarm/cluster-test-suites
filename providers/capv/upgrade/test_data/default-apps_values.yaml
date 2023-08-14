@@ -1,0 +1,2 @@
+clusterName: "{{ .ClusterName }}"
+organization: "{{ .Organization }}"

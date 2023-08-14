@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bumped clustertest to `v0.1.1` to fix `GITHUB_TOKEN` issue
 
+### Added
+
+- Upgrade cluster tests
+
 ## [1.7.0] - 2023-07-20
 
 ### Changed
