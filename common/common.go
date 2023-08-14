@@ -16,5 +16,6 @@ var (
 
 func Run(cfg *TestConfig) {
 	runBasic()
+	runApps()
 	runDNS(cfg.BastionSupported)
 }
