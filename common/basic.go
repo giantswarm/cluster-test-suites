@@ -24,14 +24,14 @@ func runBasic() {
 		BeforeEach(func() {
 			var err error
 
-			wcClient, err = state.Get().GetFramework().WC(state.Get().GetCluster().Name)
+			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
 			if err != nil {
 				Fail(err.Error())
 			}
 		})
 
 		It("should be able to connect to MC cluster", func() {
-			Expect(state.Get().GetFramework().MC().CheckConnection()).To(Succeed())
+			Expect(state.GetFramework().MC().CheckConnection()).To(Succeed())
 		})
 
 		It("should be able to connect to WC cluster", func() {

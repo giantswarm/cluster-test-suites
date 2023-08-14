@@ -35,18 +35,18 @@ var _ = BeforeSuite(func() {
 
 	logger.LogWriter = GinkgoWriter
 
-	state.Get().SetContext(context.Background())
+	state.SetContext(context.Background())
 
 	framework, err := clustertest.New(KubeContext)
 	Expect(err).NotTo(HaveOccurred())
-	state.Get().SetFramework(framework)
+	state.SetFramework(framework)
 
 	cluster := setUpWorkloadCluster()
-	state.Get().SetCluster(cluster)
+	state.SetCluster(cluster)
 })
 
 func setUpWorkloadCluster() *application.Cluster {
-	cluster, err := state.Get().GetFramework().LoadCluster()
+	cluster, err := state.GetFramework().LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
 		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
@@ -60,22 +60,22 @@ func createCluster() *application.Cluster {
 	cluster := capa.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml").
 		WithAppVersions("latest", "latest")
 	logger.Log("Workload cluster name: %s", cluster.Name)
-	state.Get().SetCluster(cluster)
+	state.SetCluster(cluster)
 
-	applyCtx, cancelApplyCtx := context.WithTimeout(state.Get().GetContext(), 20*time.Minute)
+	applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
 	defer cancelApplyCtx()
 
-	client, err := state.Get().GetFramework().ApplyCluster(applyCtx, state.Get().GetCluster())
+	client, err := state.GetFramework().ApplyCluster(applyCtx, state.GetCluster())
 	Expect(err).NotTo(HaveOccurred())
 
 	Eventually(
-		wait.AreNumNodesReady(state.Get().GetContext(), client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		wait.AreNumNodesReady(state.GetContext(), client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
 		20*time.Minute, 15*time.Second,
 	).Should(BeTrue())
 
 	DeferCleanup(func() {
-		Expect(state.Get().GetFramework().DeleteCluster(state.Get().GetContext(), state.Get().GetCluster())).To(Succeed())
+		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
 
-	return state.Get().GetCluster()
+	return state.GetCluster()
 }

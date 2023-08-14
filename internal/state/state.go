@@ -18,7 +18,7 @@ type state struct {
 
 var singleInstance *state
 
-func Get() *state {
+func get() *state {
 	if singleInstance == nil {
 		lock.Lock()
 		defer lock.Unlock()
@@ -30,26 +30,29 @@ func Get() *state {
 	return singleInstance
 }
 
-func (s *state) SetContext(ctx context.Context) {
+func SetContext(ctx context.Context) {
+	s := get()
 	s.ctx = ctx
 }
 
-func (s *state) GetContext() context.Context {
-	return s.ctx
+func GetContext() context.Context {
+	return get().ctx
 }
 
-func (s *state) SetFramework(framework *clustertest.Framework) {
+func SetFramework(framework *clustertest.Framework) {
+	s := get()
 	s.framework = framework
 }
 
-func (s *state) GetFramework() *clustertest.Framework {
-	return s.framework
+func GetFramework() *clustertest.Framework {
+	return get().framework
 }
 
-func (s *state) SetCluster(framework *application.Cluster) {
+func SetCluster(framework *application.Cluster) {
+	s := get()
 	s.cluster = framework
 }
 
-func (s *state) GetCluster() *application.Cluster {
-	return s.cluster
+func GetCluster() *application.Cluster {
+	return get().cluster
 }

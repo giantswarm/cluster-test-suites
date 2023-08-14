@@ -33,8 +33,8 @@ func runDNS(bastionSuppoted bool) {
 
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
-			defaultAppsName := fmt.Sprintf("%s-default-apps", state.Get().GetCluster().Name)
-			err := state.Get().GetFramework().MC().GetHelmValues(defaultAppsName, state.Get().GetCluster().Namespace, values)
+			defaultAppsName := fmt.Sprintf("%s-default-apps", state.GetCluster().Name)
+			err := state.GetFramework().MC().GetHelmValues(defaultAppsName, state.GetCluster().Namespace, values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
