@@ -1,0 +1,17 @@
+metadata:
+  name: "{{ .ClusterName }}"
+  description: "E2E Test cluster"
+  organization: "{{ .Organization }}"
+
+controlPlane:
+  replicas: 3
+nodePools:
+  pool0:
+    instanceType: m5.xlarge
+    maxSize: 10
+    minSize: 3
+    rootVolumeSizeGB: 300
+connectivity:
+  availabilityZoneUsageLimit: 3
+  bastion:
+    enabled: true

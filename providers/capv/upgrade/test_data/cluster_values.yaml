@@ -1,0 +1,54 @@
+clusterDescription: "E2E Test cluster"
+organization: "{{ .Organization }}"
+
+baseDomain: test.gigantic.io
+cluster:
+  kubernetesVersion: "v1.24.11"
+
+controlPlane:
+  replicas: 1
+  catalog: "giantswarm"
+  image:
+    repository: registry.k8s.io
+  machineTemplate:
+    template: ubuntu-2004-kube-v1.24.11
+    cloneMode: "linkedClone"
+    diskGiB: 50
+    numCPUs: 4
+    memoryMiB: 8096
+    resourcePool: "grasshopper"
+    network:
+      devices:
+      - networkName: 'grasshopper-capv'
+        dhcp4: true
+
+connectivity:
+  bastion:
+    enabled: true
+  network:
+    allowAllEgress: true
+    controlPlaneEndpoint:
+      host: ""  # [string] Manually select an IP for kube API. "" for auto selection from the ipPoolName pool.
+      port: 6443
+      ipPoolName: "wc-cp-ips"  # [string] Ip for control plane will be drawn from this GlobalInClusterIPPool (for gcapeverde it's 10.10.222.232 - 10.10.222.238 inclusive)
+    loadBalancers:
+      cidrBlocks:
+      - "10.10.222.239/32"
+
+nodeClasses:
+  default:
+    template: ubuntu-2004-kube-v1.24.11
+    cloneMode: "linkedClone"
+    diskGiB: 50
+    numCPUs: 6
+    memoryMiB: 16896
+    resourcePool: "grasshopper"
+    network:
+      devices:
+      - networkName: 'grasshopper-capv'
+        dhcp4: true
+
+nodePools:
+  worker:
+    class: "default"
+    replicas: 2
