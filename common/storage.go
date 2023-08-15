@@ -44,7 +44,6 @@ func runStorage() {
 		})
 
 		When("a pod uses a persistent volume claim", func() {
-			Expect(createPodWithPVC(wcClient)).To(Succeed())
 			BeforeEach(func() {
 				Eventually(createPodWithPVC(wcClient)).
 					WithTimeout(wait.DefaultTimeout).
