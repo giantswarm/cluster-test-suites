@@ -44,15 +44,16 @@ func runStorage() {
 		})
 
 		When("a pod uses a persistent volume claim", func() {
+			Expect(createPodWithPVC(wcClient)).To(Succeed())
 			BeforeEach(func() {
-				Eventually(wait.Consistent(createPodWithPVC(wcClient), 10, time.Second)).
+				Eventually(createPodWithPVC(wcClient)).
 					WithTimeout(wait.DefaultTimeout).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})
 
 			AfterEach(func() {
-				Eventually(wait.Consistent(deleteStorage(wcClient, namespace), 10, time.Second)).
+				Eventually(deleteStorage(wcClient, namespace)).
 					WithTimeout(wait.DefaultTimeout).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
@@ -64,28 +65,6 @@ func runStorage() {
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})
-		})
-	})
-}
-
-func cleanupStorage() {
-	Context("storage", func() {
-		var wcClient *client.Client
-
-		BeforeEach(func() {
-			var err error
-
-			wcClient, err = Framework.WC(Cluster.Name)
-			if err != nil {
-				Fail(err.Error())
-			}
-		})
-
-		It("has deleted all objects in namespace test-storage", func() {
-			Eventually(wait.Consistent(deleteStorage(wcClient, namespace), 10, time.Second)).
-				WithTimeout(wait.DefaultTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
 		})
 	})
 }
