@@ -97,8 +97,9 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 		if err != nil {
 			if apierror.IsAlreadyExists(err) {
 				// fall through
+			} else {
+				return err
 			}
-			return nil
 		}
 
 		pvcObj, err := helper.Deserialize(storage.PVC)
@@ -110,8 +111,9 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 		if err != nil {
 			if apierror.IsAlreadyExists(err) {
 				// fall through
+			} else {
+				return err
 			}
-			return err
 		}
 
 		podObj, err := helper.Deserialize(storage.Pod)
@@ -123,8 +125,9 @@ func createPodWithPVC(wcClient *client.Client) func() error {
 		if err != nil {
 			if apierror.IsAlreadyExists(err) {
 				// fall through
+			} else {
+				return err
 			}
-			return err
 		}
 
 		return nil
