@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add a PVC test.
 
+### Fixed
+
+- Bastion tests are disabled for CAPV.
+
 ## [1.8.0] - 2023-08-14
 
 ### Added
