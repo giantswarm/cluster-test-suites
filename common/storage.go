@@ -7,6 +7,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/assets/storage"
 	"github.com/giantswarm/cluster-test-suites/helper"
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
@@ -30,7 +31,7 @@ func runStorage() {
 		BeforeEach(func() {
 			var err error
 
-			wcClient, err = Framework.WC(Cluster.Name)
+			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
 			if err != nil {
 				Fail(err.Error())
 			}
