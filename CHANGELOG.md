@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bastion tests are disabled for CAPV.
 
+### Changed
+
+- Refactored state management to use singleton
+
 ## [1.8.0] - 2023-08-14
 
 ### Added
