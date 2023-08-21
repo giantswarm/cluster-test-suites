@@ -27,7 +27,10 @@ func NewClusterApp(clusterName string, orgName string, clusterValuesFile string,
 
 	return application.NewClusterApp(clusterName, application.ProviderCloudDirector).
 		WithOrg(organization.New(orgName)).
-		WithAppValuesFile(path.Clean(clusterValuesFile), path.Clean(defaultAppsValuesFile)).
+		WithAppValuesFile(path.Clean(clusterValuesFile), path.Clean(defaultAppsValuesFile), &application.TemplateValues{
+			ClusterName:  clusterName,
+			Organization: orgName,
+		}).
 		WithExtraConfigs([]applicationv1alpha1.AppExtraConfig{
 			{
 				Kind:      "secret",

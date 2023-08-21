@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bumped clustertest to `v0.1.1` to fix `GITHUB_TOKEN` issue
+- Bumped clustertest to `v0.1.1` to fix `GITHUB_TOKEN` issue.
+- Bumped clustertest to `v0.2.0` to use custom app values.
 
 ## [1.7.0] - 2023-07-20
 
