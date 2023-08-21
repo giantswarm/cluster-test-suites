@@ -16,18 +16,11 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/common"
-	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/cluster-test-suites/providers/capa"
 )
 
 const KubeContext = "capa"
-
-var (
-	ctx       context.Context
-	framework *clustertest.Framework
-	cluster   *application.Cluster
-)
 
 func TestCAPAUpgrade(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -40,23 +33,20 @@ var _ = BeforeSuite(func() {
 		return
 	}
 
-	ctx = context.Background()
 	logger.LogWriter = GinkgoWriter
 
-	var err error
-	framework, err = clustertest.New(KubeContext)
+	state.SetContext(context.Background())
+
+	framework, err := clustertest.New(KubeContext)
 	Expect(err).NotTo(HaveOccurred())
+	state.SetFramework(framework)
 
-	cluster = setUpWorkloadCluster()
-
-	common.Framework = framework
-	common.Cluster = cluster
-	upgrade.Framework = framework
-	upgrade.Cluster = cluster
+	cluster := setUpWorkloadCluster()
+	state.SetCluster(cluster)
 })
 
 func setUpWorkloadCluster() *application.Cluster {
-	cluster, err := framework.LoadCluster()
+	cluster, err := state.GetFramework().LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
 		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
@@ -67,24 +57,25 @@ func setUpWorkloadCluster() *application.Cluster {
 }
 
 func createCluster() *application.Cluster {
-	cluster = capa.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml").
+	cluster := capa.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml").
 		WithAppVersions("latest", "latest")
 	logger.Log("Workload cluster name: %s", cluster.Name)
+	state.SetCluster(cluster)
 
-	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
+	applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
 	defer cancelApplyCtx()
 
-	client, err := framework.ApplyCluster(applyCtx, cluster)
+	client, err := state.GetFramework().ApplyCluster(applyCtx, state.GetCluster())
 	Expect(err).NotTo(HaveOccurred())
 
 	Eventually(
-		wait.AreNumNodesReady(ctx, client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		wait.AreNumNodesReady(state.GetContext(), client, 1, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
 		20*time.Minute, 15*time.Second,
 	).Should(BeTrue())
 
 	DeferCleanup(func() {
-		Expect(framework.DeleteCluster(ctx, cluster)).To(Succeed())
+		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
 
-	return cluster
+	return state.GetCluster()
 }
