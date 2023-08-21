@@ -1,9 +1,9 @@
 # Main / Shared
 * @giantswarm/team-tinkerers
-/common @giantswarm/team-clippy @giantswarm/team-phoenix @giantswarm/team-rocket
+/common @giantswarm/team-phoenix @giantswarm/team-rocket
 
 # Teams:
-/providers/capz @giantswarm/team-clippy
+/providers/capz @giantswarm/team-phoenix
 /providers/capa @giantswarm/team-phoenix
 /providers/capvcd @giantswarm/team-rocket
 /providers/capv @giantswarm/team-rocket

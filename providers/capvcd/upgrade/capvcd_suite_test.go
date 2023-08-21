@@ -1,19 +1,20 @@
-package standard
+package upgrade
 
 import (
 	"context"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	cr "sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/cluster-test-suites/providers/capvcd"
@@ -21,12 +22,17 @@ import (
 
 const KubeContext = "capvcd"
 
-func TestCAPVCDStandard(t *testing.T) {
+func TestCAPVCDUpgrade(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CAPVCD Standard Suite")
+	RunSpecs(t, "CAPVCD Upgrade Suite")
 }
 
 var _ = BeforeSuite(func() {
+	if strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
+		Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
+		return
+	}
+
 	logger.LogWriter = GinkgoWriter
 
 	state.SetContext(context.Background())
@@ -43,6 +49,7 @@ func setUpWorkloadCluster() *application.Cluster {
 	cluster, err := state.GetFramework().LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
 		return cluster
 	}
 
@@ -50,7 +57,8 @@ func setUpWorkloadCluster() *application.Cluster {
 }
 
 func createCluster() *application.Cluster {
-	cluster := capvcd.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
+	cluster := capvcd.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml").
+		WithAppVersions("latest", "latest")
 	logger.Log("Workload cluster name: %s", cluster.Name)
 	state.SetCluster(cluster)
 

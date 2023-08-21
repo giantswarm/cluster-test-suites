@@ -95,6 +95,16 @@ Running with Docker:
 docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
 ```
 
+## ⬆️ Upgrade Tests
+
+Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of both the cluster App and the default-apps App. It then upgrades that cluster to whatever currently needs testing.
+
+There are a few things to be aware about these tests:
+
+* These test suites only run if a `E2E_OVERRIDE_VERSIONS` environment variable is set, indicating the versions to upgrade the Apps to.
+* The initial workload cluster created uses whatever the latest released version on GitHub is, this is not currently configurable.
+* These test suites use [Ginkgo Ordered Containers](https://onsi.github.io/ginkgo/#ordered-containers) to ensure certain tests specs are run before and after the upgrade process as required.
+
 ## ➕ Adding Tests
 
 > See the Ginkgo docs for specifics on how to write tests: https://onsi.github.io/ginkgo/#writing-specs

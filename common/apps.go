@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
@@ -30,16 +31,16 @@ func runApps() {
 			ctx := context.Background()
 
 			// We need to wait for default-apps to be deployed before we can check all apps.
-			defaultAppsAppName := fmt.Sprintf("%s-%s", Cluster.Name, "default-apps")
-			Eventually(Framework.GetApp, "30s").WithContext(ctx).WithArguments(defaultAppsAppName, Cluster.Organization.GetNamespace()).Should(HaveAppStatus("deployed"))
+			defaultAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "default-apps")
+			Eventually(state.GetFramework().GetApp, "30s").WithContext(ctx).WithArguments(defaultAppsAppName, state.GetCluster().Organization.GetNamespace()).Should(HaveAppStatus("deployed"))
 
-			managementClusterKubeClient := Framework.MC()
+			managementClusterKubeClient := state.GetFramework().MC()
 			appList := &v1alpha1.AppList{}
-			err := managementClusterKubeClient.List(ctx, appList, ctrl.InNamespace(Cluster.Organization.GetNamespace()), ctrl.MatchingLabels{"giantswarm.io/managed-by": defaultAppsAppName})
+			err := managementClusterKubeClient.List(ctx, appList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()), ctrl.MatchingLabels{"giantswarm.io/managed-by": defaultAppsAppName})
 			Expect(err).ShouldNot(HaveOccurred())
 
 			for _, app := range appList.Items {
-				Eventually(Framework.GetApp, "10m", "10s").WithContext(ctx).WithArguments(app.Name, app.Namespace).Should(HaveAppStatus("deployed"))
+				Eventually(state.GetFramework().GetApp, "10m", "10s").WithContext(ctx).WithArguments(app.Name, app.Namespace).Should(HaveAppStatus("deployed"))
 			}
 		})
 
