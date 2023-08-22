@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped clustertest to `v0.2.0` to use custom app values.
+
 ## [1.9.0] - 2023-08-21
 
 ### Added
