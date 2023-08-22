@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored default app tests so they can log out current state during iterations
 - Log out the non-running pods in test spec to show progress
 
+### Added
+
+- Add test that deploys hello-world application.
+
 ## [1.9.0] - 2023-08-21
 
 ### Added

@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
@@ -31,10 +32,14 @@ func helloWorld() {
 			ctx := context.Background()
 			managementClusterKubeClient := state.GetFramework().MC()
 
-			app, err := application.New(fmt.Sprintf("%s-ingress-nginx-app", state.GetCluster().Name), "ingress-nginx-app").WithCatalog("giantswarm").WithValuesFile("helloworld_values.yaml", &application.TemplateValues{
-				ClusterName:  state.GetCluster().Name,
-				Organization: state.GetCluster().Organization.Name,
-			})
+			app, err := application.New(fmt.Sprintf("%s-ingress-nginx-app", state.GetCluster().Name), "ingress-nginx").
+				WithCatalog("giantswarm").
+				WithNamespace("giantswarm").
+				WithInCluster(false).
+				WithValuesFile(path.Clean("./test_data/helloworld_values.yaml"), &application.TemplateValues{
+					ClusterName:  state.GetCluster().Name,
+					Organization: state.GetCluster().Organization.Name,
+				})
 			Expect(err).ShouldNot(HaveOccurred())
 			nginxApp, nginxConfigMap, err := app.Build()
 			Expect(err).ShouldNot(HaveOccurred())
@@ -45,10 +50,14 @@ func helloWorld() {
 			err = managementClusterKubeClient.Create(ctx, nginxApp)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			helloworldApp, err := application.New(fmt.Sprintf("%s-hello-world-app", state.GetCluster().Name), "hello-world-app").WithCatalog("giantswarm").WithValuesFile("nginx_values.yaml", &application.TemplateValues{
-				ClusterName:  state.GetCluster().Name,
-				Organization: state.GetCluster().Organization.Name,
-			})
+			helloworldApp, err := application.New(fmt.Sprintf("%s-hello-world-app", state.GetCluster().Name), "hello-world-app").
+				WithCatalog("giantswarm").
+				WithNamespace("giantswarm").
+				WithInCluster(false).
+				WithValuesFile(path.Clean("./test_data/nginx_values.yaml"), &application.TemplateValues{
+					ClusterName:  state.GetCluster().Name,
+					Organization: state.GetCluster().Organization.Name,
+				})
 			Expect(err).ShouldNot(HaveOccurred())
 			helloApp, helloConfigMap, err := helloworldApp.Build()
 			Expect(err).ShouldNot(HaveOccurred())
