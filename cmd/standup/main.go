@@ -8,11 +8,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/cmd/standup/types"
-	"github.com/giantswarm/cluster-test-suites/providers/capa"
-	"github.com/giantswarm/cluster-test-suites/providers/capv"
-	"github.com/giantswarm/cluster-test-suites/providers/capvcd"
-	"github.com/giantswarm/cluster-test-suites/providers/capz"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
@@ -21,6 +16,12 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	"github.com/spf13/cobra"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/cluster-test-suites/cmd/standup/types"
+	"github.com/giantswarm/cluster-test-suites/providers/capa"
+	"github.com/giantswarm/cluster-test-suites/providers/capv"
+	"github.com/giantswarm/cluster-test-suites/providers/capvcd"
+	"github.com/giantswarm/cluster-test-suites/providers/capz"
 )
 
 var (
@@ -98,7 +99,10 @@ func run(cmd *cobra.Command, args []string) error {
 		cluster = application.NewClusterApp(clusterName, provider).
 			WithAppVersions(clusterVersion, defaultAppVersion).
 			WithOrg(organization.New(orgName)).
-			WithAppValuesFile(path.Clean(clusterValues), path.Clean(defaultAppValues))
+			WithAppValuesFile(path.Clean(clusterValues), path.Clean(defaultAppValues), &application.TemplateValues{
+				ClusterName:  clusterName,
+				Organization: orgName,
+			})
 	}
 
 	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)

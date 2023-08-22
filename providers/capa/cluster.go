@@ -18,5 +18,8 @@ func NewClusterApp(clusterName string, orgName string, clusterValuesFile string,
 
 	return application.NewClusterApp(clusterName, application.ProviderAWS).
 		WithOrg(organization.New(orgName)).
-		WithAppValuesFile(path.Clean(clusterValuesFile), path.Clean(defaultAppsValuesFile))
+		WithAppValuesFile(path.Clean(clusterValuesFile), path.Clean(defaultAppsValuesFile), &application.TemplateValues{
+			ClusterName:  clusterName,
+			Organization: orgName,
+		})
 }
