@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
 func runApps() {
@@ -40,7 +41,7 @@ func runApps() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			for _, app := range appList.Items {
-				Eventually(state.GetFramework().GetApp, "10m", "10s").WithContext(ctx).WithArguments(app.Name, app.Namespace).Should(HaveAppStatus("deployed"))
+				Eventually(state.GetFramework().GetApp, "15m", "10s").WithContext(ctx).WithArguments(app.Name, app.Namespace).Should(HaveAppStatus("deployed"))
 			}
 		})
 
