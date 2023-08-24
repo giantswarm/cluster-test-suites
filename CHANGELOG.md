@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Log out the non-running pods in test spec to show progress
 - Bump Ginkgo to v2.12.0
 
+### Added
+
+- Generate test result reports
+
 ## [1.9.0] - 2023-08-21
 
 ### Added
