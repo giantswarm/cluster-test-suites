@@ -6,12 +6,13 @@ import (
 	"net"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
 func runDNS(bastionSuppoted bool) {
@@ -34,7 +35,7 @@ func runDNS(bastionSuppoted bool) {
 		BeforeEach(func() {
 			values = &application.DefaultAppsValues{}
 			defaultAppsName := fmt.Sprintf("%s-default-apps", state.GetCluster().Name)
-			err := state.GetFramework().MC().GetHelmValues(defaultAppsName, state.GetCluster().Namespace, values)
+			err := state.GetFramework().MC().GetHelmValues(defaultAppsName, state.GetCluster().GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{

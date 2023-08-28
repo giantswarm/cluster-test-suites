@@ -28,7 +28,7 @@ var _ = Describe("Common tests", func() {
 
 	It("has all the control-plane nodes running", func() {
 		values := &ClusterValues{}
-		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().Namespace, values)
+		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
 		Expect(err).NotTo(HaveOccurred())
 
 		wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
@@ -42,7 +42,7 @@ var _ = Describe("Common tests", func() {
 
 	It("has all the worker nodes running", func() {
 		values := &ClusterValues{}
-		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().Namespace, values)
+		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
 		Expect(err).NotTo(HaveOccurred())
 
 		wcClient, err := state.GetFramework().WC(state.GetCluster().Name)

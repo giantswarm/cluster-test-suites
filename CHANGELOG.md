@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bumped clustertest to `v0.3.0` to be able to set the app `Organization`.
+
+### Changed
+
 - Bumped clustertest to `v0.2.0` to use custom app values.
 
 ## [1.9.0] - 2023-08-21
