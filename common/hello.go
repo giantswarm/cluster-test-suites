@@ -32,7 +32,7 @@ func helloWorld() {
 			ctx := context.Background()
 			managementClusterKubeClient := state.GetFramework().MC()
 
-			app, err := application.New(fmt.Sprintf("%s-ingress-nginx-app", state.GetCluster().Name), "ingress-nginx").
+			nginxApplication, err := application.New(fmt.Sprintf("%s-ingress-nginx-app", state.GetCluster().Name), "ingress-nginx-app").
 				WithCatalog("giantswarm").
 				WithNamespace("giantswarm").
 				WithInCluster(false).
@@ -41,7 +41,7 @@ func helloWorld() {
 					Organization: state.GetCluster().Organization.Name,
 				})
 			Expect(err).ShouldNot(HaveOccurred())
-			nginxApp, nginxConfigMap, err := app.Build()
+			nginxApp, nginxConfigMap, err := nginxApplication.Build()
 			Expect(err).ShouldNot(HaveOccurred())
 
 			err = managementClusterKubeClient.Create(ctx, nginxConfigMap)
