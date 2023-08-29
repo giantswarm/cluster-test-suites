@@ -41,13 +41,13 @@ func runApps() {
 					return err
 				}
 
+				logger.Log("Checking status of %d apps", len(appList.Items))
 				errs := []error{}
 				for _, app := range appList.Items {
 					if err := checkAppStatus(&app); err != nil {
 						errs = append(errs, err)
 					}
 				}
-
 				return errors.NewAggregate(errs)
 			}).
 				WithTimeout(15 * time.Minute).
