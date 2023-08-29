@@ -104,10 +104,12 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 		for _, pod := range podList.Items {
 			phase := pod.Status.Phase
 			if phase != corev1.PodRunning && phase != corev1.PodSucceeded {
+				logger.Log("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
 				return fmt.Errorf("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
 			}
 		}
 
+		logger.Log("All (%d) pods currently in a running or completed state", len(podList.Items))
 		return nil
 	}
 }
