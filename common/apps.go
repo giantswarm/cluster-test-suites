@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/errors"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -40,13 +41,14 @@ func runApps() {
 					return err
 				}
 
+				errs := []error{}
 				for _, app := range appList.Items {
 					if err := checkAppStatus(&app); err != nil {
-						return err
+						errs = append(errs, err)
 					}
 				}
 
-				return nil
+				return errors.NewAggregate(errs)
 			}).
 				WithTimeout(15 * time.Minute).
 				WithPolling(10 * time.Second).
