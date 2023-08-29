@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped clustertest to `v0.2.0` to use custom app values.
 - Refactored default app tests so they can log out current state during iterations
 - Log out the non-running pods in test spec to show progress
+- Bump Ginkgo to v2.12.0
 
 ## [1.9.0] - 2023-08-21
 
