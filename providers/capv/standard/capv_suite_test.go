@@ -10,12 +10,13 @@ import (
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/providers/capv"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/providers/capv"
 )
 
 const (
@@ -46,7 +47,7 @@ func setUpWorkloadCluster() *application.Cluster {
 	cluster, err := state.GetFramework().LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
-		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.Namespace)
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.GetNamespace())
 		return cluster
 	}
 

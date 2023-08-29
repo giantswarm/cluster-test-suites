@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/common"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -23,7 +24,7 @@ func Run() {
 
 		It("has all the control-plane nodes running", func() {
 			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.Namespace, values)
+			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
@@ -37,7 +38,7 @@ func Run() {
 
 		It("has all the worker nodes running", func() {
 			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.Namespace, values)
+			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
@@ -83,7 +84,7 @@ func Run() {
 
 		It("has all the control-plane nodes running", func() {
 			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.Namespace, values)
+			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
@@ -97,7 +98,7 @@ func Run() {
 
 		It("has all the worker nodes running", func() {
 			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.Namespace, values)
+			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)

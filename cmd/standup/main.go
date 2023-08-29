@@ -131,7 +131,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	defer kubeconfigFile.Close()
 
-	kubeconfig, err := framework.MC().GetClusterKubeConfig(ctx, cluster.Name, cluster.Namespace)
+	kubeconfig, err := framework.MC().GetClusterKubeConfig(ctx, cluster.Name, cluster.GetNamespace())
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func run(cmd *cobra.Command, args []string) error {
 		Provider:       string(provider),
 		ClusterName:    clusterName,
 		OrgName:        orgName,
-		Namespace:      cluster.Namespace,
+		Namespace:      cluster.GetNamespace(),
 		ClusterVersion: cluster.ClusterApp.Version,
 		KubeconfigPath: kubeconfigFile.Name(),
 	}
