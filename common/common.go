@@ -5,9 +5,9 @@ type TestConfig struct {
 }
 
 func Run(cfg *TestConfig) {
-	helloWorld()
-	runBasic()
 	runApps()
+	runBasic()
 	runDNS(cfg.BastionSupported)
+	runHelloWorld()
 	runStorage()
 }

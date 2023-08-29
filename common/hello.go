@@ -5,51 +5,60 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"time"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/organization"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/format"
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
-func helloWorld() {
+func runHelloWorld() {
 	Context("hello world", func() {
-		var customFormatterKey format.CustomFormatterKey
 		var nginxApp, helloApp *v1alpha1.App
 		var nginxConfigMap, helloConfigMap *v1.ConfigMap
 
 		BeforeEach(func() {
-			customFormatterKey = format.RegisterCustomFormatter(func(value interface{}) (string, bool) {
-				app, ok := value.(v1alpha1.App)
-				if ok {
-					return fmt.Sprintf("App: %s/%s, Status: %s, Reason: %s", app.Namespace, app.Name, app.Status.Release.Status, app.Status.Release.Reason), true
-				}
-
-				return "", false
-			})
 			ctx := context.Background()
 			org := organization.New("giantswarm")
 
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "./test_data/nginx_values.yaml")
-			Eventually(state.GetFramework().GetApp, "5m", "10s").WithContext(ctx).WithArguments(nginxApp.Name, nginxApp.Namespace).Should(HaveAppStatus("deployed"))
+			Eventually(func() error {
+				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
+				if err != nil {
+					return err
+				}
+				return checkAppStatus(app)
+			}).
+				WithTimeout(3 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
+
 			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml")
-			Eventually(state.GetFramework().GetApp, "5m", "10s").WithContext(ctx).WithArguments(helloApp.Name, helloApp.Namespace).Should(HaveAppStatus("deployed"))
+			Eventually(func() error {
+				app, err := state.GetFramework().GetApp(ctx, helloApp.Name, helloApp.Namespace)
+				if err != nil {
+					return err
+				}
+				return checkAppStatus(app)
+			}).
+				WithTimeout(3 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 		})
 
 		It("hello world app responds successfully", func() {
 			Eventually(func() (*http.Response, error) {
 				return http.Get(fmt.Sprintf("https://hello-world.%s.gaws.gigantic.io", state.GetCluster().Name))
-			}, "5m", "5s").Should(HaveAppStatus("200"))
+			}, "5m", "5s").Should(HaveHTTPStatus(http.StatusOK))
 		})
 
 		AfterEach(func() {
 			ctx := context.Background()
-			format.UnregisterCustomFormatter(customFormatterKey)
 
 			managementClusterKubeClient := state.GetFramework().MC()
 			err := managementClusterKubeClient.Delete(ctx, nginxApp)
