@@ -12,9 +12,8 @@ import (
 	. "github.com/onsi/gomega"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	cmapiutil "github.com/cert-manager/cert-manager/pkg/api/util"
-	cmv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var clusterIssuers = []string{"letsencrypt-giantswarm", "selfsigned-giantswarm"}
@@ -45,18 +44,36 @@ func runCertManager() {
 }
 
 func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error {
-	clusterIssuer := &cmv1.ClusterIssuer{}
-	err := wcClient.Get(context.Background(), cr.ObjectKey{Name: clusterIssuerName}, clusterIssuer)
+
+	// Using a unstructured object.
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "cert-manager.io",
+		Kind:    "ClusterIssuer",
+		Version: "v1",
+	})
+	err := wcClient.Get(context.Background(), cr.ObjectKey{
+		Name: clusterIssuerName,
+	}, u)
 	if err != nil {
 		return err
 	}
 
-	if !cmapiutil.IssuerHasCondition(clusterIssuer, cmv1.IssuerCondition{
-		Type:   cmv1.IssuerConditionReady,
-		Status: cmmeta.ConditionTrue,
-	}) {
-		return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
+	conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
+	if err != nil {
+		return err
+	}
+	if !found {
+		return fmt.Errorf("ClusterIssuer '%s' does not have status.conditions", clusterIssuerName)
 	}
 
-	return nil
+	for _, condition := range conditions {
+		c := condition.(map[string]interface{})
+		conditionType := c["type"]
+		status := c["status"]
+		if conditionType == "Ready" && status == "True" {
+			return nil
+		}
+	}
+	return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
 }
