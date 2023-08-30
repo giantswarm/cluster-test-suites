@@ -8,4 +8,7 @@ fi
 SUITES_TO_RUN=$(find $1 -name '*.test' | xargs)
 shift
 
-ginkgo --timeout 4h --keep-going -v -r $@ ${SUITES_TO_RUN}
+REPORT_DIR=${REPORT_DIR:-/tmp/reports}
+mkdir -p ${REPORT_DIR}
+
+ginkgo --output-dir=${REPORT_DIR} --junit-report=test-results.xml --timeout 4h --keep-going -v -r $@ ${SUITES_TO_RUN}
