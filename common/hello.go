@@ -25,7 +25,7 @@ func runHelloWorld() {
 
 		BeforeEach(func() {
 			ctx := context.Background()
-			org := organization.New("giantswarm")
+			org := state.GetCluster().Organization
 
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "")
 			Eventually(func() error {
@@ -117,6 +117,7 @@ func deployApp(ctx context.Context, name, namespace string, organization *organi
 
 	// We need to set these properties manually after building, because they are calculated using the `app.Config` property that we currently can't set.
 	app.Spec.Config.ConfigMap.Name = fmt.Sprintf("%s-cluster-values", state.GetCluster().Name)
+	app.Spec.Config.ConfigMap.Namespace = organization.GetNamespace()
 	app.Spec.KubeConfig.Context.Name = fmt.Sprintf("%s-admin@%s", state.GetCluster().Name, state.GetCluster().Name)
 	app.Spec.KubeConfig.Secret.Name = fmt.Sprintf("%s-kubeconfig", state.GetCluster().Name)
 
