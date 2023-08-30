@@ -27,7 +27,7 @@ func runHelloWorld() {
 			ctx := context.Background()
 			org := state.GetCluster().Organization
 
-			// The hello world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
+			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
 			Eventually(func() error {
 				app, err := state.GetFramework().GetApp(ctx, "cert-manager", org.GetNamespace())
 				if err != nil {
