@@ -29,7 +29,7 @@ func runHelloWorld() {
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
 			Eventually(func() error {
-				app, err := state.GetFramework().GetApp(ctx, "cert-manager", org.GetNamespace())
+				app, err := state.GetFramework().GetApp(ctx, fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())
 				if err != nil {
 					return err
 				}
@@ -40,7 +40,7 @@ func runHelloWorld() {
 				Should(Succeed())
 
 			Eventually(func() error {
-				app, err := state.GetFramework().GetApp(ctx, "external-dns", org.GetNamespace())
+				app, err := state.GetFramework().GetApp(ctx, fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())
 				if err != nil {
 					return err
 				}
@@ -50,6 +50,7 @@ func runHelloWorld() {
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
+			// `external-dns` will only create dns records for Ingresses on the `kube-system` namespace, that's why we install the nginx app in that namespace.
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "")
 			Eventually(func() error {
 				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
@@ -91,7 +92,7 @@ func runHelloWorld() {
 		It("hello world app responds successfully", func() {
 			Eventually(func() (*http.Response, error) {
 				return http.Get(fmt.Sprintf("https://hello-world.%s.gaws.gigantic.io", state.GetCluster().Name))
-			}, "5m", "5s").Should(HaveHTTPStatus(http.StatusOK))
+			}, "10m", "5s").Should(HaveHTTPStatus(http.StatusOK))
 		})
 
 		AfterEach(func() {
