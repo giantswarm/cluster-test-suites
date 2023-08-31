@@ -3,15 +3,11 @@ metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
 
-controlPlane:
-  replicas: 3
+# We need to pass the node pools otherwise the test called "has all the worker nodes running" will fail because it
+# expects to find the number of worker nodes in the helm values, but the value is not there if don't pass it, as it's
+# defaulted in the chart template.
+# @TODO: https://github.com/giantswarm/giantswarm/issues/28063
 nodePools:
   pool0:
-    instanceType: m5.xlarge
-    maxSize: 10
-    minSize: 3
-    rootVolumeSizeGB: 300
-connectivity:
-  availabilityZoneUsageLimit: 3
-  bastion:
-    enabled: true
+    maxSize: 2
+    minSize: 2

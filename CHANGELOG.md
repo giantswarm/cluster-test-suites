@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Shrink container image by excluding build artifacts and language files.
+- Rely on `cluster-aws` default values when installing the chart.
 
 ### Docs
 
