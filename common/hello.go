@@ -28,7 +28,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 		BeforeEach(func() {
 			if !externalDnsSupported {
-				Skip("Bastion is not supported.")
+				Skip("external-dns is not supported")
 			}
 
 			ctx := context.Background()
@@ -57,7 +57,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
-			// `external-dns` will only create dns records for Ingresses on the `kube-system` namespace, that's why we install the nginx app in that namespace.
+			// `external-dns` will only create dns records for Services on the `kube-system` namespace, that's why we install the nginx app in that namespace.
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "", map[string]string{})
 			Eventually(func() error {
 				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
@@ -100,7 +100,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 		It("hello world app responds successfully", func() {
 			if !externalDnsSupported {
-				Skip("Bastion is not supported.")
+				Skip("external-dns is not supported")
 			}
 
 			Eventually(func() (*http.Response, error) {
@@ -112,7 +112,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 		AfterEach(func() {
 			if !externalDnsSupported {
-				Skip("Bastion is not supported.")
+				Skip("external-dns is not supported")
 			}
 
 			ctx := context.Background()
