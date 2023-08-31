@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add test that deploys hello-world application.
 
+### Changed
+
+- Shrink container image by excluding build artifacts and language files.
+
 ### Docs
 
 - Updated readme info
