@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme info
 
+### Changed
+
+- Bumped `clustertest` to v0.3.1 with fix for `ClusterValues` unmarshalling if different `NodePool` types
+- Refactored node tests to reuse code now the `NodePool` type fix is in `clustertest`
+
 ## [1.11.0] - 2023-08-29
 
 ### Added
