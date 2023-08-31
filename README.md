@@ -95,6 +95,21 @@ Running with Docker:
 docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
 ```
 
+### ⚙️ Running Tests in CI
+
+These tests are configures to run in our Tekton pipelines with our [cluster-test-suites pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/pipelines/cluster-test-suites.yaml). This pipeline can be triggered on appropriate repos by using the `/run cluster-test-suites` comment trigger.
+
+Note: Test suites are configured to run in parallel using a [Matrix](https://tekton.dev/docs/pipelines/matrix/) in the Tekton Pipeline. Once all suites are complete the results of each will be collected and presented in a final Pipeline Task to show the results of all suites.
+
+When the pipeline runs against PRs to the `cluster-test-suites` repo the following is of note:
+* The pipeline will use a container image built from the changes in the PR. The image building and publishing is still handled by CircleCI so the pipeline has a step at the start to wait for this image to be available.
+* The `upgrade` tests won't run as there's no information as to what versions to upgrade from/to.
+* All providers will be tested. These test suites will run in parallel and the pipeline will wait for all of them to complete before finishing.
+
+When the pipeline runs against one of the provider-specific repos (e.g. cluster or default-apps repos) the following is of note:
+* The pipeline will use the latest tagged release of the cluster-test-suites container image.
+* Only the tests associated with that provider will be run, including the `upgrade` tests.
+
 ## ⬆️ Upgrade Tests
 
 Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of both the cluster App and the default-apps App. It then upgrades that cluster to whatever currently needs testing.
@@ -111,7 +126,7 @@ There are a few things to be aware about these tests:
 
 Where possible, new tests cases should be added that are compatible with all providers so that all benefit. The is obviously not always possible and some provider-specific tests will be required.
 
-All tests make use of our [clustertest](https://github.com/giantswarm/clustertest) test framework.
+All tests make use of our [clustertest](https://github.com/giantswarm/clustertest) test framework. Please refer to the [documentation](https://pkg.go.dev/github.com/giantswarm/clustertest) for more information.
 
 ### Adding cross-provider tests
 
@@ -155,7 +170,7 @@ The `test_data` directory should contain at least the values files for the clust
 
 Values files can be stored as `*.yaml` files and loaded in using the test framework for use when creating apps in clusters.
 
-The values files can use Go templating to replace some specific values (see the [clustertest docs](https://pkg.go.dev/github.com/giantswarm/clustertest/pkg/application#ValuesTemplateVars) for specific variables available).
+The values files can use Go templating to replace some variables with their cluster-specific values (see the [clustertest docs](https://pkg.go.dev/github.com/giantswarm/clustertest/pkg/application#TemplateValues) for specific variables available). It is also possible to provide an `ExtraValues` map that contains key/value pairs made available to the templateing.
 
 E.g. the following will have the `name` and `organization` values replaced with those set on the Cluster instance.
 
@@ -170,3 +185,9 @@ controlPlane:
 ```
 
 > Note: It is best to always wrap these template strings in quote where appropriate to ensure the data used doesn't accidentally break the yaml schema.
+
+## Resources
+
+* [`clustertest` documentation](https://pkg.go.dev/github.com/giantswarm/clustertest)
+* [CI Tekton Pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/pipelines/cluster-test-suites.yaml)
+* [Ginkgo docs](https://onsi.github.io/ginkgo/)
