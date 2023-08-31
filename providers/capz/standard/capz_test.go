@@ -3,17 +3,14 @@ package standard
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/giantswarm/clustertest/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/common"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
 type ClusterValues struct {
@@ -24,34 +21,6 @@ type ClusterValues struct {
 var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
 		BastionSupported: true,
-	})
-
-	It("has all the control-plane nodes running", func() {
-		values := &ClusterValues{}
-		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
-		Expect(err).NotTo(HaveOccurred())
-
-		wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
-		Expect(err).NotTo(HaveOccurred())
-
-		Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
-			WithTimeout(wait.DefaultTimeout).
-			WithPolling(wait.DefaultInterval).
-			Should(Succeed())
-	})
-
-	It("has all the worker nodes running", func() {
-		values := &ClusterValues{}
-		err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
-		Expect(err).NotTo(HaveOccurred())
-
-		wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
-		Expect(err).NotTo(HaveOccurred())
-
-		Eventually(wait.Consistent(CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-			WithTimeout(wait.DefaultTimeout).
-			WithPolling(wait.DefaultInterval).
-			Should(Succeed())
 	})
 })
 

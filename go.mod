@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.0
-	github.com/giantswarm/clustertest v0.3.0
+	github.com/giantswarm/clustertest v0.3.1
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/spf13/cobra v1.7.0
