@@ -16,7 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-var clusterIssuers = []string{"letsencrypt-giantswarm", "selfsigned-giantswarm"}
+var clusterIssuers = []string{"selfsigned-giantswarm", "letsencrypt-giantswarm"}
 
 func runCertManager() {
 	Context("cert-manager ClusterIssuers", func() {
@@ -58,6 +58,7 @@ func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error
 	if err != nil {
 		return err
 	}
+	logger.Log("ClusterIssuer '%s' is present", clusterIssuerName)
 
 	conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
 	if err != nil {
