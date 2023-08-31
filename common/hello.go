@@ -57,7 +57,9 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
-			// `external-dns` will only create dns records for Services on the `kube-system` namespace, that's why we install the nginx app in that namespace.
+			// By default, `external-dns` will only create dns records for Services on the `kube-system` namespace, because that's the default value for `namespaceFilter`.
+			// That's why we install the nginx app in that namespace.
+			// https://github.com/giantswarm/external-dns-app/blob/main/helm/external-dns-app/values.yaml#L114-L117
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "", map[string]string{})
 			Eventually(func() error {
 				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
@@ -74,8 +76,9 @@ func runHelloWorld(externalDnsSupported bool) {
 			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml", helloAppValues)
 			Eventually(func() error {
-				// The hello-world app creates Ingress resources, and they won't be able to be created until the nginx webhooks are up and running, so the first time we try to install the hello-world app, it will fail.
-				// Meaning that it won't be retried until the next chart-operator reconciliation loop 5 minutes later.
+				// The hello-world app creates `Ingress` resources, and the `ingress-nginx` app installed above has created some admission webhooks for `Ingress`. While `nginx` webhooks are booting, requests to them will fail to respond successfully,
+				// and `Ingress` resources won't be able to be created until the webhooks are up and running. The first time we try to install the `hello-world` app, it will fail because of this.
+				// `chart-operator` reconciles `charts` every 5 minutes, which means that the `hello-world` app won't be retried again until the next chart-operator reconciliation loop 5 minutes later.
 				// To speed things up, we keep patching the hello-world `App` CR by adding a label. That way, we trigger reconciliation loops in chart-operator.
 				now := time.Now()
 				patchedApp := helloApp.DeepCopy()
