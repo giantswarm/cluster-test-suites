@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Shrink container image by excluding build artifacts and language files.
 
+### Docs
+
+- Updated readme info
+
 ## [1.11.0] - 2023-08-29
 
 ### Added
