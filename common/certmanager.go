@@ -33,7 +33,7 @@ func runCertManager() {
 
 		It("cert-manager default ClusterIssuers are present and ready", func() {
 			for _, clusterIssuerName := range clusterIssuers {
-				logger.Log("checking ClusterIssuer '%s'", clusterIssuerName)
+				logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
 				Eventually(checkClusterIssuer(wcClient, clusterIssuerName)).
 					WithTimeout(30 * time.Second).
 					WithPolling(50 * time.Millisecond).
@@ -72,8 +72,10 @@ func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error
 		conditionType := c["type"]
 		status := c["status"]
 		if conditionType == "Ready" && status == "True" {
+			logger.Log("Found status.condition with type '%s' and status '%s' in ClusterIssuer '%s'", conditionType, status, clusterIssuerName)
 			return nil
 		}
 	}
+
 	return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
 }
