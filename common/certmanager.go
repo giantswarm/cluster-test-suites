@@ -78,5 +78,6 @@ func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error
 		}
 	}
 
+    logger.Log("ClusterIssuer '%s' is not Ready", clusterIssuerName)
 	return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
 }
