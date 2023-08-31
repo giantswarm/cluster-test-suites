@@ -17,6 +17,8 @@ RUN ginkgo build --skip-package /X -r ./
 
 FROM debian:bookworm-slim
 
+WORKDIR /app
+
 RUN apt-get update \
   && apt-get install --no-install-recommends --no-install-suggests -y ca-certificates \
   && rm -rf /var/lib/apt/lists/*
