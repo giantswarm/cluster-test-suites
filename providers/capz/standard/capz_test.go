@@ -23,7 +23,8 @@ type ClusterValues struct {
 
 var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
-		BastionSupported: true,
+		BastionSupported:     true,
+		ExternalDnsSupported: false,
 	})
 
 	It("has all the control-plane nodes running", func() {

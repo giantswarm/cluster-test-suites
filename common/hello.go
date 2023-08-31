@@ -20,13 +20,17 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
-func runHelloWorld() {
+func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", func() {
 		var nginxApp, helloApp *v1alpha1.App
 		var nginxConfigMap, helloConfigMap *v1.ConfigMap
 		var helloWorldIngressHost string
 
 		BeforeEach(func() {
+			if !externalDnsSupported {
+				Skip("Bastion is not supported.")
+			}
+
 			ctx := context.Background()
 			org := state.GetCluster().Organization
 
@@ -95,6 +99,10 @@ func runHelloWorld() {
 		})
 
 		It("hello world app responds successfully", func() {
+			if !externalDnsSupported {
+				Skip("Bastion is not supported.")
+			}
+
 			Eventually(func() (*http.Response, error) {
 				helloWorldIngressUrl := fmt.Sprintf("https://%s", helloWorldIngressHost)
 				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)
@@ -103,6 +111,10 @@ func runHelloWorld() {
 		})
 
 		AfterEach(func() {
+			if !externalDnsSupported {
+				Skip("Bastion is not supported.")
+			}
+
 			ctx := context.Background()
 
 			managementClusterKubeClient := state.GetFramework().MC()
