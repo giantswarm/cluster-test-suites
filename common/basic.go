@@ -38,6 +38,34 @@ func runBasic() {
 			Expect(wcClient.CheckConnection()).To(Succeed())
 		})
 
+		It("has all the control-plane nodes running", func() {
+			values := &application.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+			Expect(err).NotTo(HaveOccurred())
+
+			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(wait.Consistent(CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all the worker nodes running", func() {
+			values := &application.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+			Expect(err).NotTo(HaveOccurred())
+
+			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(wait.Consistent(CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
 		It("has all of it's Pods in the Running state", func() {
 			Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 				WithTimeout(wait.DefaultTimeout).
