@@ -9,10 +9,12 @@ import (
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/organization"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -22,6 +24,7 @@ func runHelloWorld() {
 	Context("hello world", func() {
 		var nginxApp, helloApp *v1alpha1.App
 		var nginxConfigMap, helloConfigMap *v1.ConfigMap
+		var helloWorldIngressHost string
 
 		BeforeEach(func() {
 			ctx := context.Background()
@@ -51,7 +54,7 @@ func runHelloWorld() {
 				Should(Succeed())
 
 			// `external-dns` will only create dns records for Ingresses on the `kube-system` namespace, that's why we install the nginx app in that namespace.
-			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "")
+			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "", map[string]string{})
 			Eventually(func() error {
 				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
 				if err != nil {
@@ -63,7 +66,9 @@ func runHelloWorld() {
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
-			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml")
+			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone(ctx))
+			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
+			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml", helloAppValues)
 			Eventually(func() error {
 				// The hello-world app creates Ingress resources, and they won't be able to be created until the nginx webhooks are up and running, so the first time we try to install the hello-world app, it will fail.
 				// Meaning that it won't be retried until the next chart-operator reconciliation loop 5 minutes later.
@@ -91,7 +96,9 @@ func runHelloWorld() {
 
 		It("hello world app responds successfully", func() {
 			Eventually(func() (*http.Response, error) {
-				return http.Get(fmt.Sprintf("https://hello-world.%s.gaws.gigantic.io", state.GetCluster().Name))
+				helloWorldIngressUrl := fmt.Sprintf("https://%s", helloWorldIngressHost)
+				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)
+				return http.Get(helloWorldIngressUrl)
 			}, "10m", "5s").Should(HaveHTTPStatus(http.StatusOK))
 		})
 
@@ -113,7 +120,7 @@ func runHelloWorld() {
 
 // deployApp creates an `App` CR for the desired application.
 // It currently has some needed workarounds until we improve our `clustertest` framework.
-func deployApp(ctx context.Context, name, namespace string, organization *organization.Org, version, valuesFile string) (*v1alpha1.App, *v1.ConfigMap) {
+func deployApp(ctx context.Context, name, namespace string, organization *organization.Org, version, valuesFile string, values map[string]string) (*v1alpha1.App, *v1.ConfigMap) {
 	var err error
 	managementClusterKubeClient := state.GetFramework().MC()
 	appBuilder := application.New(fmt.Sprintf("%s-%s", state.GetCluster().Name, name), name).
@@ -129,6 +136,7 @@ func deployApp(ctx context.Context, name, namespace string, organization *organi
 		appBuilder, err = appBuilder.WithValuesFile(path.Clean(valuesFile), &application.TemplateValues{
 			ClusterName:  state.GetCluster().Name,
 			Organization: state.GetCluster().Organization.Name,
+			ExtraValues:  values,
 		})
 		Expect(err).ShouldNot(HaveOccurred())
 	}
@@ -151,4 +159,20 @@ func deployApp(ctx context.Context, name, namespace string, organization *organi
 	Expect(err).ShouldNot(HaveOccurred())
 
 	return app, configMap
+}
+
+func getWorkloadClusterDnsZone(ctx context.Context) string {
+	clusterValuesConfigMap := &v1.ConfigMap{}
+	err := state.GetFramework().MC().Get(ctx, ctrl.ObjectKey{Namespace: state.GetCluster().Organization.GetNamespace(), Name: fmt.Sprintf("%s-cluster-values", state.GetCluster().Name)}, clusterValuesConfigMap)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	clusterValuesConfigMapData := make(map[string]interface{})
+	err = yaml.Unmarshal([]byte(clusterValuesConfigMap.Data["values"]), &clusterValuesConfigMapData)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	if clusterValuesConfigMapData["baseDomain"] == "" {
+		Fail("baseDomain field missing from cluster-values configmap")
+	}
+
+	return fmt.Sprintf("%s", clusterValuesConfigMapData["baseDomain"])
 }
