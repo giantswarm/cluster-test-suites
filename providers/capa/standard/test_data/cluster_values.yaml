@@ -2,3 +2,8 @@ metadata:
   name: "{{ .ClusterName }}"
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
+
+nodePools:
+  pool0:
+    maxSize: 2
+    minSize: 2
