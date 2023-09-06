@@ -184,5 +184,5 @@ func getWorkloadClusterDnsZone() string {
 		Fail("baseDomain field missing from cluster helm values")
 	}
 
-	return values.BaseDomain
+	return fmt.Sprintf("%s.%s", state.GetCluster().Name, values.BaseDomain)
 }
