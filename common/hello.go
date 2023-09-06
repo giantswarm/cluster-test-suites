@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/yaml"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -72,7 +71,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
-			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone(ctx))
+			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml", helloAppValues)
 			Eventually(func() error {
@@ -176,18 +175,14 @@ func deployApp(ctx context.Context, name, namespace string, organization *organi
 	return app, configMap
 }
 
-func getWorkloadClusterDnsZone(ctx context.Context) string {
-	clusterValuesConfigMap := &v1.ConfigMap{}
-	err := state.GetFramework().MC().Get(ctx, ctrl.ObjectKey{Namespace: state.GetCluster().Organization.GetNamespace(), Name: fmt.Sprintf("%s-cluster-values", state.GetCluster().Name)}, clusterValuesConfigMap)
-	Expect(err).ShouldNot(HaveOccurred())
+func getWorkloadClusterDnsZone() string {
+	values := &application.DefaultAppsValues{}
+	err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+	Expect(err).NotTo(HaveOccurred())
 
-	clusterValuesConfigMapData := make(map[string]interface{})
-	err = yaml.Unmarshal([]byte(clusterValuesConfigMap.Data["values"]), &clusterValuesConfigMapData)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	if clusterValuesConfigMapData["baseDomain"] == "" {
-		Fail("baseDomain field missing from cluster-values configmap")
+	if values.BaseDomain == "" {
+		Fail("baseDomain field missing from cluster helm values")
 	}
 
-	return fmt.Sprintf("%s", clusterValuesConfigMapData["baseDomain"])
+	return values.BaseDomain
 }
