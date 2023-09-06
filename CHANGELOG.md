@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add test that deploys hello-world application.
+- Add a cert-manager ClusterIssuer readiness test.
 
 ## [1.11.1] - 2023-08-31
 

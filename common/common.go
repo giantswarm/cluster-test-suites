@@ -8,6 +8,7 @@ type TestConfig struct {
 func Run(cfg *TestConfig) {
 	runApps()
 	runBasic()
+	runCertManager()
 	runDNS(cfg.BastionSupported)
 	runHelloWorld(cfg.ExternalDnsSupported)
 	runStorage()
