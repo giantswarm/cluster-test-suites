@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"path"
 	"time"
@@ -23,7 +24,7 @@ func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", func() {
 		var nginxApp, helloApp *v1alpha1.App
 		var nginxConfigMap, helloConfigMap *v1.ConfigMap
-		var helloWorldIngressHost string
+		var helloWorldIngressHost, helloWorldIngressUrl string
 
 		BeforeEach(func() {
 			if !externalDnsSupported {
@@ -72,6 +73,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				Should(Succeed())
 
 			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
+			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml", helloAppValues)
 			Eventually(func() error {
@@ -105,11 +107,25 @@ func runHelloWorld(externalDnsSupported bool) {
 				Skip("external-dns is not supported")
 			}
 
-			Eventually(func() (*http.Response, error) {
-				helloWorldIngressUrl := fmt.Sprintf("https://%s", helloWorldIngressHost)
+			Eventually(func() (string, error) {
 				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)
-				return http.Get(helloWorldIngressUrl)
-			}, "10m", "5s").Should(And(HaveHTTPStatus(http.StatusOK), ContainSubstring("Hello World")))
+				resp, err := http.Get(helloWorldIngressUrl)
+				if err != nil {
+					return "", err
+				}
+				defer resp.Body.Close()
+
+				if resp.StatusCode != http.StatusOK {
+					return "", err
+				}
+
+				bodyBytes, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return "", err
+				}
+
+				return string(bodyBytes), nil
+			}, "10m", "5s").Should(ContainSubstring("Hello World"))
 		})
 
 		AfterEach(func() {
