@@ -109,7 +109,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				helloWorldIngressUrl := fmt.Sprintf("https://%s", helloWorldIngressHost)
 				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)
 				return http.Get(helloWorldIngressUrl)
-			}, "10m", "5s").Should(HaveHTTPStatus(http.StatusOK))
+			}, "10m", "5s").Should(And(HaveHTTPStatus(http.StatusOK), ContainSubstring("Hello World")))
 		})
 
 		AfterEach(func() {
