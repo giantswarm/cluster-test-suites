@@ -21,7 +21,7 @@ func runApps() {
 			// We need to wait for default-apps to be deployed before we can check all apps.
 			defaultAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "default-apps")
 
-			Eventually(wait.IsAppStatus(state.GetContext(), state.GetFramework().MC(), defaultAppsAppName, state.GetCluster().Organization.GetNamespace(), "deployed")).
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsAppName, state.GetCluster().Organization.GetNamespace())).
 				WithTimeout(30 * time.Second).
 				WithPolling(50 * time.Millisecond).
 				Should(BeTrue())
