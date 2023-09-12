@@ -116,7 +116,7 @@ Each of the providers have a test suite called `upgrade` that is designed to fir
 
 There are a few things to be aware about these tests:
 
-* These test suites only run if a `E2E_OVERRIDE_VERSIONS` environment variable is set, indicating the versions to upgrade the Apps to.
+* These test suites only run if a `E2E_OVERRIDE_VERSIONS` environment variable is set, indicating the versions to upgrade the Apps to. For example `E2E_OVERRIDE_VERSIONS="cluster-aws=0.38.0-5f4372ac697fce58d524830a985ede2082d7f461"`.
 * The initial workload cluster created uses whatever the latest released version on GitHub is, this is not currently configurable.
 * These test suites use [Ginkgo Ordered Containers](https://onsi.github.io/ginkgo/#ordered-containers) to ensure certain tests specs are run before and after the upgrade process as required.
 

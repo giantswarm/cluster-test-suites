@@ -1,13 +1,15 @@
 package common
 
 type TestConfig struct {
-	BastionSupported bool
+	BastionSupported     bool
+	ExternalDnsSupported bool
 }
 
 func Run(cfg *TestConfig) {
-	runBasic()
 	runApps()
+	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)
+	runHelloWorld(cfg.ExternalDnsSupported)
 	runStorage()
 }

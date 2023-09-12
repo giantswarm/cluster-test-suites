@@ -21,6 +21,8 @@ type ClusterValues struct {
 var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
 		BastionSupported: true,
+		// Disabled until https://github.com/giantswarm/default-apps-azure/pull/150
+		ExternalDnsSupported: false,
 	})
 })
 

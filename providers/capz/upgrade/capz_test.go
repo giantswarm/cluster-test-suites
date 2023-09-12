@@ -13,5 +13,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// Finally run the common tests after upgrade is completed
 	common.Run(&common.TestConfig{
 		BastionSupported: true,
+		// Disabled until https://github.com/giantswarm/default-apps-azure/pull/150
+		ExternalDnsSupported: false,
 	})
 })
