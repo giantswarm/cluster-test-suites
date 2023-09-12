@@ -12,6 +12,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/organization"
+	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -26,6 +27,11 @@ func runHelloWorld(externalDnsSupported bool) {
 		var nginxConfigMap, helloConfigMap *v1.ConfigMap
 		var helloWorldIngressHost, helloWorldIngressUrl string
 
+		const (
+			appReadyTimeout  = 3 * time.Minute
+			appReadyInterval = 5 * time.Second
+		)
+
 		BeforeEach(func() {
 			if !externalDnsSupported {
 				Skip("external-dns is not supported")
@@ -35,48 +41,31 @@ func runHelloWorld(externalDnsSupported bool) {
 			org := state.GetCluster().Organization
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
-			Eventually(func() error {
-				app, err := state.GetFramework().GetApp(ctx, fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())
-				if err != nil {
-					return err
-				}
-				return checkAppStatus(app)
-			}).
-				WithTimeout(3 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(Succeed())
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
+				WithTimeout(appReadyTimeout).
+				WithPolling(appReadyInterval).
+				Should(BeTrue())
 
-			Eventually(func() error {
-				app, err := state.GetFramework().GetApp(ctx, fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())
-				if err != nil {
-					return err
-				}
-				return checkAppStatus(app)
-			}).
-				WithTimeout(3 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(Succeed())
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
+				WithTimeout(appReadyTimeout).
+				WithPolling(appReadyInterval).
+				Should(BeTrue())
 
 			// By default, `external-dns` will only create dns records for Services on the `kube-system` namespace, because that's the default value for `namespaceFilter`.
 			// That's why we install the nginx app in that namespace.
 			// https://github.com/giantswarm/external-dns-app/blob/main/helm/external-dns-app/values.yaml#L114-L117
 			nginxApp, nginxConfigMap = deployApp(ctx, "ingress-nginx", "kube-system", org, "3.0.0", "", map[string]string{})
-			Eventually(func() error {
-				app, err := state.GetFramework().GetApp(ctx, nginxApp.Name, nginxApp.Namespace)
-				if err != nil {
-					return err
-				}
-				return checkAppStatus(app)
-			}).
-				WithTimeout(3 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(Succeed())
+
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), nginxApp.Name, nginxApp.Namespace)).
+				WithTimeout(appReadyTimeout).
+				WithPolling(appReadyInterval).
+				Should(BeTrue())
 
 			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 			helloApp, helloConfigMap = deployApp(ctx, "hello-world", "giantswarm", org, "2.0.0", "./test_data/helloworld_values.yaml", helloAppValues)
-			Eventually(func() error {
+			Eventually(func() (bool, error) {
 				// The hello-world app creates `Ingress` resources, and the `ingress-nginx` app installed above has created some admission webhooks for `Ingress`. While `nginx` webhooks are booting, requests to them will fail to respond successfully,
 				// and `Ingress` resources won't be able to be created until the webhooks are up and running. The first time we try to install the `hello-world` app, it will fail because of this.
 				// `chart-operator` reconciles `charts` every 5 minutes, which means that the `hello-world` app won't be retried again until the next chart-operator reconciliation loop 5 minutes later.
@@ -89,17 +78,14 @@ func runHelloWorld(externalDnsSupported bool) {
 				managementClusterKubeClient := state.GetFramework().MC()
 				err := managementClusterKubeClient.Patch(ctx, patchedApp, ctrl.MergeFrom(helloApp))
 				if err != nil {
-					return err
+					return false, err
 				}
-				app, err := state.GetFramework().GetApp(ctx, helloApp.Name, helloApp.Namespace)
-				if err != nil {
-					return err
-				}
-				return checkAppStatus(app)
+
+				return wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.Name, helloApp.Namespace)()
 			}).
 				WithTimeout(6 * time.Minute).
 				WithPolling(5 * time.Second).
-				Should(Succeed())
+				Should(BeTrue())
 		})
 
 		It("hello world app responds successfully", func() {

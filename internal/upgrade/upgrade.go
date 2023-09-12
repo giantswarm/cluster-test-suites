@@ -67,7 +67,7 @@ func Run() {
 			).Should(BeTrue())
 
 			Eventually(
-				wait.IsAppStatus(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace, "deployed"),
+				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace),
 				10*time.Minute, 5*time.Second,
 			).Should(BeTrue())
 
@@ -77,7 +77,7 @@ func Run() {
 			).Should(BeTrue())
 
 			Eventually(
-				wait.IsAppStatus(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace, "deployed"),
+				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace),
 				10*time.Minute, 5*time.Second,
 			).Should(BeTrue())
 		})

@@ -190,8 +190,8 @@ github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbS
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/giantswarm/apiextensions-application v0.6.0 h1:ZPIiq27zJ2VatrWH21/dK6jR9rJrr4VJUP/Fo0GvsPE=
 github.com/giantswarm/apiextensions-application v0.6.0/go.mod h1:O6mg+EdXC9CyTLgi0d3rf6QTXrQX/79iw4kjMJRinig=
-github.com/giantswarm/clustertest v0.3.1 h1:k7NE4BIzdRAu/muaPhcuAT1vnBQhVf7Z8qkZ2M+ATZE=
-github.com/giantswarm/clustertest v0.3.1/go.mod h1:+XvsS0/Ix2mxmVE00i65SSYKwNBVXOkNM5JsrScikTE=
+github.com/giantswarm/clustertest v0.4.0 h1:zFGqq5m/eTjx62CNQpMp4rpyJfG5VKMELtP9AlRQp6s=
+github.com/giantswarm/clustertest v0.4.0/go.mod h1:YfS5YnCNzuaNg9K2ef/IfzFtcZKT1k8GkizVNi06zmg=
 github.com/giantswarm/k8smetadata v0.21.0 h1:NeLh8thaQf3iRobPhP94qF8kd7KUU65gUUNSkwFfu+E=
 github.com/giantswarm/k8smetadata v0.21.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubectl-gs/v2 v2.41.0 h1:UDxf82xWSQ9eD/EZlu859GnxgNFxfc38c8ic3i8zUag=
@@ -305,8 +305,8 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.7/go.mod h1:n+brtR0CgQNWTVd5ZUFpTBC8YFBDLK/h/bpaJ8/DtOE=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/google/go-github/v54 v54.0.0 h1:OZdXwow4EAD5jEo5qg+dGFH2DpkyZvVsAehjvJuUL/c=
-github.com/google/go-github/v54 v54.0.0/go.mod h1:Sw1LXWHhXRZtzJ9LI5fyJg9wbQzYvFhW8W5P2yaAQ7s=
+github.com/google/go-github/v55 v55.0.0 h1:4pp/1tNMB9X/LuAhs5i0KQAE40NmiR/y6prLNb9x9cg=
+github.com/google/go-github/v55 v55.0.0/go.mod h1:JLahOTA1DnXzhxEymmFF5PP2tSS9JVNj68mSZNDwskA=
 github.com/google/go-querystring v1.1.0 h1:AnCroh3fv4ZBgVIf1Iwtovgjaw/GiKJo8M8yD/fhyJ8=
 github.com/google/go-querystring v1.1.0/go.mod h1:Kcdr2DB4koayq7X8pmAG4sNG59So17icRSOU623lUBU=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
