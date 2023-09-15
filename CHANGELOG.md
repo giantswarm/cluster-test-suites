@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `clustertest` to v0.6.0
+- Updated `clustertest` to v0.6.1
 - Refactored app deployment to use `clustertest` helper functions
 
 ## [1.12.1] - 2023-09-12
