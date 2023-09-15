@@ -13,7 +13,6 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -22,9 +21,12 @@ import (
 
 func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", func() {
-		var nginxApp, helloApp *v1alpha1.App
-		var nginxConfigMap, helloConfigMap *v1.ConfigMap
-		var helloWorldIngressHost, helloWorldIngressUrl string
+		var (
+			nginxApp              *application.Application
+			helloApp              *application.Application
+			helloWorldIngressHost string
+			helloWorldIngressUrl  string
+		)
 
 		const (
 			appReadyTimeout  = 3 * time.Minute
@@ -53,7 +55,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			// By default, `external-dns` will only create dns records for Services on the `kube-system` namespace, because that's the default value for `namespaceFilter`.
 			// That's why we install the nginx app in that namespace.
 			// https://github.com/giantswarm/external-dns-app/blob/main/helm/external-dns-app/values.yaml#L114-L117
-			nginxApp := application.New(fmt.Sprintf("%s-ingress-nginx", state.GetCluster().Name), "ingress-nginx").
+			nginxApp = application.New(fmt.Sprintf("%s-ingress-nginx", state.GetCluster().Name), "ingress-nginx").
 				WithCatalog("giantswarm").
 				WithOrganization(*org).
 				WithVersion("latest").
@@ -73,7 +75,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 
-			helloApp := application.New(fmt.Sprintf("%s-hello-world", state.GetCluster().Name), "hello-world").
+			helloApp = application.New(fmt.Sprintf("%s-hello-world", state.GetCluster().Name), "hello-world").
 				WithCatalog("giantswarm").
 				WithOrganization(*org).
 				WithVersion("latest").
@@ -151,16 +153,9 @@ func runHelloWorld(externalDnsSupported bool) {
 				Skip("external-dns is not supported")
 			}
 
-			ctx := context.Background()
-
-			managementClusterKubeClient := state.GetFramework().MC()
-			err := managementClusterKubeClient.Delete(ctx, nginxApp)
+			err := state.GetFramework().MC().DeleteApp(state.GetContext(), *nginxApp)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = managementClusterKubeClient.Delete(ctx, nginxConfigMap)
-			Expect(err).ShouldNot(HaveOccurred())
-			err = managementClusterKubeClient.Delete(ctx, helloApp)
-			Expect(err).ShouldNot(HaveOccurred())
-			err = managementClusterKubeClient.Delete(ctx, helloConfigMap)
+			err = state.GetFramework().MC().DeleteApp(state.GetContext(), *helloApp)
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
