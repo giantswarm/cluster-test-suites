@@ -56,5 +56,10 @@
       "extractVersionTemplate": "^v(?<version>.*)$"
     }
   ],
-  "schedule": [ "after 6am on thursday" ]
+  "schedule": [ "at any time" ],
+  "ansible": { "enabled": false },
+  "prBodyNotes": [
+    "Trigger E2E tests:",
+    "/run cluster-test-suites"
+  ]
 }
