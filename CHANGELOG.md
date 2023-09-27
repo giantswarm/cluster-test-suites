@@ -10,13 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use Spot instances for CAPA tests.
+- Updated `clustertest` to v0.8.0.
 
 ## [1.13.0] - 2023-09-15
 
 ### Changed
 
-- Updated `clustertest` to v0.7.0
-- Refactored app deployment to use `clustertest` helper functions
+- Updated `clustertest` to v0.7.0.
+- Refactored app deployment to use `clustertest` helper functions.
 
 ## [1.12.1] - 2023-09-12
 
