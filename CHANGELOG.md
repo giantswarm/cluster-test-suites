@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Use Spot instances for CAPA tests.
+- Use smaller volumes sizes for CAPA tests.
 
 ## [1.13.0] - 2023-09-15
 
