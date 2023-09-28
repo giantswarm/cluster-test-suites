@@ -37,34 +37,29 @@ func runStorage() {
 			}
 		})
 
-		It("has a at least one storage class available", func() {
+		It("should successfully create a pod that uses a persistent volume claim", func() {
+			By("It has at least one storage class available")
 			Eventually(wait.Consistent(checkStorageClassExists(wcClient), 10, time.Second)).
 				WithTimeout(wait.DefaultTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
-		})
 
-		When("a pod uses a persistent volume claim", func() {
-			BeforeEach(func() {
-				Eventually(createPodWithPVC(wcClient)).
-					WithTimeout(wait.DefaultTimeout).
-					WithPolling(wait.DefaultInterval).
-					Should(Succeed())
-			})
+			By("Creating pod with PVC")
+			Eventually(createPodWithPVC(wcClient)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 
-			AfterEach(func() {
-				Eventually(deleteStorage(wcClient, namespace)).
-					WithTimeout(wait.DefaultTimeout).
-					WithPolling(wait.DefaultInterval).
-					Should(Succeed())
-			})
+			Eventually(wait.Consistent(verifyPodState(wcClient, "pvc-test-pod", namespace), 10, time.Second)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 
-			It("runs successfully", func() {
-				Eventually(wait.Consistent(verifyPodState(wcClient, "pvc-test-pod", namespace), 10, time.Second)).
-					WithTimeout(wait.DefaultTimeout).
-					WithPolling(wait.DefaultInterval).
-					Should(Succeed())
-			})
+			By("cleaning up")
+			Eventually(deleteStorage(wcClient, namespace)).
+				WithTimeout(wait.DefaultTimeout).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 		})
 	})
 }

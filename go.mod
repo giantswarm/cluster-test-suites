@@ -2,6 +2,8 @@ module github.com/giantswarm/cluster-test-suites
 
 go 1.18
 
+replace github.com/giantswarm/clustertest => /Users/marcus/Code/GiantSwarm/clustertest
+
 require (
 	github.com/giantswarm/apiextensions-application v0.6.0
 	github.com/giantswarm/clustertest v0.7.0
@@ -48,8 +50,8 @@ require (
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/giantswarm/k8smetadata v0.21.0 // indirect
-	github.com/giantswarm/kubectl-gs/v2 v2.41.0 // indirect
+	github.com/giantswarm/k8smetadata v0.22.0 // indirect
+	github.com/giantswarm/kubectl-gs/v2 v2.41.1 // indirect
 	github.com/giantswarm/microerror v0.4.0 // indirect
 	github.com/giantswarm/organization-operator v1.4.0 // indirect
 	github.com/giantswarm/release-operator/v4 v4.1.0 // indirect

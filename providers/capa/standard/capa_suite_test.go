@@ -2,6 +2,9 @@ package standard
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,18 +28,37 @@ func TestCAPAStandard(t *testing.T) {
 	RunSpecs(t, "CAPA Standard Suite")
 }
 
-var _ = BeforeSuite(func() {
-	logger.LogWriter = GinkgoWriter
+var _ = SynchronizedBeforeSuite(
+	func() []byte {
+		logger.LogWriter = GinkgoWriter
 
-	state.SetContext(context.Background())
+		state.SetContext(context.Background())
 
-	framework, err := clustertest.New(KubeContext)
-	Expect(err).NotTo(HaveOccurred())
-	state.SetFramework(framework)
+		framework, err := clustertest.New(KubeContext)
+		Expect(err).NotTo(HaveOccurred())
+		state.SetFramework(framework)
 
-	cluster := setUpWorkloadCluster()
-	state.SetCluster(cluster)
-})
+		cluster := setUpWorkloadCluster()
+		state.SetCluster(cluster)
+
+		return []byte(fmt.Sprintf("%s/%s", cluster.GetNamespace(), cluster.Name))
+	},
+	func(clusterDetails []byte) {
+		state.SetContext(context.Background())
+
+		framework, err := clustertest.New(KubeContext)
+		Expect(err).NotTo(HaveOccurred())
+		state.SetFramework(framework)
+
+		clusterParts := strings.Split(string(clusterDetails), "/")
+		os.Setenv(clustertest.EnvWorkloadClusterNamespace, clusterParts[0])
+		os.Setenv(clustertest.EnvWorkloadClusterName, clusterParts[1])
+		cluster, err := state.GetFramework().LoadCluster()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(cluster).NotTo(BeNil())
+		state.SetCluster(cluster)
+	},
+)
 
 func setUpWorkloadCluster() *application.Cluster {
 	cluster, err := state.GetFramework().LoadCluster()

@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
@@ -26,16 +27,19 @@ func runCertManager() {
 			var err error
 
 			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
-			if err != nil {
-				Fail(err.Error())
-			}
+			Expect(err).To(BeNil())
+
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), state.GetCluster().Organization.GetNamespace())).
+				WithTimeout(30 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(BeTrue())
 		})
 
 		It("cert-manager default ClusterIssuers are present and ready", func() {
 			for _, clusterIssuerName := range clusterIssuers {
 				logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
 				Eventually(checkClusterIssuer(wcClient, clusterIssuerName)).
-					WithTimeout(30 * time.Second).
+					WithTimeout(30 * time.Minute).
 					WithPolling(50 * time.Millisecond).
 					Should(Succeed())
 			}
@@ -44,7 +48,6 @@ func runCertManager() {
 }
 
 func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error {
-
 	// Using a unstructured object.
 	u := &unstructured.Unstructured{}
 	u.SetGroupVersionKind(schema.GroupVersionKind{

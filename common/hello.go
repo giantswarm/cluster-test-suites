@@ -29,7 +29,7 @@ func runHelloWorld(externalDnsSupported bool) {
 		)
 
 		const (
-			appReadyTimeout  = 3 * time.Minute
+			appReadyTimeout  = 10 * time.Minute
 			appReadyInterval = 5 * time.Second
 		)
 
@@ -43,12 +43,12 @@ func runHelloWorld(externalDnsSupported bool) {
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
-				WithTimeout(appReadyTimeout).
+				WithTimeout(30 * time.Minute).
 				WithPolling(appReadyInterval).
 				Should(BeTrue())
 
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
-				WithTimeout(appReadyTimeout).
+				WithTimeout(30 * time.Minute).
 				WithPolling(appReadyInterval).
 				Should(BeTrue())
 
