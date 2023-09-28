@@ -3,6 +3,12 @@ metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
 
+controlPlane:
+  containerdVolumeSizeGB: 15
+  etcdVolumeSizeGB: 50
+  kubeletVolumeSizeGB: 10
+  rootVolumeSizeGB: 10
+
 # We need to pass the node pools otherwise the test called "has all the worker nodes running" will fail because it
 # expects to find the number of worker nodes in the helm values, but the value is not there if don't pass it, as it's
 # defaulted in the chart template.
@@ -11,6 +17,7 @@ nodePools:
   pool0:
     maxSize: 2
     minSize: 2
+    rootVolumeSizeGB: 25
     spotInstances:
       enabled: true
       maxPrice: 0.2960
