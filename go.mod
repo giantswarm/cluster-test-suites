@@ -1,6 +1,6 @@
 module github.com/giantswarm/cluster-test-suites
 
-go 1.18
+go 1.20
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.0
