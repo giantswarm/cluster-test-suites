@@ -3,7 +3,7 @@ module github.com/giantswarm/cluster-test-suites
 go 1.20
 
 require (
-	github.com/giantswarm/apiextensions-application v0.6.0
+	github.com/giantswarm/apiextensions-application v0.6.1
 	github.com/giantswarm/clustertest v0.8.0
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
