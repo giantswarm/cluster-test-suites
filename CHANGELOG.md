@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use Spot instances for CAPA tests.
 - Use smaller volumes sizes for CAPA tests.
-- Updated `clustertest` to v0.8.0.
+- Updated `clustertest` to v0.9.0.
+- Make timeouts more relevant to the context of the test
 
 ## [1.13.0] - 2023-09-15
 

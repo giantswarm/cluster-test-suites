@@ -39,7 +39,7 @@ func runStorage() {
 
 		It("has a at least one storage class available", func() {
 			Eventually(wait.Consistent(checkStorageClassExists(wcClient), 10, time.Second)).
-				WithTimeout(wait.DefaultTimeout).
+				WithTimeout(5 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -47,21 +47,21 @@ func runStorage() {
 		When("a pod uses a persistent volume claim", func() {
 			BeforeEach(func() {
 				Eventually(createPodWithPVC(wcClient)).
-					WithTimeout(wait.DefaultTimeout).
+					WithTimeout(1 * time.Minute).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})
 
 			AfterEach(func() {
 				Eventually(deleteStorage(wcClient, namespace)).
-					WithTimeout(wait.DefaultTimeout).
+					WithTimeout(1 * time.Minute).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})
 
 			It("runs successfully", func() {
 				Eventually(wait.Consistent(verifyPodState(wcClient, "pvc-test-pod", namespace), 10, time.Second)).
-					WithTimeout(wait.DefaultTimeout).
+					WithTimeout(20 * time.Minute).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})

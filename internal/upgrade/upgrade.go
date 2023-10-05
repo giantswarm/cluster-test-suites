@@ -31,7 +31,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
-				WithTimeout(wait.DefaultTimeout).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -45,7 +45,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(wait.DefaultTimeout).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -91,7 +91,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
-				WithTimeout(wait.DefaultTimeout).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -105,7 +105,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(wait.DefaultTimeout).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})

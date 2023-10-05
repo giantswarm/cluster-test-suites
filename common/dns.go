@@ -57,7 +57,8 @@ func runDNS(bastionSuppoted bool) {
 				var err error
 				records, err = getARecords(apiDomain)
 				return err
-			}).WithTimeout(wait.DefaultTimeout).
+			}).
+				WithTimeout(5 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 			Expect(records).ToNot(BeEmpty())
@@ -73,7 +74,8 @@ func runDNS(bastionSuppoted bool) {
 				var err error
 				records, err = getARecords(bastionDomain)
 				return err
-			}).WithTimeout(wait.DefaultTimeout).
+			}).
+				WithTimeout(5 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 			Expect(records).ToNot(BeEmpty())
