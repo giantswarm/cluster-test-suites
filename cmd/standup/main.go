@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
+	"text/tabwriter"
 	"time"
 
+	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
@@ -15,6 +18,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	"github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
+	apitypes "k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/cmd/standup/types"
@@ -63,6 +68,14 @@ func init() {
 	standupCmd.MarkFlagRequired("default-apps-values")
 }
 
+type Timing struct {
+	Name      string
+	Timestamp time.Time
+	Err       error
+}
+
+var timings = []Timing{}
+
 func main() {
 	if err := standupCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -70,6 +83,25 @@ func main() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	defer func() {
+		durations := []string{}
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+		for i, timing := range timings {
+			duration := time.Duration(0)
+			if i > 0 {
+				duration = timing.Timestamp.Sub(timings[i-1].Timestamp)
+			}
+			fmt.Fprintf(w, "%d\t| %s\t| %v\t| %v\n", i, timing.Name, timing.Timestamp, duration)
+			if timing.Err != nil {
+				durations = append(durations, "X")
+			} else {
+				durations = append(durations, fmt.Sprintf("%f", duration.Seconds()))
+			}
+		}
+		w.Flush()
+		fmt.Println(strings.Join(durations, ","))
+	}()
+
 	cmd.SilenceUsage = true
 
 	ctx := context.Background()
@@ -108,22 +140,12 @@ func run(cmd *cobra.Command, args []string) error {
 	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
 	defer cancelApplyCtx()
 
+	timings = append(timings, Timing{Name: "0-start", Timestamp: time.Now()})
 	wcClient, err := framework.ApplyCluster(applyCtx, cluster)
 	if err != nil {
 		return err
 	}
-
-	wait.For(
-		wait.AreNumNodesReady(ctx, wcClient, controlPlaneNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
-		wait.WithTimeout(20*time.Minute),
-		wait.WithInterval(15*time.Second),
-	)
-
-	wait.For(
-		wait.AreNumNodesReady(ctx, wcClient, workerNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"}),
-		wait.WithTimeout(20*time.Minute),
-		wait.WithInterval(15*time.Second),
-	)
+	timings = append(timings, Timing{Name: "1-api-available", Timestamp: time.Now(), Err: err})
 
 	kubeconfigFile, err := os.Create(path.Join(outputDirectory, "kubeconfig"))
 	if err != nil {
@@ -158,6 +180,65 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	_, err = resultsFile.Write(resultBytes)
+
+	wait.For(
+		wait.AreNumNodesReady(ctx, wcClient, controlPlaneNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+		wait.WithTimeout(wait.DefaultTimeout),
+		wait.WithInterval(15*time.Second),
+	)
+	timings = append(timings, Timing{Name: "2-single-control-plane-node-ready", Timestamp: time.Now(), Err: err})
+
+	wait.For(
+		wait.AreNumNodesReady(ctx, wcClient, workerNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"}),
+		wait.WithTimeout(wait.DefaultTimeout),
+		wait.WithInterval(15*time.Second),
+	)
+	timings = append(timings, Timing{Name: "3-single-worker-node-ready", Timestamp: time.Now(), Err: err})
+
+	defaultAppsAppName := fmt.Sprintf("%s-%s", cluster.Name, "default-apps")
+	wait.For(
+		wait.IsAppDeployed(ctx, framework.MC(), defaultAppsAppName, cluster.Organization.GetNamespace()),
+		wait.WithTimeout(wait.DefaultTimeout),
+		wait.WithInterval(50*time.Millisecond),
+	)
+	timings = append(timings, Timing{Name: "4-default-apps-deployed", Timestamp: time.Now(), Err: err})
+
+	appList := &v1alpha1.AppList{}
+	err = framework.MC().List(ctx, appList, cr.InNamespace(cluster.Organization.GetNamespace()), cr.MatchingLabels{"giantswarm.io/managed-by": defaultAppsAppName})
+	if err != nil {
+		return err
+	}
+	appNamespacedNames := []apitypes.NamespacedName{}
+	for _, app := range appList.Items {
+		appNamespacedNames = append(appNamespacedNames, apitypes.NamespacedName{Name: app.Name, Namespace: app.Namespace})
+	}
+	wait.For(
+		wait.IsAllAppDeployed(ctx, framework.MC(), appNamespacedNames),
+		wait.WithTimeout(wait.DefaultTimeout),
+		wait.WithInterval(10*time.Second),
+	)
+	timings = append(timings, Timing{Name: "5-all-default-apps-deployed", Timestamp: time.Now(), Err: err})
+
+	wait.For(func() (bool, error) {
+		podList := &corev1.PodList{}
+		err := wcClient.List(context.Background(), podList)
+		if err != nil {
+			return false, err
+		}
+
+		for _, pod := range podList.Items {
+			phase := pod.Status.Phase
+			if phase != corev1.PodRunning && phase != corev1.PodSucceeded {
+				return false, fmt.Errorf("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
+			}
+		}
+
+		return true, nil
+	},
+		wait.WithTimeout(wait.DefaultTimeout),
+		wait.WithInterval(wait.DefaultInterval),
+	)
+	timings = append(timings, Timing{Name: "6-all-pods-running", Timestamp: time.Now(), Err: err})
 
 	return err
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	"github.com/giantswarm/cluster-test-suites/cmd/standup/types"
 	"github.com/giantswarm/clustertest"
@@ -84,6 +85,11 @@ func run(cmd *cobra.Command, args []string) error {
 
 	cluster := application.NewClusterApp(clusterName, provider).WithOrg(organization.New(orgName))
 
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		fmt.Printf("%f\n", duration.Seconds())
+	}()
 	err = framework.DeleteCluster(ctx, cluster)
 	if err != nil {
 		return err
