@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Moved `helpers` into `internal` directory
+- Moved `common` into `internal` directory
+- Removed unused function
+- Cleaned up Readme
+
 ## [1.14.0] - 2023-10-05
 
 ### Changed

@@ -3,7 +3,7 @@ package upgrade
 import (
 	. "github.com/onsi/ginkgo/v2"
 
-	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
 )
 
