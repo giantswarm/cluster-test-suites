@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/cluster-test-suites/assets/storage"
-	"github.com/giantswarm/cluster-test-suites/helper"
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/wait"

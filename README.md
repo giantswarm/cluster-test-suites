@@ -130,9 +130,9 @@ All tests make use of our [clustertest](https://github.com/giantswarm/clustertes
 
 ### Adding cross-provider tests
 
-New cross-provider tests should be added to the [`./common/common.go`](./common/common.go) package as part of the `Run` function.
+New cross-provider tests should be added to the [`./internal/common/common.go`](./internal/common/common.go) package as part of the `Run` function.
 
-A new test case can be included byu adding a new `It` block within the `Run` finction. E.g.
+A new test case can be included by adding a new `It` block within the `Run` functions. E.g.
 
 ```go
 It("should test something", func() {
@@ -144,6 +144,8 @@ It("should test something", func() {
 })
 ```
 
+To add a new grouping of common tests you can create a new file with a function similar to `runMyNewGrouping()` and then add a call to this from the [`./internal/common/common.go`](./internal/common/common.go) `Run()` function.
+
 ### Adding provider-specific tests
 
 Each CAPI provider has its own subdirectory under [`./providers/`](./providers/) that specific tests can be added to.
@@ -152,7 +154,7 @@ Each directory under the provider directory is a test suite and each consists to
 
 New tests can be added to these provider-specific suites using any Ginkgo context nodes that make sense. Please refer to the [Ginkgo docs](https://onsi.github.io/ginkgo/) for more details.
 
-### Adding Test Suites
+### Adding Test Suites (new cluster variations in an existing provider)
 
 As mentioned above, test suites are scoped to a single workload cluster configuration variant. To test the different possible configuration options of clusters, for example private networking, we need to create multiple test suites.
 

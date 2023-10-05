@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/common"
+	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 
 	. "github.com/onsi/ginkgo/v2"
