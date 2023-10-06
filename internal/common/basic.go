@@ -39,14 +39,13 @@ func runBasic() {
 		})
 
 		It("has all the control-plane nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
+			Eventually(wait.Consistent(CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -75,8 +74,7 @@ func runBasic() {
 	})
 }
 
-func CheckControlPlaneNodesReady(wcClient *client.Client, values application.ControlPlane) func() error {
-	expectedNodes := values.Replicas
+func CheckControlPlaneNodesReady(wcClient *client.Client, expectedNodes int) func() error {
 	controlPlaneFunc := wait.AreNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
 
 	return func() error {

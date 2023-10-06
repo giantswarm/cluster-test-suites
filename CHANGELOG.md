@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved `common` into `internal` directory
 - Removed unused function
 - Cleaned up Readme
+- Updated `clustertest` to v0.10.0
+- Change control plane node test to use new `GetExpectedControlPlaneReplicas` helper function
 
 ## [1.14.0] - 2023-10-05
 
