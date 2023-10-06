@@ -23,14 +23,13 @@ func Run() {
 		})
 
 		It("has all the control-plane nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
+			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -83,14 +82,13 @@ func Run() {
 		})
 
 		It("has all the control-plane nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
+			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, values.ControlPlane), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
