@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/clustertest v0.9.0
+	github.com/giantswarm/clustertest v0.10.0
 	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.28.0
 	github.com/spf13/cobra v1.7.0
@@ -33,6 +33,8 @@ require (
 	github.com/chai2010/gettext-go v1.0.2 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/containerd/containerd v1.7.0 // indirect
+	github.com/coredns/caddy v1.1.0 // indirect
+	github.com/coredns/corefile-migration v1.0.20 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/cli v20.10.21+incompatible // indirect
@@ -49,7 +51,7 @@ require (
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/giantswarm/k8smetadata v0.22.0 // indirect
-	github.com/giantswarm/kubectl-gs/v2 v2.41.1 // indirect
+	github.com/giantswarm/kubectl-gs/v2 v2.42.0 // indirect
 	github.com/giantswarm/microerror v0.4.0 // indirect
 	github.com/giantswarm/organization-operator v1.6.0 // indirect
 	github.com/giantswarm/release-operator/v4 v4.1.0 // indirect
@@ -81,7 +83,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
@@ -155,6 +157,7 @@ require (
 	helm.sh/helm/v3 v3.11.3 // indirect
 	k8s.io/apiserver v0.26.3 // indirect
 	k8s.io/cli-runtime v0.26.3 // indirect
+	k8s.io/cluster-bootstrap v0.25.0 // indirect
 	k8s.io/component-base v0.26.3 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
