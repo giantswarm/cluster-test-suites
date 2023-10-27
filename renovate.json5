@@ -1,45 +1,8 @@
 {
   "extends": [
-    "config:base"
+    "github>giantswarm/renovate-presets:default.json5",
+    "github>giantswarm/renovate-presets:lang-go.json5",
   ],
-  "labels": ["dependencies", "renovate"],
-  "packageRules": [
-    {
-      "matchPackagePatterns": ["github.com/onsi/*"],
-      "groupName": "test libraries"
-    },
-    {
-      "matchPackagePatterns": [".*giantswarm.*"],
-      "groupName": "giantswarm modules"
-    },
-    {
-      "matchPackagePatterns": ["^k8s.io", "^sigs.k8s.io"],
-      "groupName": "k8s modules"
-    }
-  ],
-  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
-  "dependencyDashboard": true,
-  "ignorePaths": [
-    ".github/workflows/zz_generated.*",
-    ".github/workflows/codeql-analysis.yml",
-    ".github/workflows/pre_commit_*.yaml"
-  ],
-  "ignoreDeps": [
-    "actions/setup-go",
-    "architect",
-    "github.com/imdario/mergo",
-    "zricethezav/gitleaks-action"
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": ["^helm\\/.+\\/values\\.yaml$"],
-      "matchStrings": ["repo: (?<depName>.*)\n(\\s)*version: (?<currentValue>.*?)\n"],
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.*)$"
-    }
-  ],
-  "schedule": [ "at any time" ],
-  "ansible": { "enabled": false },
   "prBodyNotes": [
     "Trigger E2E tests:",
     "/run cluster-test-suites"
