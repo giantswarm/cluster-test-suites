@@ -15,7 +15,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/providers/capa"
+	"github.com/giantswarm/cluster-test-suites/providers/eks"
 )
 
 const KubeContext = "eks"
@@ -50,7 +50,7 @@ func setUpWorkloadCluster() *application.Cluster {
 }
 
 func createCluster() *application.Cluster {
-	cluster := capa.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
+	cluster := eks.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
 	logger.Log("Workload cluster name: %s", cluster.Name)
 	state.SetCluster(cluster)
 
