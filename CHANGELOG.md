@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Vsphere now uses IPAM also for WC's Service LB (kubevip)
 - Moved `helpers` into `internal` directory
 - Moved `common` into `internal` directory
 - Removed unused function
