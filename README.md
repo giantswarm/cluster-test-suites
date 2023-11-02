@@ -77,7 +77,9 @@ users:
 
 Assuming the above requirements are fulfilled:
 
-Running the entire test suite:
+> Note: If you need the current kubeconfig its best to pull it from the `cluster-test-suites-mc-kubeconfig` Secret on the Tekton cluster
+
+Running the all test suites:
 
 ```sh
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r .
@@ -89,10 +91,29 @@ Running a single provider (e.g. `capa`):
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa
 ```
 
+Running a single test suite (e.g. the `capa` `standard` test suite)
+
+```sh
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa/standard
+```
+
 Running with Docker:
 
 ```sh
 docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
+```
+
+### Testing changes to `clustertest`
+
+To test out changes to [clustertest](https://github.com/giantswarm/clustertest) without needing to create a new release you can add a `replace` directive to your `go.mod` to point to your local copy of `clustertest`. 
+
+```
+module github.com/giantswarm/cluster-test-suites
+
+go 1.20
+
+replace github.com/giantswarm/clustertest v0.10.0 => /path/to/clustertest
+
 ```
 
 ### ⚙️ Running Tests in CI

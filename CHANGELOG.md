@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add new test provider EKS.
 
+## [1.15.1] - 2023-11-02
+
 ## [1.15.0] - 2023-10-06
 
 ### Changed
 
+- Vsphere now uses IPAM also for WC's Service LB (kubevip)
 - Moved `helpers` into `internal` directory
 - Moved `common` into `internal` directory
 - Removed unused function
@@ -195,7 +198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.15.1...HEAD
+[1.15.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.12.1...v1.13.0
