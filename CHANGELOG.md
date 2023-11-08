@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Fix CAPV tests by switching to Flatcar image.
+
+
 ## [1.16.1] - 2023-11-03
 
 ### Changed

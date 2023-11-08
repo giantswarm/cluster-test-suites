@@ -11,7 +11,7 @@ controlPlane:
   image:
     repository: registry.k8s.io
   machineTemplate:
-    template: ubuntu-2004-kube-v1.24.11
+    template: flatcar-stable-3602.2.1-kube-v1.24.12-gs
     cloneMode: "linkedClone"
     diskGiB: 50
     numCPUs: 4
@@ -37,7 +37,7 @@ connectivity:
 
 nodeClasses:
   default:
-    template: ubuntu-2004-kube-v1.24.11
+    template: flatcar-stable-3602.2.1-kube-v1.24.12-gs
     cloneMode: "linkedClone"
     diskGiB: 50
     numCPUs: 6
