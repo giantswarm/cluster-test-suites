@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix CAPV tests by switching to Flatcar image.
+- Updated `clustertest` to v0.12.4` to fix missing default namespace issue.
 
 
 ## [1.16.1] - 2023-11-03
