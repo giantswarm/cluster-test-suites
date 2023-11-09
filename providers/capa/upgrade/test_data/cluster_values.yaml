@@ -15,7 +15,7 @@ controlPlane:
 # @TODO: https://github.com/giantswarm/giantswarm/issues/28063
 nodePools:
   pool0:
-    maxSize: 2
+    maxSize: 3
     minSize: 2
     rootVolumeSizeGB: 25
     spotInstances:
