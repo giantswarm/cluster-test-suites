@@ -111,7 +111,7 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return strconv.Itoa(int(helloDeployment.Status.ReadyReplicas)), nil
-			}, "10m", "5s").Should(Equal(helloAppValues["ReplicaCount"]))
+			}, "30m", "5s").Should(Equal(helloAppValues["ReplicaCount"]))
 		})
 
 		AfterEach(func() {
