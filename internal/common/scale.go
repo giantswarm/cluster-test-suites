@@ -9,14 +9,12 @@ import (
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
-	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
@@ -73,20 +71,9 @@ func runScale(autoScalingSupported bool) {
 					return false, err
 				}
 
-				now := time.Now()
-				patchedApp := helloApplication.DeepCopy()
-				labels := patchedApp.GetLabels()
-				labels["update"] = fmt.Sprintf("%d", now.Unix())
-				patchedApp.SetLabels(labels)
-
-				err = managementClusterKubeClient.Patch(ctx, patchedApp, ctrl.MergeFrom(helloApplication))
-				if err != nil {
-					return false, err
-				}
-
 				return wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.InstallName, helloApp.GetNamespace())()
 			}).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(5 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(BeTrue())
 		})
@@ -99,7 +86,6 @@ func runScale(autoScalingSupported bool) {
 			ctx := context.Background()
 
 			Eventually(func() (string, error) {
-				logger.Log("Trying to get number of nodes from %s", state.GetCluster().Name)
 				helloDeployment := &v1.Deployment{}
 
 				err := wcClient.Get(ctx, cr.ObjectKey{
@@ -111,7 +97,7 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return strconv.Itoa(int(helloDeployment.Status.ReadyReplicas)), nil
-			}, "30m", "5s").Should(Equal(helloAppValues["ReplicaCount"]))
+			}, "15m", "5s").Should(Equal(helloAppValues["ReplicaCount"]))
 		})
 
 		AfterEach(func() {
