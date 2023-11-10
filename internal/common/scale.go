@@ -43,7 +43,7 @@ func runScale(autoScalingSupported bool) {
 			org := state.GetCluster().Organization
 
 			helloAppValues = map[string]string{
-				"ReplicaCount": "3",
+				"ReplicaCount": "2",
 			}
 
 			helloApp = application.New(fmt.Sprintf("%s-scale-hello-world", state.GetCluster().Name), "hello-world").
