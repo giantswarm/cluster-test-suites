@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add test for autoscaling MachinePool nodes.
+
 ## [1.16.2] - 2023-11-13
 
 ### Changed
 
 - Fix CAPV tests by switching to Flatcar image.
-
 
 ## [1.16.1] - 2023-11-03
 
