@@ -16,7 +16,7 @@ controlPlane:
 nodePools:
   pool0:
     maxSize: 2
-    minSize: 2
+    minSize: 1
     rootVolumeSizeGB: 25
     spotInstances:
       enabled: true
