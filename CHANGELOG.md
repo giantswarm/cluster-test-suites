@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add new test provider EKS.
+- Add test for autoscaling MachinePool nodes.
+
+## [1.16.2] - 2023-11-13
+
+### Changed
+
+- Fix CAPV tests by switching to Flatcar image.
+
+## [1.16.1] - 2023-11-03
+
+### Changed
+
+- Updated `clustertest` to v0.12.1` to fix upgrade tests.
 
 ## [1.16.0] - 2023-11-02
 
