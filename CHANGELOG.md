@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add new test provider EKS.
 - Add test for autoscaling MachinePool nodes.
 
 ## [1.16.2] - 2023-11-13
