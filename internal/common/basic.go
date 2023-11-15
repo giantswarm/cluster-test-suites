@@ -44,7 +44,7 @@ func runBasic() {
 
 			// Skip this test is the cluster is a managed cluster (e.g. EKS)
 			if replicas == 0 {
-				Skip("Bastion is not supported.")
+				Skip("ControlPlane is not supported.")
 			}
 
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
