@@ -103,6 +103,19 @@ Running with Docker:
 docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
 ```
 
+### Testing with an existing Workload Cluster
+
+It's possible to re-use an existing workload cluster to speed up development and to debug things after the tests have run. The Workload Cluster needs to be created manually in the relevant Management Cluster first and once ready you can set the following environment variables when running the tests to make use of your own WC:
+
+* `E2E_WC_NAME` - The name of your Workload Cluster on the MC
+* `E2E_WC_NAMESPACE` - The namespace your Workload Cluster is in on the MC
+
+Example:
+
+```sh
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml E2E_WC_NAME=mn-test E2E_WC_NAMESPACE=org-giantswarm ginkgo -v -r ./providers/capa/standard
+```
+
 ### Testing changes to `clustertest`
 
 To test out changes to [clustertest](https://github.com/giantswarm/clustertest) without needing to create a new release you can add a `replace` directive to your `go.mod` to point to your local copy of `clustertest`. 
