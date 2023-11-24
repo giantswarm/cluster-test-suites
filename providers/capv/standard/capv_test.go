@@ -8,7 +8,9 @@ import (
 
 var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
-		BastionSupported: false,
+		// No autoscaling on-prem
+		AutoScalingSupported: false,
+		BastionSupported:     false,
 		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
 		ExternalDnsSupported: false,
 	})
