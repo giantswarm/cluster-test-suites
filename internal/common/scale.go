@@ -3,12 +3,12 @@ package common
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -80,24 +80,30 @@ func runScale(autoScalingSupported bool) {
 
 		It("scales node by creating anti-affiniy pods", func() {
 			if !autoScalingSupported {
-				Skip("external-dns is not supported")
+				Skip("autoscaling is not supported")
 			}
 
 			ctx := context.Background()
 
+			expectedReplicas := helloAppValues["ReplicaCount"]
 			Eventually(func() (string, error) {
 				helloDeployment := &v1.Deployment{}
 
-				err := wcClient.Get(ctx, cr.ObjectKey{
-					Name:      "scale-hello-world",
-					Namespace: helloApp.InstallNamespace}, helloDeployment)
-
+				err := wcClient.Get(ctx,
+					cr.ObjectKey{
+						Name:      "scale-hello-world",
+						Namespace: helloApp.InstallNamespace,
+					},
+					helloDeployment,
+				)
 				if err != nil {
 					return "", err
 				}
 
-				return strconv.Itoa(int(helloDeployment.Status.ReadyReplicas)), nil
-			}, "15m", "5s").Should(Equal(helloAppValues["ReplicaCount"]))
+				replicas := fmt.Sprint(helloDeployment.Status.ReadyReplicas)
+				logger.Log("Checking for increased replicas. Expected: %s, Actual: %s", expectedReplicas, replicas)
+				return replicas, nil
+			}, "15m", "10s").Should(Equal(expectedReplicas))
 		})
 
 		AfterEach(func() {
