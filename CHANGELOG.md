@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `observability-bundle` test in the common/apps.go file.
+
 ## [1.17.1] - 2023-11-26
 
 ### Changed
