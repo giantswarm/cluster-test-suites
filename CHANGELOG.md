@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add initial support for new cluster app Helm values structure where root-level properties are moved to `.Values.global`.
+
 ## [1.18.0] - 2023-11-28
 
 ### Added
