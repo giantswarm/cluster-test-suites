@@ -36,14 +36,22 @@ func Run() {
 		})
 
 		It("has all the worker nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
+			var valuesWithOldSchema *application.ClusterValues
+			valuesWithNewSchema := &common.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), valuesWithNewSchema)
 			Expect(err).NotTo(HaveOccurred())
+
+			if common.ClusterIsUsingNewHelmValuesSchema(valuesWithNewSchema) {
+				valuesWithOldSchema = valuesWithNewSchema.ToClusterValuesWithOldSchema()
+			} else {
+				err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), valuesWithOldSchema)
+				Expect(err).NotTo(HaveOccurred())
+			}
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, valuesWithOldSchema), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -95,14 +103,22 @@ func Run() {
 		})
 
 		It("has all the worker nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
+			var valuesWithOldSchema *application.ClusterValues
+			valuesWithNewSchema := &common.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), valuesWithNewSchema)
 			Expect(err).NotTo(HaveOccurred())
+
+			if common.ClusterIsUsingNewHelmValuesSchema(valuesWithNewSchema) {
+				valuesWithOldSchema = valuesWithNewSchema.ToClusterValuesWithOldSchema()
+			} else {
+				err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), valuesWithOldSchema)
+				Expect(err).NotTo(HaveOccurred())
+			}
 
 			wcClient, err := state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, valuesWithOldSchema), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
