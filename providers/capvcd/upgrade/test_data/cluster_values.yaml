@@ -8,6 +8,9 @@ connectivity:
   network:
     loadBalancers:
       vipSubnet: "10.205.9.254/24"
+  ntp:
+    servers:
+      - "10.205.105.253"
   proxy:
     enabled: true
 nodePools:
