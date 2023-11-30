@@ -3,17 +3,15 @@ package common
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"time"
 
+	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/giantswarm/cluster-test-suites/internal/state"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -59,23 +57,14 @@ func runBasic() {
 		})
 
 		It("has all the worker nodes running", func() {
-			var valuesWithOldSchema *application.ClusterValues
-			valuesWithNewSchema := &ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), valuesWithNewSchema)
+			values := &application.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
-
-			if ClusterIsUsingNewHelmValuesSchema(valuesWithNewSchema) {
-				valuesWithOldSchema = valuesWithNewSchema.ToClusterValuesWithOldSchema()
-			} else {
-				valuesWithOldSchema = &application.ClusterValues{}
-				err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), valuesWithOldSchema)
-				Expect(err).NotTo(HaveOccurred())
-			}
 
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(CheckWorkerNodesReady(wcClient, valuesWithOldSchema), 12, 5*time.Second)).
+			Eventually(wait.Consistent(CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -88,10 +77,6 @@ func runBasic() {
 				Should(Succeed())
 		})
 	})
-}
-
-func ClusterIsUsingNewHelmValuesSchema(valuesWithNewSchema *ClusterValues) bool {
-	return !reflect.DeepEqual(valuesWithNewSchema.Global.Metadata, Metadata{})
 }
 
 func CheckControlPlaneNodesReady(wcClient *client.Client, expectedNodes int) func() error {
