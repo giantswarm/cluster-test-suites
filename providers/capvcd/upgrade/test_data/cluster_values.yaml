@@ -15,6 +15,7 @@ nodePools:
     class: default
     replicas: 2
 providerSpecific:
+  cloudProviderInterface: {}
   org: GIANT_SWARM
   ovdc: Org-GIANT-SWARM
   site: "https://cd.neoedge.cloud"
@@ -27,7 +28,6 @@ providerSpecific:
   userContext:
     secretRef:
       secretName: vcd-credentials
-  vmNamingTemplate: neoedge{{.machine.Name | sha256sum | trunc 4}}
 metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
