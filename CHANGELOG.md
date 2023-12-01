@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.19.0] - 2023-12-01
+
+### Added
+
+- Add initial support for new cluster app Helm values structure where root-level properties are moved to `.Values.global`.
+
 ## [1.18.0] - 2023-11-28
 
 ### Added
@@ -232,7 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.18.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.0...HEAD
+[1.19.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.17.1...v1.18.0
 [1.17.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.16.2...v1.17.0
