@@ -22,22 +22,3 @@ global:
       spotInstances:
         enabled: true
         maxPrice: 0.2960
-
-# TODO: Old Schema - to be deleted when migration complete
-metadata:
-  name: "{{ .ClusterName }}"
-  description: "E2E Test cluster"
-  organization: "{{ .Organization }}"
-controlPlane:
-  containerdVolumeSizeGB: 15
-  etcdVolumeSizeGB: 50
-  kubeletVolumeSizeGB: 10
-  rootVolumeSizeGB: 10
-nodePools:
-  pool0:
-    maxSize: 2
-    minSize: 1
-    rootVolumeSizeGB: 25
-    spotInstances:
-      enabled: true
-      maxPrice: 0.2960

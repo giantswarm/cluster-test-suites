@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Removed the old schema from the cluster-aws values
+
 ## [1.19.1] - 2023-12-04
 
 ### Fixed
