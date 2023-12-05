@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump `clustertest` to v0.14.0 that increased the char count of cluster names to 20 chars
 
+## [1.19.3] - 2023-12-05
+
+### Fixed
+
+- Increased timeout for observability-bundle apps.
+
 ## [1.19.2] - 2023-12-04
 
 ### Fixed
@@ -253,7 +259,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.3...HEAD
+[1.19.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.2...v1.19.3
 [1.19.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.1...v1.19.2
 [1.19.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.0...v1.19.1
 [1.19.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.18.0...v1.19.0
