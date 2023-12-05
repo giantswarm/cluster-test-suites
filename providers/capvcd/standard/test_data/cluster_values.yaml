@@ -4,6 +4,11 @@ controlPlane:
   replicas: 3
   sizingPolicy: m1.large
   template: ubuntu-2004-kube-v1.24.10
+  oidc:
+    clientId: "dex-k8s-authenticator"
+    groupsClaim: "groups"
+    issuerUrl: "https://dex.gerbil.test.gigantic.io"
+    usernameClaim: "email"
 connectivity:
   network:
     loadBalancers:
