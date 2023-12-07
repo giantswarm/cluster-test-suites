@@ -116,9 +116,11 @@ Example:
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml E2E_WC_NAME=mn-test E2E_WC_NAMESPACE=org-giantswarm ginkgo -v -r ./providers/capa/standard
 ```
 
+If you'd like to create a workload cluster test using the same configuration as the test suites you can make use of the [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs available in this repo.
+
 ### Testing changes to `clustertest`
 
-To test out changes to [clustertest](https://github.com/giantswarm/clustertest) without needing to create a new release you can add a `replace` directive to your `go.mod` to point to your local copy of `clustertest`. 
+To test out changes to [clustertest](https://github.com/giantswarm/clustertest) without needing to create a new release you can add a `replace` directive to your `go.mod` to point to your local copy of `clustertest`.
 
 ```
 module github.com/giantswarm/cluster-test-suites
@@ -225,5 +227,6 @@ controlPlane:
 ## Resources
 
 * [`clustertest` documentation](https://pkg.go.dev/github.com/giantswarm/clustertest)
+* [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs
 * [CI Tekton Pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/pipelines/cluster-test-suites.yaml)
 * [Ginkgo docs](https://onsi.github.io/ginkgo/)
