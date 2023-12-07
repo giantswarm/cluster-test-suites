@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bump `clustertest` to v0.14.0 that increased the char count of cluster names to 20 chars
+- CAPV: WCs have the default deny-all network policies 
 
 ## [1.19.3] - 2023-12-05
 
