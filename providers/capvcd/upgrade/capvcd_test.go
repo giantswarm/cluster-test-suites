@@ -14,7 +14,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	common.Run(&common.TestConfig{
 		// No autoscaling on-prem
 		AutoScalingSupported: false,
-		BastionSupported:     true,
+		BastionSupported:     false,
 		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
 		ExternalDnsSupported: false,
 	})

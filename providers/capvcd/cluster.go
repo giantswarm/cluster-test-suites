@@ -13,8 +13,6 @@ import (
 const (
 	RegCredSecretName      = "container-registries-configuration"
 	RegCredSecretNamespace = "default"
-	VCDCredSecretName      = "vcd-credentials"
-	VCDCredSecretNamespace = "org-giantswarm"
 )
 
 func NewClusterApp(clusterName string, orgName string, clusterValuesFile string, defaultAppsValuesFile string) *application.Cluster {
@@ -36,12 +34,6 @@ func NewClusterApp(clusterName string, orgName string, clusterValuesFile string,
 				Kind:      "secret",
 				Name:      RegCredSecretName,
 				Namespace: RegCredSecretNamespace,
-				Priority:  25,
-			},
-			{
-				Kind:      "secret",
-				Name:      VCDCredSecretName,
-				Namespace: VCDCredSecretNamespace,
 				Priority:  25,
 			},
 		})
