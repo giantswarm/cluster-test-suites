@@ -15,7 +15,8 @@ global:
   # defaulted in the chart template.
   # @TODO: https://github.com/giantswarm/giantswarm/issues/28063
   nodePools:
-    pool0:
+    # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
+    nodepool-0:
       maxSize: 2
       minSize: 1
       rootVolumeSizeGB: 25
