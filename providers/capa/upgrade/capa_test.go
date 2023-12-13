@@ -13,7 +13,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// Finally run the common tests after upgrade is completed
 	common.Run(&common.TestConfig{
 		AutoScalingSupported: true,
-		BastionSupported:     true,
+		BastionSupported:     false,
 		ExternalDnsSupported: true,
 	})
 })
