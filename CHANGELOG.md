@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update to new schema for `cluster-eks` values.
+
 ## [1.20.0] - 2023-12-11
 
 ### Changed
