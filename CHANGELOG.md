@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.20.2] - 2023-12-13
 
+- Disable Bastion tests for `capa` provider.
+  
 ## [1.20.1] - 2023-12-13
 
 ### Changed
