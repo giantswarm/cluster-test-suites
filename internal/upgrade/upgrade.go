@@ -14,7 +14,19 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func Run() {
+type TestConfig struct {
+	ControlPlaneNodesTimeout time.Duration
+	WorkerNodesTimeout       time.Duration
+}
+
+func NewTestConfigWithDefaults() *TestConfig {
+	return &TestConfig{
+		ControlPlaneNodesTimeout: 15 * time.Minute,
+		WorkerNodesTimeout:       15 * time.Minute,
+	}
+}
+
+func Run(cfg *TestConfig) {
 	Context("upgrade", func() {
 		var cluster *application.Cluster
 
@@ -30,7 +42,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(cfg.ControlPlaneNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -44,7 +56,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(cfg.WorkerNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -89,7 +101,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(cfg.ControlPlaneNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -103,7 +115,7 @@ func Run() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(cfg.WorkerNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
