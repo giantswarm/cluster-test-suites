@@ -8,7 +8,7 @@ import (
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
-	upgrade.Run()
+	upgrade.Run(upgrade.NewTestConfigWithDefaults())
 
 	// Finally run the common tests after upgrade is completed
 	common.Run(&common.TestConfig{
