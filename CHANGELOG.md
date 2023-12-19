@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.20.3] - 2023-12-19
+
 ### Added
 
 - Add test config for upgrades to be able to customize timeouts per provider.
@@ -277,7 +279,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.3...HEAD
+[1.20.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.1...v1.20.2
 [1.20.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.19.3...v1.20.0
