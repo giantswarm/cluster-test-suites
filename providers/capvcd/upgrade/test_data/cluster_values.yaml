@@ -1,7 +1,7 @@
 baseDomain: test.gigantic.io
 controlPlane:
   catalog: giantswarm
-  replicas: 3
+  replicas: 1
   sizingPolicy: m1.large
   template: ubuntu-2004-kube-v1.24.10
   oidc:
