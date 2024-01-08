@@ -20,7 +20,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/providers/capa"
 )
 
-const KubeContext = "capa"
+const KubeContext = "capa-private-proxy"
 
 func TestCAPAStandard(t *testing.T) {
 	RegisterFailHandler(Fail)
