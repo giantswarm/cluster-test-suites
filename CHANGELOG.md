@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Reduce the number of CP nodes from 3 to 1 in CAPVCD tests in order to avoid timeouts.
+
 ## [1.20.3] - 2023-12-19
 
 ### Added
