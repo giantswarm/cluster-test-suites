@@ -1,6 +1,8 @@
 baseDomain: test.gigantic.io
 controlPlane:
   catalog: giantswarm
+  # HA is disabled temporarily due to
+  # https://github.com/giantswarm/giantswarm/issues/29353
   replicas: 1
   sizingPolicy: m1.large
   template: ubuntu-2004-kube-v1.24.10
