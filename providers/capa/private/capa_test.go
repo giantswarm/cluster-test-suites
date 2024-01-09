@@ -8,7 +8,7 @@ import (
 
 var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
-		AutoScalingSupported: true,
+		AutoScalingSupported: false,
 		BastionSupported:     false,
 		ExternalDnsSupported: false,
 	})
