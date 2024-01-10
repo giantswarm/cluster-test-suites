@@ -58,7 +58,7 @@ func setUpWorkloadCluster() *application.Cluster {
 
 func createCluster() *application.Cluster {
 	cluster := eks.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml").
-		WithAppVersions("latest", "latest")
+		WithAppVersions("0.10.0-bf5df5293128aab88e5c59d2440b1049935eb897", "latest")
 	logger.Log("Workload cluster name: %s", cluster.Name)
 	state.SetCluster(cluster)
 
