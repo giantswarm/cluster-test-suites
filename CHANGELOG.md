@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - CAPA private cluster tests
+- EKS autoscale tests
 
 ## [1.20.4] - 2024-01-08
 
