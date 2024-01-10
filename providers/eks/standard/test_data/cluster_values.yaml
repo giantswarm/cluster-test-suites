@@ -20,6 +20,6 @@ global:
     # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
     nodepool-0:
       instanceType: r6i.xlarge
-      maxSize: 2
-      minSize: 1
+      maxSize: 4
+      minSize: 3
       rootVolumeSizeGB: 25
