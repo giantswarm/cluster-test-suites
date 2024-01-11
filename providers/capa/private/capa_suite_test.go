@@ -24,7 +24,7 @@ const KubeContext = "capa-private-proxy"
 
 func TestCAPAStandard(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CAPA Standard Suite")
+	RunSpecs(t, "CAPA Private Suite")
 }
 
 var _ = BeforeSuite(func() {
