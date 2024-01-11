@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix ClusterIssuer test to actually keep checking for issues being ready until timeout
+- Fixed typo in CAPA private suite name
 
 ## [1.21.0] - 2024-01-11
 
