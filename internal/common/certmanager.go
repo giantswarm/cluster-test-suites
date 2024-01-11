@@ -43,41 +43,42 @@ func runCertManager() {
 	})
 }
 
-func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) error {
-
-	// Using a unstructured object.
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "cert-manager.io",
-		Kind:    "ClusterIssuer",
-		Version: "v1",
-	})
-	err := wcClient.Get(context.Background(), cr.ObjectKey{
-		Name: clusterIssuerName,
-	}, u)
-	if err != nil {
-		return err
-	}
-	logger.Log("ClusterIssuer '%s' is present", clusterIssuerName)
-
-	conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
-	if err != nil {
-		return err
-	}
-	if !found {
-		return fmt.Errorf("ClusterIssuer '%s' does not have status.conditions", clusterIssuerName)
-	}
-
-	for _, condition := range conditions {
-		c := condition.(map[string]interface{})
-		conditionType := c["type"]
-		status := c["status"]
-		if conditionType == "Ready" && status == "True" {
-			logger.Log("Found status.condition with type '%s' and status '%s' in ClusterIssuer '%s'", conditionType, status, clusterIssuerName)
-			return nil
+func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) func() error {
+	return func() error {
+		// Using a unstructured object.
+		u := &unstructured.Unstructured{}
+		u.SetGroupVersionKind(schema.GroupVersionKind{
+			Group:   "cert-manager.io",
+			Kind:    "ClusterIssuer",
+			Version: "v1",
+		})
+		err := wcClient.Get(context.Background(), cr.ObjectKey{
+			Name: clusterIssuerName,
+		}, u)
+		if err != nil {
+			return err
 		}
-	}
+		logger.Log("ClusterIssuer '%s' is present", clusterIssuerName)
 
-	logger.Log("ClusterIssuer '%s' is not Ready", clusterIssuerName)
-	return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
+		conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("ClusterIssuer '%s' does not have status.conditions", clusterIssuerName)
+		}
+
+		for _, condition := range conditions {
+			c := condition.(map[string]interface{})
+			conditionType := c["type"]
+			status := c["status"]
+			if conditionType == "Ready" && status == "True" {
+				logger.Log("Found status.condition with type '%s' and status '%s' in ClusterIssuer '%s'", conditionType, status, clusterIssuerName)
+				return nil
+			}
+		}
+
+		logger.Log("ClusterIssuer '%s' is not Ready", clusterIssuerName)
+		return fmt.Errorf("ClusterIssuer '%s' is not Ready", clusterIssuerName)
+	}
 }
