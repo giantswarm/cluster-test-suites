@@ -30,11 +30,11 @@ func runBasic() {
 			}
 		})
 
-		It("should be able to connect to MC cluster", func() {
+		It("should be able to connect to MC cluster", FlakeAttempts(3), func() {
 			Expect(state.GetFramework().MC().CheckConnection()).To(Succeed())
 		})
 
-		It("should be able to connect to WC cluster", func() {
+		It("should be able to connect to WC cluster", FlakeAttempts(3), func() {
 			Expect(wcClient.CheckConnection()).To(Succeed())
 		})
 
