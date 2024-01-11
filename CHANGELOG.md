@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.21.0] - 2024-01-11
+
 ### Added
 
 - CAPA private cluster tests
@@ -293,7 +295,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.0...HEAD
+[1.21.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.3...v1.20.4
 [1.20.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.1...v1.20.2
