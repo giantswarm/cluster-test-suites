@@ -1,6 +1,8 @@
 package upgrade
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -13,7 +15,11 @@ import (
 const KubeContext = "capvcd"
 
 func TestCAPVCDUpgrade(t *testing.T) {
-	suite.Setup(KubeContext, &capvcd.ClusterBuilder{})
+	if strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
+		Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
+	} else {
+		suite.Setup(KubeContext, &capvcd.ClusterBuilder{})
+	}
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPVCD Upgrade Suite")
