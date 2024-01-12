@@ -13,7 +13,7 @@ import (
 const KubeContext = "capv"
 
 func TestCAPVStandard(t *testing.T) {
-	suite.Setup(KubeContext, &capv.ClusterBuilder{})
+	suite.Setup(false, KubeContext, &capv.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPV Standard Suite")

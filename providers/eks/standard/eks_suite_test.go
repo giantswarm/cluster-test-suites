@@ -19,7 +19,7 @@ import (
 const KubeContext = "eks"
 
 func TestEKSStandard(t *testing.T) {
-	suite.Setup(KubeContext, &eks.ClusterBuilder{}, func(client *client.Client) {
+	suite.Setup(false, KubeContext, &eks.ClusterBuilder{}, func(client *client.Client) {
 		Eventually(
 			wait.AreNumNodesReady(state.GetContext(), client, 3, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
 			20*time.Minute, 15*time.Second,

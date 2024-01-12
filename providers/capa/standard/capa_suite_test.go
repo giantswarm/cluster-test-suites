@@ -13,7 +13,7 @@ import (
 const KubeContext = "capa"
 
 func TestCAPAStandard(t *testing.T) {
-	suite.Setup(KubeContext, &capa.ClusterBuilder{})
+	suite.Setup(false, KubeContext, &capa.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Standard Suite")

@@ -1,8 +1,6 @@
 package upgrade
 
 import (
-	"os"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -15,11 +13,7 @@ import (
 const KubeContext = "capa"
 
 func TestCAPAUpgrade(t *testing.T) {
-	if strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
-		Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
-	} else {
-		suite.Setup(KubeContext, &capa.ClusterBuilder{})
-	}
+	suite.Setup(true, KubeContext, &capa.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Upgrade Suite")

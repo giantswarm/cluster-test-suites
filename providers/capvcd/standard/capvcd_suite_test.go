@@ -13,7 +13,7 @@ import (
 const KubeContext = "capvcd"
 
 func TestCAPVCDStandard(t *testing.T) {
-	suite.Setup(KubeContext, &capvcd.ClusterBuilder{})
+	suite.Setup(false, KubeContext, &capvcd.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPVCD Standard Suite")

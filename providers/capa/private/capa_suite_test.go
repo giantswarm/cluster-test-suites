@@ -13,7 +13,7 @@ import (
 const KubeContext = "capa-private-proxy"
 
 func TestCAPAPrivate(t *testing.T) {
-	suite.Setup(KubeContext, &capa.PrivateClusterBuilder{})
+	suite.Setup(false, KubeContext, &capa.PrivateClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Private Suite")

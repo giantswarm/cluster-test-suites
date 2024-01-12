@@ -13,7 +13,7 @@ import (
 const KubeContext = "capz"
 
 func TestCAPZStandard(t *testing.T) {
-	suite.Setup(KubeContext, &capz.ClusterBuilder{})
+	suite.Setup(false, KubeContext, &capz.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPZ Standard Suite")

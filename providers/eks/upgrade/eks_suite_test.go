@@ -1,8 +1,6 @@
 package upgrade
 
 import (
-	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -21,16 +19,12 @@ import (
 const KubeContext = "eks"
 
 func TestEKSUpgrade(t *testing.T) {
-	if strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
-		Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
-	} else {
-		suite.Setup(KubeContext, &eks.ClusterBuilder{}, func(client *client.Client) {
-			Eventually(
-				wait.AreNumNodesReady(state.GetContext(), client, 3, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
-				20*time.Minute, 15*time.Second,
-			).Should(BeTrue())
-		})
-	}
+	suite.Setup(true, KubeContext, &eks.ClusterBuilder{}, func(client *client.Client) {
+		Eventually(
+			wait.AreNumNodesReady(state.GetContext(), client, 3, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
+			20*time.Minute, 15*time.Second,
+		).Should(BeTrue())
+	})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "EKS Upgrade Suite")
