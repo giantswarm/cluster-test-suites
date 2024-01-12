@@ -156,11 +156,13 @@ func runHelloWorld(externalDnsSupported bool) {
 				defer resp.Body.Close()
 
 				if resp.StatusCode != http.StatusOK {
+					logger.Log("Was expecting status code '%d' but actually got '%d'", http.StatusOK, resp.StatusCode)
 					return "", err
 				}
 
 				bodyBytes, err := io.ReadAll(resp.Body)
 				if err != nil {
+					logger.Log("Was not expecting the response body to be empty")
 					return "", err
 				}
 
