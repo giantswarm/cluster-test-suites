@@ -22,6 +22,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/providers/capv"
 	"github.com/giantswarm/cluster-test-suites/providers/capvcd"
 	"github.com/giantswarm/cluster-test-suites/providers/capz"
+	"github.com/giantswarm/cluster-test-suites/providers/eks"
 )
 
 var (
@@ -88,13 +89,20 @@ func run(cmd *cobra.Command, args []string) error {
 	var cluster *application.Cluster
 	switch provider {
 	case application.ProviderVSphere:
-		cluster = capv.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		clusterBuilder := capv.ClusterBuilder{}
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
 	case application.ProviderCloudDirector:
-		cluster = capvcd.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		clusterBuilder := capvcd.ClusterBuilder{}
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
 	case application.ProviderAWS:
-		cluster = capa.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		clusterBuilder := capa.ClusterBuilder{}
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+	case application.ProviderEKS:
+		clusterBuilder := eks.ClusterBuilder{}
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
 	case application.ProviderAzure:
-		cluster = capz.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		clusterBuilder := capz.ClusterBuilder{}
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
 	default:
 		cluster = application.NewClusterApp(clusterName, provider).
 			WithAppVersions(clusterVersion, defaultAppVersion).

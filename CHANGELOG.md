@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Consolidated test suite setup (`BeforeSuite` and `AfterSuite`) into a single, reusable module to reduce duplication.
+
+### Fixed
+
+- Added `AfterSuite` to perform test cluster cleanup. This should now cleanup clusters even if they timeout during creation in the `BeforeSuite`.
+
+### Added
+
+- Added EKS cluster support to the `standup` CLI
+
 ## [1.21.1] - 2024-01-11
 
 ### Fixed
