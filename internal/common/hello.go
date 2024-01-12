@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
@@ -127,9 +128,28 @@ func runHelloWorld(externalDnsSupported bool) {
 				Skip("external-dns is not supported")
 			}
 
+			httpClient := &http.Client{
+				Transport: &http.Transport{
+					DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+						dialer := &net.Dialer{
+							Resolver: &net.Resolver{
+								PreferGo: true,
+								Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+									d := net.Dialer{
+										Timeout: time.Millisecond * time.Duration(10000),
+									}
+									return d.DialContext(ctx, "udp", "8.8.4.4:53")
+								},
+							},
+						}
+						return dialer.DialContext(ctx, network, addr)
+					},
+				},
+			}
+
 			Eventually(func() (string, error) {
 				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)
-				resp, err := http.Get(helloWorldIngressUrl)
+				resp, err := httpClient.Get(helloWorldIngressUrl)
 				if err != nil {
 					return "", err
 				}
