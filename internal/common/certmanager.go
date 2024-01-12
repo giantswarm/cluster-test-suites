@@ -33,10 +33,9 @@ func runCertManager() {
 
 		It("cert-manager default ClusterIssuers are present and ready", func() {
 			for _, clusterIssuerName := range clusterIssuers {
-				logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
 				Eventually(checkClusterIssuer(wcClient, clusterIssuerName)).
 					WithTimeout(30 * time.Second).
-					WithPolling(50 * time.Millisecond).
+					WithPolling(1 * time.Second).
 					Should(Succeed())
 			}
 		})
@@ -45,6 +44,7 @@ func runCertManager() {
 
 func checkClusterIssuer(wcClient *client.Client, clusterIssuerName string) func() error {
 	return func() error {
+		logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
 		// Using a unstructured object.
 		u := &unstructured.Unstructured{}
 		u.SetGroupVersionKind(schema.GroupVersionKind{
