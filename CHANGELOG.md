@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use custom dialer when calling hello-world application to avoid DNS caching the not found result
 
+## [1.21.2] - 2024-01-15
+
+### Changed
+
+- Consolidated test suite setup (`BeforeSuite` and `AfterSuite`) into a single, reusable module to reduce duplication.
+
+### Fixed
+
+- Added `AfterSuite` to perform test cluster cleanup. This should now cleanup clusters even if they timeout during creation in the `BeforeSuite`.
+
+### Added
+
+- Added EKS cluster support to the `standup` CLI
+
 ## [1.21.1] - 2024-01-11
 
 ### Fixed
@@ -306,7 +320,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.2...HEAD
+[1.21.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.1...v1.21.2
 [1.21.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.3...v1.20.4

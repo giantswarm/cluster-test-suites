@@ -200,7 +200,7 @@ A new test suite is added by creating a new module under the provider directory 
 * a `suite_test.go` file
 * at least one `*_test.go` file
 
-The `suite_test.go` should mostly be the same across test suites so it will likely be enough to copy the function over from the `standard` test suite and update the names used to represent the test suite being created.
+The `suite_test.go` should mostly be the same across test suites so it will likely be enough to copy the function over from the `standard` test suite and update the names used to represent the test suite being created. This file mostly relies on the [`suite`](./internal/suite/) module to handle the test suite setup and clean up logic.
 
 The `test_data` directory should contain at least the values files for the cluster app and the default-apps app. These values are what indicate the variant used for this test suite. See [Creating values files](#Creating-values-files) below for more details.
 
