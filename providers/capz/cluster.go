@@ -8,7 +8,9 @@ import (
 	"github.com/giantswarm/clustertest/pkg/utils"
 )
 
-func NewClusterApp(clusterName string, orgName string, clusterValuesFile string, defaultAppsValuesFile string) *application.Cluster {
+type ClusterBuilder struct{}
+
+func (c *ClusterBuilder) NewClusterApp(clusterName string, orgName string, clusterValuesFile string, defaultAppsValuesFile string) *application.Cluster {
 	if clusterName == "" {
 		clusterName = utils.GenerateRandomName("t")
 	}
