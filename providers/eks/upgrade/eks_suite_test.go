@@ -1,22 +1,18 @@
 package upgrade
 
 import (
-	"context"
-	"os"
-	"strings"
 	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/giantswarm/clustertest"
-	"github.com/giantswarm/clustertest/pkg/application"
-	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/suite"
 	"github.com/giantswarm/cluster-test-suites/providers/eks"
 )
 
@@ -68,14 +64,17 @@ func createCluster() *application.Cluster {
 	client, err := state.GetFramework().ApplyCluster(applyCtx, state.GetCluster())
 	Expect(err).NotTo(HaveOccurred())
 
-	Eventually(
-		wait.AreNumNodesReady(state.GetContext(), client, 3, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
-		20*time.Minute, 15*time.Second,
-	).Should(BeTrue())
+	suite.Setup(true, KubeContext, &eks.ClusterBuilder{}, func(client *client.Client) {
+		Eventually(
+			wait.AreNumNodesReady(state.GetContext(), client, 3, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
+			20*time.Minute, 15*time.Second,
+		).Should(BeTrue())
+  }
 
 	DeferCleanup(func() {
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
 
-	return state.GetCluster()
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "EKS Upgrade Suite")
 }
