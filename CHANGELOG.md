@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.21.2] - 2024-01-15
+
+### Changed
+
+- Consolidated test suite setup (`BeforeSuite` and `AfterSuite`) into a single, reusable module to reduce duplication.
+
+### Fixed
+
+- Added `AfterSuite` to perform test cluster cleanup. This should now cleanup clusters even if they timeout during creation in the `BeforeSuite`.
+
+### Added
+
+- Added EKS cluster support to the `standup` CLI
+
+## [1.21.1] - 2024-01-11
+
+### Fixed
+
+- Fix ClusterIssuer test to actually keep checking for issues being ready until timeout
+- Fixed typo in CAPA private suite name
+
+## [1.21.0] - 2024-01-11
+
 ### Added
 
 - CAPA private cluster tests
@@ -14,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Remove CPI config from CAPVCD tests so that we use the chart defaults instead.
+
+### Changed
+
+- Allow basic tests to be flakey and retry in case of network issues
 
 ## [1.20.4] - 2024-01-08
 
@@ -30,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.20.2] - 2023-12-13
 
 - Disable Bastion tests for `capa` provider.
-  
+
 ## [1.20.1] - 2023-12-13
 
 ### Changed
@@ -42,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bump `clustertest` to v0.14.0 that increased the char count of cluster names to 20 chars
-- CAPV: WCs have the default deny-all network policies 
+- CAPV: WCs have the default deny-all network policies
 
 ## [1.19.3] - 2023-12-05
 
@@ -293,7 +320,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.2...HEAD
+[1.21.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.1...v1.21.2
+[1.21.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.0...v1.21.1
+[1.21.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.3...v1.20.4
 [1.20.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.1...v1.20.2
