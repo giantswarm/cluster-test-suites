@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - CAPA private cluster tests
+- 
+### Changed
+
+- Remove CPI config from CAPVCD tests so that we use the chart defaults instead.
 
 ### Changed
 
