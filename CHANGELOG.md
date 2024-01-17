@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Remove CPI config from CAPVCD tests so that we use the chart defaults instead.
+
 ## [1.21.2] - 2024-01-15
 
 ### Changed
