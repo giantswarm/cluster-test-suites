@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Disable capa private test suite until MC stability issues are solved
+
 ## [1.21.3] - 2024-01-17
 
 ### Changed
