@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add a retrying healthcheck call to the MC at the start of the test suite to ensure connection is usable
+
+### Changed
+
+- Re-enabled CAPA private test suite
+
 ## [1.22.0] - 2024-01-18
 
 ### Changed
