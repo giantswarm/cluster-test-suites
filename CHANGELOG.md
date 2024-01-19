@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.23.0] - 2024-01-19
+
 ### Added
 
 - Add a retrying healthcheck call to the MC at the start of the test suite to ensure connection is usable
@@ -336,7 +338,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.22.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.23.0...HEAD
+[1.23.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.22.0...v1.23.0
 [1.22.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.3...v1.22.0
 [1.21.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.2...v1.21.3
 [1.21.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.1...v1.21.2
