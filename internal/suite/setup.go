@@ -43,6 +43,17 @@ func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, cl
 		Expect(err).NotTo(HaveOccurred())
 		state.SetFramework(framework)
 
+		// In certain cases, when connecting over the VPN, it is possible that the tunnel
+		// isn't ready and can take a short while to become usable. This attempts to wait
+		// for the connection to be usable before starting the tests.
+		Eventually(func() error {
+			logger.Log("Checking connection to MC is available")
+			return framework.MC().CheckConnection()
+		}).
+			WithTimeout(5 * time.Minute).
+			WithPolling(5 * time.Second).
+			Should(Succeed())
+
 		cluster := setUpWorkloadCluster(clusterBuilder, clusterReadyFns...)
 		state.SetCluster(cluster)
 	})
