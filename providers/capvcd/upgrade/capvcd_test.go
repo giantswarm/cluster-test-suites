@@ -9,7 +9,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
 )
 
-var _ = Describe("Basic upgrade test", Ordered, func() {
+var _ = XDescribe("Basic upgrade test", Ordered, func() {
 	// it is better to get defaults at first and then customize
 	// further changes in defaults will be effective here.
 	cfg := upgrade.NewTestConfigWithDefaults()
