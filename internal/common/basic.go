@@ -70,7 +70,7 @@ func runBasic() {
 				Should(Succeed())
 		})
 
-		It("has all of it's Pods in the Running state", func() {
+		It("has all of its Pods in the Running state", func() {
 			Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
