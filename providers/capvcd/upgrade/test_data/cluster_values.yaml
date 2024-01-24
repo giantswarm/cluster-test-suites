@@ -25,7 +25,6 @@ nodePools:
     class: default
     replicas: 2
 providerSpecific:
-  cloudProviderInterface: {}
   org: GIANT_SWARM
   ovdc: Org-GIANT-SWARM
   site: "https://cd.neoedge.cloud"
