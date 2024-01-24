@@ -23,5 +23,5 @@ func (c *ClusterBuilder) NewClusterApp(clusterName string, orgName string, clust
 		WithAppValuesFile(path.Clean(clusterValuesFile), path.Clean(defaultAppsValuesFile), &application.TemplateValues{
 			ClusterName:  clusterName,
 			Organization: orgName,
-		}).WithAppVersions("0.10.0-ed5ac1348d6b244573c71c323450089f5a68e419", "0.3.1-32fa6ef6f59b1418889134c77d0400840922db78")
+		})
 }
