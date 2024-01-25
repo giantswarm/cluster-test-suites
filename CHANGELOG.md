@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use custom dialer when calling hello-world application to avoid DNS caching the not found result
 
+## [1.23.1] - 2024-01-19
+
+### Changed
+
+- Disabled CAPVCD tests while we recover the broken MC
+
+## [1.23.0] - 2024-01-19
+
+### Added
+
+- Add a retrying healthcheck call to the MC at the start of the test suite to ensure connection is usable
+
+### Changed
+
+- Re-enabled CAPA private test suite
+
+## [1.22.0] - 2024-01-18
+
+### Changed
+
+- Disable capa private test suite until MC stability issues are solved
+
+## [1.21.3] - 2024-01-17
+
+### Changed
+
+- Remove CPI config from CAPVCD tests so that we use the chart defaults instead.
+
 ## [1.21.2] - 2024-01-15
 
 ### Changed
@@ -320,7 +348,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.23.1...HEAD
+[1.23.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.23.0...v1.23.1
+[1.23.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.22.0...v1.23.0
+[1.22.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.3...v1.22.0
+[1.21.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.2...v1.21.3
 [1.21.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.1...v1.21.2
 [1.21.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.20.4...v1.21.0
