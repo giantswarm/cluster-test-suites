@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use custom dialer when calling hello-world application to avoid DNS caching the not found result
+
 ## [1.23.1] - 2024-01-19
 
 ### Changed
