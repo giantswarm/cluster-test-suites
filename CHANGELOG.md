@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Set min worker nodes to 2 for CAPA clusters
+- Make the scale test dynamic based on the current number of worker nodes
+
 ## [1.23.2] - 2024-01-26
 
 ### Changed
