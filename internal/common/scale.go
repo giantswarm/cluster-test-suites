@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,8 +43,13 @@ func runScale(autoScalingSupported bool) {
 			ctx := context.Background()
 			org := state.GetCluster().Organization
 
+			// Get the current number of worker nodes and set the replicas to one more to force scale up
+			nodes := corev1.NodeList{}
+			err = wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+			Expect(err).To(BeNil())
+
 			helloAppValues = map[string]string{
-				"ReplicaCount": "3",
+				"ReplicaCount": fmt.Sprintf("%d", len(nodes.Items)+1),
 			}
 
 			helloApp = application.New(fmt.Sprintf("%s-scale-hello-world", state.GetCluster().Name), "hello-world").
