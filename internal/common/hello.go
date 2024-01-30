@@ -35,9 +35,11 @@ func runHelloWorld(externalDnsSupported bool) {
 			appReadyInterval = 5 * time.Second
 		)
 
-		if !externalDnsSupported {
-			Skip("external-dns is not supported")
-		}
+		BeforeEach(func() {
+			if !externalDnsSupported {
+				Skip("external-dns is not supported")
+			}
+		})
 
 		It("should have cert-manager and external-dns deployed", func() {
 			org := state.GetCluster().Organization
