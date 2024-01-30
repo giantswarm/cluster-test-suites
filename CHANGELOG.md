@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Re-enable CAPVCD tests on gerbil.
+
 ## [1.24.0] - 2024-01-26
 
 ### Changed
