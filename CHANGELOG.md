@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactored `hello-world` tests to split out into individual (ordered) test cases to better understand where things fail
+- Increased the timout of the `hello-world` ingress check from 10min to 15min
+- Introduced a check for the ingress resources status being updated with the load balancer hostname
+
 ## [1.24.0] - 2024-01-26
 
 ### Changed

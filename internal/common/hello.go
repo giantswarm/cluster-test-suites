@@ -14,6 +14,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -21,7 +22,7 @@ import (
 )
 
 func runHelloWorld(externalDnsSupported bool) {
-	Context("hello world", func() {
+	Context("hello world", Ordered, func() {
 		var (
 			nginxApp              *application.Application
 			helloApp              *application.Application
@@ -34,12 +35,11 @@ func runHelloWorld(externalDnsSupported bool) {
 			appReadyInterval = 5 * time.Second
 		)
 
-		BeforeEach(func() {
-			if !externalDnsSupported {
-				Skip("external-dns is not supported")
-			}
+		if !externalDnsSupported {
+			Skip("external-dns is not supported")
+		}
 
-			ctx := context.Background()
+		It("should have cert-manager and external-dns deployed", func() {
 			org := state.GetCluster().Organization
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
@@ -52,6 +52,10 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue())
+		})
+
+		It("should deploy ingress-nginx", func() {
+			org := state.GetCluster().Organization
 
 			// By default, `external-dns` will only create dns records for Services on the `kube-system` namespace, because that's the default value for `namespaceFilter`.
 			// That's why we install the nginx app in that namespace.
@@ -64,13 +68,17 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithInCluster(false).
 				WithInstallNamespace("kube-system")
 
-			err := state.GetFramework().MC().DeployApp(ctx, *nginxApp)
+			err := state.GetFramework().MC().DeployApp(state.GetContext(), *nginxApp)
 			Expect(err).To(BeNil())
 
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), nginxApp.InstallName, nginxApp.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue())
+		})
+
+		It("should deploy the hello-world app", func() {
+			org := state.GetCluster().Organization
 
 			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
@@ -89,7 +97,7 @@ func runHelloWorld(externalDnsSupported bool) {
 					ExtraValues:  helloAppValues,
 				})
 
-			err = state.GetFramework().MC().DeployApp(ctx, *helloApp)
+			err := state.GetFramework().MC().DeployApp(state.GetContext(), *helloApp)
 			Expect(err).To(BeNil())
 
 			Eventually(func() (bool, error) {
@@ -100,7 +108,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				managementClusterKubeClient := state.GetFramework().MC()
 
 				helloApplication := &v1alpha1.App{}
-				err := managementClusterKubeClient.Get(ctx, types.NamespacedName{Name: helloApp.InstallName, Namespace: helloApp.GetNamespace()}, helloApplication)
+				err := managementClusterKubeClient.Get(state.GetContext(), types.NamespacedName{Name: helloApp.InstallName, Namespace: helloApp.GetNamespace()}, helloApplication)
 				if err != nil {
 					return false, err
 				}
@@ -111,7 +119,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				labels["update"] = fmt.Sprintf("%d", now.Unix())
 				patchedApp.SetLabels(labels)
 
-				err = managementClusterKubeClient.Patch(ctx, patchedApp, ctrl.MergeFrom(helloApplication))
+				err = managementClusterKubeClient.Patch(state.GetContext(), patchedApp, ctrl.MergeFrom(helloApplication))
 				if err != nil {
 					return false, err
 				}
@@ -123,11 +131,35 @@ func runHelloWorld(externalDnsSupported bool) {
 				Should(BeTrue())
 		})
 
-		It("hello world app responds successfully", func() {
-			if !externalDnsSupported {
-				Skip("external-dns is not supported")
-			}
+		It("ingress resource has load balancer in status", func() {
+			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+			Expect(err).ShouldNot(HaveOccurred())
 
+			Eventually(func() (bool, error) {
+				logger.Log("Checking if ingress has load balancer set in status")
+				helloIngress := networkingv1.Ingress{}
+				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: "hello-world", Namespace: "giantswarm"}, &helloIngress)
+				if err != nil {
+					logger.Log("Failed to get ingress: %v", err)
+					return false, err
+				}
+
+				if helloIngress.Status.LoadBalancer.Ingress != nil &&
+					len(helloIngress.Status.LoadBalancer.Ingress) > 0 &&
+					helloIngress.Status.LoadBalancer.Ingress[0].Hostname != "" {
+
+					logger.Log("Load balancer hostname found in ingress status: %s", helloIngress.Status.LoadBalancer.Ingress[0].Hostname)
+					return true, nil
+				}
+
+				return false, nil
+			}).
+				WithTimeout(6 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(BeTrue())
+		})
+
+		It("hello world app responds successfully", func() {
 			httpClient := &http.Client{
 				Transport: &http.Transport{
 					DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -167,14 +199,13 @@ func runHelloWorld(externalDnsSupported bool) {
 				}
 
 				return string(bodyBytes), nil
-			}, "10m", "5s").Should(ContainSubstring("Hello World"))
+			}).
+				WithTimeout(15 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(ContainSubstring("Hello World"))
 		})
 
-		AfterEach(func() {
-			if !externalDnsSupported {
-				Skip("external-dns is not supported")
-			}
-
+		It("uninstall apps", func() {
 			err := state.GetFramework().MC().DeleteApp(state.GetContext(), *nginxApp)
 			Expect(err).ShouldNot(HaveOccurred())
 			err = state.GetFramework().MC().DeleteApp(state.GetContext(), *helloApp)
