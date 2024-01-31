@@ -28,6 +28,16 @@ metadata:
   name: pvc-test-pod
   namespace: test-storage
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
   containers:
     - name: pvc-test-container
       image: nginx
