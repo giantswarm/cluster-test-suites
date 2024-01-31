@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Add security context to PVC pod.
+
 ## [1.25.0] - 2024-01-30
 
 ### Changed
