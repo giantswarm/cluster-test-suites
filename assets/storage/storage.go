@@ -28,12 +28,22 @@ metadata:
   name: pvc-test-pod
   namespace: test-storage
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
   containers:
     - name: pvc-test-container
-      image: nginx
+      image: nginxinc/nginx-unprivileged
       volumeMounts:
         - name: test-volume
           mountPath: /data
+      securityContext:
+        allowPrivilegeEscalation: false
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+          - ALL
   volumes:
     - name: test-volume
       persistentVolumeClaim:

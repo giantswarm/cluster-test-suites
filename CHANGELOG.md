@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Re-enable CAPVCD tests on gerbil.
 
+## [1.25.3] - 2024-02-05
+
+### Changed
+
+- Disable Bastion Support for CAPZ
+
+## [1.25.2] - 2024-01-31
+
+### Changed
+
+- Make PVC pod run unprivelleged.
+
+## [1.25.1] - 2024-01-31
+
+### Changed
+
+- Add security context to PVC pod.
+
 ## [1.25.0] - 2024-01-30
 
 ### Changed
@@ -86,6 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - CAPA private cluster tests
+- EKS autoscale tests
 
 ### Changed
 
@@ -369,7 +388,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.3...HEAD
+[1.25.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.2...v1.25.3
+[1.25.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.1...v1.25.2
+[1.25.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.0...v1.25.1
 [1.25.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.24.0...v1.25.0
 [1.24.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.23.2...v1.24.0
 [1.23.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.23.1...v1.23.2

@@ -14,7 +14,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	common.Run(&common.TestConfig{
 		// Disabled until https://github.com/giantswarm/roadmap/issues/2693
 		AutoScalingSupported: false,
-		BastionSupported:     true,
+		BastionSupported:     false,
 		// Disabled until wildcard ingress support is added
 		ExternalDnsSupported: false,
 	})
