@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add tests on DeploymentSets, StatefulSets and DaemonSets to ensure all desired replicas/pods are running.
+
 ## [1.25.4] - 2024-02-08
 
 ### Changed
