@@ -71,13 +71,6 @@ func runBasic() {
 				Should(Succeed())
 		})
 
-		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
-				WithTimeout(15 * time.Minute).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-		})
-
 		It("has all its Deployments Ready (means all replicas are running)", func() {
 			Eventually(wait.Consistent(checkAllDeploymentsReady(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
@@ -94,6 +87,13 @@ func runBasic() {
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
 			Eventually(wait.Consistent(checkAllDaemonSetsReady(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all of its Pods in the Running state", func() {
+			Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
