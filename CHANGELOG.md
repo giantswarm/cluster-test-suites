@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.25.3] - 2024-02-08
+
 ### Changed
 
 - Re-enable CAPVCD tests on gerbil.
@@ -389,6 +391,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dockerfile for running tests in CI
 
 [Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.3...HEAD
+[1.25.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.3...v1.25.3
 [1.25.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.2...v1.25.3
 [1.25.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.1...v1.25.2
 [1.25.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.25.0...v1.25.1
