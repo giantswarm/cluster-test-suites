@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use `Standard_D4s_v5` and 2 replicas for workers in CAPZ.
+
 ## [1.26.0] - 2024-02-08
 
 ### Added
