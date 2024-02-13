@@ -54,7 +54,7 @@ func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, cl
 			WithPolling(5 * time.Second).
 			Should(Succeed())
 
-		cluster := setUpWorkloadCluster(clusterBuilder, clusterReadyFns...)
+		cluster := setUpWorkloadCluster(isUpgrade, clusterBuilder, clusterReadyFns...)
 		state.SetCluster(cluster)
 	})
 
@@ -67,7 +67,7 @@ func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, cl
 	})
 }
 
-func setUpWorkloadCluster(clusterBuilder ClusterBuilder, clusterReadyFns ...func(client *client.Client)) *application.Cluster {
+func setUpWorkloadCluster(isUpgrade bool, clusterBuilder ClusterBuilder, clusterReadyFns ...func(client *client.Client)) *application.Cluster {
 	cluster, err := state.GetFramework().LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
@@ -75,11 +75,14 @@ func setUpWorkloadCluster(clusterBuilder ClusterBuilder, clusterReadyFns ...func
 		return cluster
 	}
 
-	return createCluster(clusterBuilder, clusterReadyFns...)
+	return createCluster(isUpgrade, clusterBuilder, clusterReadyFns...)
 }
 
-func createCluster(clusterBuilder ClusterBuilder, clusterReadyFns ...func(client *client.Client)) *application.Cluster {
+func createCluster(isUpgrade bool, clusterBuilder ClusterBuilder, clusterReadyFns ...func(client *client.Client)) *application.Cluster {
 	cluster := clusterBuilder.NewClusterApp("", "", "./test_data/cluster_values.yaml", "./test_data/default-apps_values.yaml")
+	if isUpgrade {
+		cluster = cluster.WithAppVersions("latest", "latest")
+	}
 	logger.Log("Workload cluster name: %s", cluster.Name)
 	state.SetCluster(cluster)
 
