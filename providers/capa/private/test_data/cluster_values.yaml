@@ -50,7 +50,7 @@ global:
   nodePools:
     # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
     nodepool-0:
-      maxSize: 3
+      maxSize: 5
       minSize: 2
       rootVolumeSizeGB: 25
       spotInstances:

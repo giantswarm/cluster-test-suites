@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Enable scale test for private CAPA clusters.
+- Increase max node pool size to 5 for CAPA test suites.
+
 ## [1.26.2] - 2024-02-13
 
 ### Fixed
