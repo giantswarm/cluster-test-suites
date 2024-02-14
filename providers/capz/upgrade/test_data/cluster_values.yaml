@@ -8,8 +8,8 @@ providerSpecific:
 nodePools:
 # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
 - name: nodepool-0
-  instanceType: Standard_D2s_v5
-  replicas: 3
+  instanceType: Standard_D4s_v5
+  replicas: 2
   rootVolumeSizeGB: 50
 connectivity:
   bastion:
