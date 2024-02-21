@@ -14,6 +14,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	common.Run(&common.TestConfig{
 		AutoScalingSupported: true,
 		BastionSupported:     false,
+		TeleportSupported:    true,
 		ExternalDnsSupported: true,
 	})
 })
