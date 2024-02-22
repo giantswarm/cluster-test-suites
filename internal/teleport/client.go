@@ -1,4 +1,4 @@
-package helper
+package teleport
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	tc "github.com/gravitational/teleport/api/client"
 )
 
-var NewTeleportClient = func(ctx context.Context, identityFilePath string) (*tc.Client, error) {
+func New(ctx context.Context, identityFilePath string) (*tc.Client, error) {
 	proxyAddr := "teleport.giantswarm.io:443"
 	client, err := tc.New(ctx, tc.Config{
 		Addrs: []string{

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/teleport"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
@@ -36,20 +36,19 @@ func runTeleport(teleportSupported bool) {
 		}
 
 		BeforeEach(func() {
-			if strings.TrimSpace(os.Getenv("TELEPORT_IDENTITY_FILE")) == "" {
+			if !teleportSupported {
+				Skip("Teleport is not supported.")
+			}
+			teleportIdentityFile := strings.TrimSpace(os.Getenv("TELEPORT_IDENTITY_FILE"))
+			if teleportIdentityFile == "" {
 				Skip("TELEPORT_IDENTITY_FILE env var not set, skipping teleport test")
-				return
 			}
 			var err error
-			teleportClient, err = helper.NewTeleportClient(context.Background(), os.Getenv("TELEPORT_IDENTITY_FILE"))
+			teleportClient, err = teleport.New(context.Background(), teleportIdentityFile)
 			Expect(err).To(BeNil())
 		})
 
 		It("cluster is registered", func() {
-			if !teleportSupported {
-				Skip("Teleport is not supported.")
-			}
-
 			Eventually(func() (bool, error) {
 				ok, err := isClusterRegistered(state.GetCluster().Name)
 				return ok, err
