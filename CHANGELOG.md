@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update Dockerfile to use Go v1.21
+- Bump Go version `v1.21` for teleport connectivity test
 
 ## [1.27.0] - 2024-02-14
 
