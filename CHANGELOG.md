@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update Dockerfile to use Go v1.21
+
 ## [1.27.0] - 2024-02-14
 
 ### Changed
