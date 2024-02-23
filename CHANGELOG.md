@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump Go version `v1.21` for teleport connectivity test
+
 ## [1.27.0] - 2024-02-14
 
 ### Changed
