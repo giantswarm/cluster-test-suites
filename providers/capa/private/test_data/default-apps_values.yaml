@@ -5,6 +5,7 @@ userConfig:
     configMap:
       values:
         serviceAccount:
+          # capa iam operator wants the service account to be named like this for IRSA to work
           name: cert-manager-controller
           annotations:
             eks.amazonaws.com/role-arn: "{{ .ClusterName }}-CertManager-Role"
