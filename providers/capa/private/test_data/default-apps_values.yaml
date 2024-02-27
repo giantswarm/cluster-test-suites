@@ -17,4 +17,3 @@ userConfig:
                 enabled: true
                 # TODO Use a variable as soon as it is available.
                 region: "eu-north-1"
-                role: "{{ .ClusterName }}-CertManager-Role"
