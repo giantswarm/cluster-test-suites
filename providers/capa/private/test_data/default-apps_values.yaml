@@ -5,6 +5,7 @@ userConfig:
     configMap:
       values:
         serviceAccount:
+          name: cert-manager-controller
           annotations:
             eks.amazonaws.com/role-arn: "{{ .ClusterName }}-CertManager-Role"
         giantSwarmClusterIssuer:
