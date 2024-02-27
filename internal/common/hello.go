@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
@@ -169,23 +170,30 @@ func runHelloWorld(externalDnsSupported bool) {
 		})
 
 		It("hello world app responds successfully", func() {
-			httpClient := &http.Client{
-				Transport: &http.Transport{
-					DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-						dialer := &net.Dialer{
-							Resolver: &net.Resolver{
-								PreferGo: true,
-								Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-									d := net.Dialer{
-										Timeout: time.Millisecond * time.Duration(10000),
-									}
-									return d.DialContext(ctx, "udp", "8.8.4.4:53")
-								},
+			transport := &http.Transport{
+				DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+					dialer := &net.Dialer{
+						Resolver: &net.Resolver{
+							PreferGo: true,
+							Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+								d := net.Dialer{
+									Timeout: time.Millisecond * time.Duration(10000),
+								}
+								return d.DialContext(ctx, "udp", "8.8.4.4:53")
 							},
-						}
-						return dialer.DialContext(ctx, network, addr)
-					},
+						},
+					}
+					return dialer.DialContext(ctx, network, addr)
 				},
+			}
+
+			if os.Getenv("HTTP_PROXY") != "" {
+				logger.Log("Detected need to use PROXY as HTTP_PROXY env var was set to %s", os.Getenv("HTTP_PROXY"))
+				transport.Proxy = http.ProxyFromEnvironment
+			}
+
+			httpClient := &http.Client{
+				Transport: transport,
 			}
 
 			Eventually(func() (string, error) {
