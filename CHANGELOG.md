@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump Go version `v1.21` for teleport connectivity test
+- Bump Go version `v1.21` for teleport connectivity test.
+
+### Added
+
+- Try and use ingress nginx app's config if present.
+- Enable ingress test for private CAPA test.
 
 ## [1.27.0] - 2024-02-14
 

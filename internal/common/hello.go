@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -69,6 +70,12 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithClusterName(state.GetCluster().Name).
 				WithInCluster(false).
 				WithInstallNamespace("kube-system")
+
+			// check if ./test_data/ingress-nginx_values.yaml exists
+			path := "./test_data/ingress-nginx_values.yaml"
+			if helper.FileExists(path) {
+				nginxApp = nginxApp.MustWithValuesFile(path, &application.TemplateValues{})
+			}
 
 			err := state.GetFramework().MC().DeployApp(state.GetContext(), *nginxApp)
 			Expect(err).To(BeNil())
