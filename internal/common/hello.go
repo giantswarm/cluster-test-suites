@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -176,6 +177,18 @@ func runHelloWorld(externalDnsSupported bool) {
 						Resolver: &net.Resolver{
 							PreferGo: true,
 							Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+								if os.Getenv("HTTP_PROXY") != "" {
+									u, err := url.Parse(os.Getenv("HTTP_PROXY"))
+									if err != nil {
+										logger.Log("Error parsing HTTP_PROXY as a URL %s", os.Getenv("HTTP_PROXY"))
+									} else {
+										if addr == u.Host {
+											// always use coredns for proxy address resolution.
+											var d net.Dialer
+											return d.Dial(network, address)
+										}
+									}
+								}
 								d := net.Dialer{
 									Timeout: time.Millisecond * time.Duration(10000),
 								}
