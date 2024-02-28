@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Try and use ingress nginx app's config if present.
 - Enable ingress test for private CAPA test.
 
+### Fixed
+
+- In environments where an egress proxy exists, don't use 8.8.8.8 as a DNS resolver for the ingress test as that would prevent the proxy address from being resolved.
+
 ## [1.27.0] - 2024-02-14
 
 ### Changed
