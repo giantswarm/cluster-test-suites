@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bump Go version `v1.21` for teleport connectivity test
+- Update CAPV values and make more use of chart's default values
 
 ## [1.27.0] - 2024-02-14
 
