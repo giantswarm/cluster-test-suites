@@ -10,6 +10,6 @@ var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
 		AutoScalingSupported: true,
 		BastionSupported:     false,
-		ExternalDnsSupported: false,
+		ExternalDnsSupported: true,
 	})
 })
