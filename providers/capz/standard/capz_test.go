@@ -18,6 +18,7 @@ var _ = Describe("Common tests", func() {
 		// Disabled until https://github.com/giantswarm/roadmap/issues/2693
 		AutoScalingSupported: false,
 		BastionSupported:     false,
+		TeleportSupported:    true,
 		// Disabled until wildcard ingress support is added
 		ExternalDnsSupported: false,
 	})

@@ -11,6 +11,7 @@ var _ = Describe("Common tests", func() {
 		// No autoscaling on-prem
 		AutoScalingSupported: false,
 		BastionSupported:     false,
+		TeleportSupported:    true,
 		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
 		ExternalDnsSupported: false,
 	})

@@ -11,6 +11,7 @@
   * `capvcd` pointing to a valid CAPVCD MC
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
+* When `TELEPORT_IDENTITY_FILE` environment variable is set to point to the path of a valid teleport credential, the test will check if E2E WC is registered in Teleport cluster (`teleport.giantswarm.io`). If it isn't set, the test will be skipped.
 
 Example kubeconfig:
 
@@ -77,7 +78,9 @@ users:
 
 Assuming the above requirements are fulfilled:
 
-> Note: If you need the current kubeconfig its best to pull it from the `cluster-test-suites-mc-kubeconfig` Secret on the Tekton cluster
+> [!NOTE]
+> If you need the current kubeconfig its best to pull it from the `cluster-test-suites-mc-kubeconfig` Secret on the Tekton cluster.
+If you need the current teleport identity file its best to pull it from the `teleport-identity-output` Secret on the Tekton cluster.
 
 Running the all test suites:
 
@@ -95,6 +98,14 @@ Running a single test suite (e.g. the `capa` `standard` test suite)
 
 ```sh
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa/standard
+```
+
+Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
+
+```sh
+kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
+
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENITTY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
 ```
 
 Running with Docker:
