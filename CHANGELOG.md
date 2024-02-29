@@ -14,6 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bump Go version `v1.21` for teleport connectivity test
+- Update CAPV values and make more use of chart's default values
+
+### Added
+
+- Try and use ingress nginx app's config if present.
+- Enable ingress test for private CAPA test.
+
+### Fixed
+
+- In environments where an egress proxy exists, don't use 8.8.8.8 as a DNS resolver for the ingress test as that would prevent the proxy address from being resolved.
 
 ## [1.27.0] - 2024-02-14
 

@@ -11,6 +11,6 @@ var _ = Describe("Common tests", func() {
 		AutoScalingSupported: true,
 		BastionSupported:     false,
 		TeleportSupported:    true,
-		ExternalDnsSupported: false,
+		ExternalDnsSupported: true,
 	})
 })
