@@ -100,6 +100,14 @@ Running a single test suite (e.g. the `capa` `standard` test suite)
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa/standard
 ```
 
+Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
+
+```sh
+kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
+
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENITTY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
+```
+
 Running with Docker:
 
 ```sh
@@ -120,25 +128,6 @@ E2E_KUBECONFIG=/path/to/kubeconfig.yaml E2E_WC_NAME=mn-test E2E_WC_NAMESPACE=org
 ```
 
 If you'd like to create a workload cluster test using the same configuration as the test suites you can make use of the [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs available in this repo.
-
-
-### Testing with Teleport
-
-To run the teleport test locally. First, get the local copy of teleport credential from `teleport-identity-output` Secret on the Tekton cluster.
-
-```sh
-kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
-```
-
-And set the following environment variable when running the tests:
-
-* `TELEPORT_IDENITTY_FILE` - The path to the local copy of teleport credential.
-
-Example:
-
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENITTY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
-```
 
 ### Testing changes to `clustertest`
 
