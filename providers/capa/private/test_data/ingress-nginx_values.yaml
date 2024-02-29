@@ -1,0 +1,11 @@
+controller:
+  service:
+    enabled: true
+    external:
+      enabled: false
+    internal:
+      enabled: true
+      # We need to reuse the external subdomain for the internal service because dns-operator-route53 creates
+      # a wildcard record pointing towards ingress.<blah> domain.
+      subdomain: ingress
+
