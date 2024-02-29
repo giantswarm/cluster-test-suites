@@ -20,21 +20,6 @@ func runTeleport(teleportSupported bool) {
 	Context("teleport", func() {
 		var teleportClient *tc.Client
 
-		isClusterRegistered := func(clusterName string) (bool, error) {
-			clusters, err := teleportClient.GetKubernetesServers(context.Background())
-			if err != nil {
-				return false, err
-			}
-			for _, cluster := range clusters {
-				if strings.Contains(cluster.GetName(), clusterName) {
-					logger.Log("cluster registered %v", cluster)
-					return true, nil
-				}
-			}
-			logger.Log("cluster %s still not registered", clusterName)
-			return false, nil
-		}
-
 		BeforeEach(func() {
 			if !teleportSupported {
 				Skip("Teleport is not supported.")
@@ -50,8 +35,18 @@ func runTeleport(teleportSupported bool) {
 
 		It("cluster is registered", func() {
 			Eventually(func() (bool, error) {
-				ok, err := isClusterRegistered(state.GetCluster().Name)
-				return ok, err
+				clusters, err := teleportClient.GetKubernetesServers(context.Background())
+				if err != nil {
+					return false, err
+				}
+				for _, cluster := range clusters {
+					if strings.Contains(cluster.GetName(), state.GetCluster().Name) {
+						logger.Log("cluster registered %v", cluster)
+						return true, nil
+					}
+				}
+				logger.Log("cluster %s still not registered", state.GetCluster().Name)
+				return false, nil
 			}).
 				WithTimeout(5 * time.Minute).
 				WithPolling(wait.DefaultInterval).
