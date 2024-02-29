@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
 	"time"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
@@ -18,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -69,6 +72,12 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithClusterName(state.GetCluster().Name).
 				WithInCluster(false).
 				WithInstallNamespace("kube-system")
+
+			// check if ./test_data/ingress-nginx_values.yaml exists
+			path := "./test_data/ingress-nginx_values.yaml"
+			if helper.FileExists(path) {
+				nginxApp = nginxApp.MustWithValuesFile(path, &application.TemplateValues{})
+			}
 
 			err := state.GetFramework().MC().DeployApp(state.GetContext(), *nginxApp)
 			Expect(err).To(BeNil())
@@ -162,23 +171,42 @@ func runHelloWorld(externalDnsSupported bool) {
 		})
 
 		It("hello world app responds successfully", func() {
-			httpClient := &http.Client{
-				Transport: &http.Transport{
-					DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-						dialer := &net.Dialer{
-							Resolver: &net.Resolver{
-								PreferGo: true,
-								Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-									d := net.Dialer{
-										Timeout: time.Millisecond * time.Duration(10000),
+			transport := &http.Transport{
+				DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+					dialer := &net.Dialer{
+						Resolver: &net.Resolver{
+							PreferGo: true,
+							Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+								if os.Getenv("HTTP_PROXY") != "" {
+									u, err := url.Parse(os.Getenv("HTTP_PROXY"))
+									if err != nil {
+										logger.Log("Error parsing HTTP_PROXY as a URL %s", os.Getenv("HTTP_PROXY"))
+									} else {
+										if addr == u.Host {
+											// always use coredns for proxy address resolution.
+											var d net.Dialer
+											return d.Dial(network, address)
+										}
 									}
-									return d.DialContext(ctx, "udp", "8.8.4.4:53")
-								},
+								}
+								d := net.Dialer{
+									Timeout: time.Millisecond * time.Duration(10000),
+								}
+								return d.DialContext(ctx, "udp", "8.8.4.4:53")
 							},
-						}
-						return dialer.DialContext(ctx, network, addr)
-					},
+						},
+					}
+					return dialer.DialContext(ctx, network, addr)
 				},
+			}
+
+			if os.Getenv("HTTP_PROXY") != "" {
+				logger.Log("Detected need to use PROXY as HTTP_PROXY env var was set to %s", os.Getenv("HTTP_PROXY"))
+				transport.Proxy = http.ProxyFromEnvironment
+			}
+
+			httpClient := &http.Client{
+				Transport: transport,
 			}
 
 			Eventually(func() (string, error) {
