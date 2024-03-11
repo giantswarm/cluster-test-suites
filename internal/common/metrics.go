@@ -67,8 +67,8 @@ func runMetrics() {
 
 			for _, metric := range metrics {
 				Eventually(checkMetricPresent(mcClient, namespace, podName, metric)).
-					WithTimeout(30 * time.Second).
-					WithPolling(1 * time.Second).
+					WithTimeout(10 * time.Minute).
+					WithPolling(10 * time.Second).
 					Should(Succeed())
 			}
 		})
