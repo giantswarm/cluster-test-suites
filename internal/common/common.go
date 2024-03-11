@@ -12,6 +12,7 @@ func Run(cfg *TestConfig) {
 	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)
+	runMetrics()
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorld(cfg.ExternalDnsSupported)
 	runScale(cfg.AutoScalingSupported)

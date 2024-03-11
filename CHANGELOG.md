@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add a new test that checks if key workload cluster metrics exist in prometheus.
+
 ## [1.29.0] - 2024-02-29
 
 ### Added
