@@ -78,7 +78,7 @@ func runMetrics() {
 func checkMetricPresent(mcClient *client.Client, namespace string, podName string, metric string) func() error {
 	return func() error {
 		query := fmt.Sprintf("absent(%s) or vector(0)", metric)
-		cmd := []string{"wget", "-q", "-O-", fmt.Sprintf("prometheus-operated.%s-prometheus:9090/%s/api/v1/query?query=%s", state.GetCluster().Name, state.GetCluster().Name, url.QueryEscape(query))}
+		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("prometheus-operated.%s-prometheus:9090/%s/api/v1/query?query=%s", state.GetCluster().Name, state.GetCluster().Name, url.QueryEscape(query))}
 		stdout, _, err := mcClient.ExecInPod(context.Background(), podName, namespace, "prometheus", cmd)
 		if err != nil {
 			return fmt.Errorf("can't exec command in pod %s: %s", podName, err)
