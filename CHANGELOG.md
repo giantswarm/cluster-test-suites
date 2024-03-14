@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Set app versions when using `standup` CLI
+- Create the `results.json` file as soon as possible when running `standup` in case the cluster creation fails to allows the `teardown` command to still use it.
+
 ## [1.30.0] - 2024-03-12
 
 ### Added

@@ -90,19 +90,24 @@ func run(cmd *cobra.Command, args []string) error {
 	switch provider {
 	case application.ProviderVSphere:
 		clusterBuilder := capv.ClusterBuilder{}
-		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues).
+			WithAppVersions(clusterVersion, defaultAppVersion)
 	case application.ProviderCloudDirector:
 		clusterBuilder := capvcd.ClusterBuilder{}
-		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues).
+			WithAppVersions(clusterVersion, defaultAppVersion)
 	case application.ProviderAWS:
 		clusterBuilder := capa.ClusterBuilder{}
-		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues).
+			WithAppVersions(clusterVersion, defaultAppVersion)
 	case application.ProviderEKS:
 		clusterBuilder := eks.ClusterBuilder{}
-		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues).
+			WithAppVersions(clusterVersion, defaultAppVersion)
 	case application.ProviderAzure:
 		clusterBuilder := capz.ClusterBuilder{}
-		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues)
+		cluster = clusterBuilder.NewClusterApp(clusterName, orgName, clusterValues, defaultAppValues).
+			WithAppVersions(clusterVersion, defaultAppVersion)
 	default:
 		cluster = application.NewClusterApp(clusterName, provider).
 			WithAppVersions(clusterVersion, defaultAppVersion).
@@ -113,6 +118,30 @@ func run(cmd *cobra.Command, args []string) error {
 			})
 	}
 
+	// Create the results file with the details we have already incase the cluster creation fails
+	result := types.StandupResult{
+		Provider:       string(provider),
+		ClusterName:    clusterName,
+		OrgName:        orgName,
+		Namespace:      cluster.GetNamespace(),
+		ClusterVersion: cluster.ClusterApp.Version,
+		KubeconfigPath: "",
+	}
+
+	resultsFile, err := os.Create(path.Join(outputDirectory, "results.json"))
+	if err != nil {
+		return err
+	}
+
+	resultBytes, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+	_, err = resultsFile.Write(resultBytes)
+
+	resultsFile.Close()
+
+	// Apply cluster App
 	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
 	defer cancelApplyCtx()
 
@@ -133,6 +162,7 @@ func run(cmd *cobra.Command, args []string) error {
 		wait.WithInterval(15*time.Second),
 	)
 
+	// Save the kubeconfig for the WC
 	kubeconfigFile, err := os.Create(path.Join(outputDirectory, "kubeconfig"))
 	if err != nil {
 		return err
@@ -148,20 +178,16 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	resultsFile, err := os.Create(path.Join(outputDirectory, "results.json"))
+	// Update the results file with the kubeconfig path
+	result.KubeconfigPath = kubeconfigFile.Name()
+
+	resultsFile, err = os.Create(path.Join(outputDirectory, "results.json"))
 	if err != nil {
 		return err
 	}
 	defer resultsFile.Close()
-	result := types.StandupResult{
-		Provider:       string(provider),
-		ClusterName:    clusterName,
-		OrgName:        orgName,
-		Namespace:      cluster.GetNamespace(),
-		ClusterVersion: cluster.ClusterApp.Version,
-		KubeconfigPath: kubeconfigFile.Name(),
-	}
-	resultBytes, err := json.Marshal(result)
+
+	resultBytes, err = json.Marshal(result)
 	if err != nil {
 		return err
 	}
