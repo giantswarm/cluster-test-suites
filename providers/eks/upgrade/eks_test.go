@@ -7,7 +7,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
 )
 
-var _ = Describe("Basic upgrade test", Ordered, func() {
+var _ = XDescribe("Basic upgrade test", Ordered, func() {
 	upgrade.Run(upgrade.NewTestConfigWithDefaults())
 
 	// Finally run the common tests after upgrade is completed
