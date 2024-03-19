@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Increase cert-manager test timeout to 2 minutes.
+
 ## [1.31.0] - 2024-03-14
 
 ### Changed
