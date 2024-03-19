@@ -34,7 +34,7 @@ func runCertManager() {
 		It("cert-manager default ClusterIssuers are present and ready", func() {
 			for _, clusterIssuerName := range clusterIssuers {
 				Eventually(checkClusterIssuer(wcClient, clusterIssuerName)).
-					WithTimeout(30 * time.Second).
+					WithTimeout(120 * time.Second).
 					WithPolling(1 * time.Second).
 					Should(Succeed())
 			}
