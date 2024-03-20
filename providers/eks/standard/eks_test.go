@@ -11,5 +11,7 @@ var _ = Describe("Common tests", func() {
 		AutoScalingSupported: true,
 		BastionSupported:     false,
 		ExternalDnsSupported: true,
+		// EKS does not have metrics for k8s control plane components.
+		ControlPlaneMetricsSupported: false,
 	})
 })

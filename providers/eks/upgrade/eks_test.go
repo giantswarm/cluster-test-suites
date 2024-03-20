@@ -15,5 +15,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 		AutoScalingSupported: true,
 		BastionSupported:     false,
 		ExternalDnsSupported: true,
+		// EKS does not have metrics for k8s control plane components.
+		ControlPlaneMetricsSupported: false,
 	})
 })

@@ -15,7 +15,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
-func runMetrics() {
+func runMetrics(controlPlaneMetricsSupported bool) {
 	Context("metrics", func() {
 		var mcClient *client.Client
 		var metrics []string
@@ -25,32 +25,10 @@ func runMetrics() {
 
 			// List of metrics that must be present.
 			metrics = []string{
-				// API server metrics in prometheus-rules
-				"apiserver_flowcontrol_dispatched_requests_total",
-				"apiserver_flowcontrol_request_concurrency_limit",
-				"apiserver_request_duration_seconds_bucket",
-				"apiserver_admission_webhook_request_total",
-				"apiserver_admission_webhook_admission_duration_seconds_sum",
-				"apiserver_admission_webhook_admission_duration_seconds_count",
-				"apiserver_request_total",
-				"apiserver_audit_event_total",
-
 				// Kubelet
 				"kube_node_status_condition",
 				"kube_node_spec_unschedulable",
 				"kube_node_created",
-
-				// Controller manager
-				"workqueue_queue_duration_seconds_count",
-				"workqueue_queue_duration_seconds_bucket",
-
-				// Scheduler
-				"scheduler_pod_scheduling_duration_seconds_count",
-				"scheduler_pod_scheduling_duration_seconds_bucket",
-
-				// ETCD
-				"etcd_request_duration_seconds_count",
-				"etcd_request_duration_seconds_bucket",
 
 				// Coredns
 				"coredns_dns_request_duration_seconds_count",
@@ -58,6 +36,32 @@ func runMetrics() {
 
 				// Net exporter
 				"network_latency_seconds_sum",
+			}
+
+			if controlPlaneMetricsSupported {
+				metrics = append(metrics, []string{
+					// API server metrics in prometheus-rules
+					"apiserver_flowcontrol_dispatched_requests_total",
+					"apiserver_flowcontrol_request_concurrency_limit",
+					"apiserver_request_duration_seconds_bucket",
+					"apiserver_admission_webhook_request_total",
+					"apiserver_admission_webhook_admission_duration_seconds_sum",
+					"apiserver_admission_webhook_admission_duration_seconds_count",
+					"apiserver_request_total",
+					"apiserver_audit_event_total",
+
+					// Controller manager
+					"workqueue_queue_duration_seconds_count",
+					"workqueue_queue_duration_seconds_bucket",
+
+					// Scheduler
+					"scheduler_pod_scheduling_duration_seconds_count",
+					"scheduler_pod_scheduling_duration_seconds_bucket",
+
+					// ETCD
+					"etcd_request_duration_seconds_count",
+					"etcd_request_duration_seconds_bucket",
+				}...)
 			}
 		})
 

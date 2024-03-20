@@ -13,6 +13,7 @@ var _ = Describe("Common tests", func() {
 		BastionSupported:     false,
 		TeleportSupported:    true,
 		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
-		ExternalDnsSupported: false,
+		ExternalDnsSupported:         false,
+		ControlPlaneMetricsSupported: true,
 	})
 })

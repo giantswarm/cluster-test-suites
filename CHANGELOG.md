@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Increase cert-manager test timeout to 2 minutes.
 - Enabled EKS tests.
+- Avoid checking control plane metrics in EKS.
 
 ## [1.31.0] - 2024-03-14
 
