@@ -20,6 +20,7 @@ var _ = Describe("Common tests", func() {
 		BastionSupported:     false,
 		TeleportSupported:    true,
 		// Disabled until wildcard ingress support is added
-		ExternalDnsSupported: false,
+		ExternalDnsSupported:         false,
+		ControlPlaneMetricsSupported: true,
 	})
 })

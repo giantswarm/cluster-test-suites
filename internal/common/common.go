@@ -1,10 +1,11 @@
 package common
 
 type TestConfig struct {
-	AutoScalingSupported bool
-	BastionSupported     bool
-	TeleportSupported    bool
-	ExternalDnsSupported bool
+	AutoScalingSupported         bool
+	BastionSupported             bool
+	TeleportSupported            bool
+	ExternalDnsSupported         bool
+	ControlPlaneMetricsSupported bool
 }
 
 func Run(cfg *TestConfig) {
@@ -12,7 +13,7 @@ func Run(cfg *TestConfig) {
 	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)
-	runMetrics()
+	runMetrics(cfg.ControlPlaneMetricsSupported)
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorld(cfg.ExternalDnsSupported)
 	runScale(cfg.AutoScalingSupported)
