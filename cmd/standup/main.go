@@ -142,7 +142,7 @@ func run(cmd *cobra.Command, args []string) error {
 	resultsFile.Close()
 
 	// Apply cluster App
-	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 20*time.Minute)
+	applyCtx, cancelApplyCtx := context.WithTimeout(ctx, 30*time.Minute)
 	defer cancelApplyCtx()
 
 	wcClient, err := framework.ApplyCluster(applyCtx, cluster)
