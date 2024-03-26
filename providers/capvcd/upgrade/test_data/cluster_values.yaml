@@ -5,7 +5,7 @@ controlPlane:
   # https://github.com/giantswarm/giantswarm/issues/29353
   replicas: 1
   sizingPolicy: m1.large
-  template: ubuntu-2004-kube-v1.24.10
+  template: ubuntu-2004-kube-v1.25.13
   oidc:
     clientId: "dex-k8s-authenticator"
     groupsClaim: "groups"
@@ -33,7 +33,7 @@ providerSpecific:
     default:
       catalog: giantswarm
       sizingPolicy: m1.large
-      template: ubuntu-2004-kube-v1.24.10
+      template: ubuntu-2004-kube-v1.25.13
   userContext:
     secretRef:
       secretName: vcd-credentials
@@ -41,4 +41,4 @@ metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
 internal:
-  kubernetesVersion: v1.24.10+vmware.1
+  kubernetesVersion: v1.25.13+vmware.1
