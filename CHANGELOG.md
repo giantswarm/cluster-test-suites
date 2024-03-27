@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Increase cluster creation timeout to 30 minutes.
 - Switch CAPVCD values to 1.25.13.
+- Increase cert-manager test timeout to 15 minutes.
 
 ## [1.32.0] - 2024-03-20
 
