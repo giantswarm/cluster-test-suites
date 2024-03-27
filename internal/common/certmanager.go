@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
