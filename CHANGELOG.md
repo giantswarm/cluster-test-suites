@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Include the MCs api endpoint when logging out the "checking connection to MC" message
+
 ## [1.33.0] - 2024-03-28
 
 ### Changed
