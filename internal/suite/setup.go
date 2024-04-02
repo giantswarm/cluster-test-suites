@@ -47,7 +47,9 @@ func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, cl
 		// isn't ready and can take a short while to become usable. This attempts to wait
 		// for the connection to be usable before starting the tests.
 		Eventually(func() error {
-			logger.Log("Checking connection to MC is available. API Endpoint: %s", framework.MC().GetAPIServerEndpoint())
+			logger.Log("Checking connection to MC is available.")
+			logger.Log("MC API Endpoint: '%s'", framework.MC().GetAPIServerEndpoint())
+			logger.Log("MC name: '%s'", framework.MC().GetClusterName())
 			return framework.MC().CheckConnection()
 		}).
 			WithTimeout(5 * time.Minute).
