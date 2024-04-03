@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Include the MCs api endpoint when logging out the "checking connection to MC" message
 
+### Changed
+
+- Switch CAPVCD to Flatcar (1.25.16).
+
 ## [1.33.0] - 2024-03-28
 
 ### Changed
