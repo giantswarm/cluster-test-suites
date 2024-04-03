@@ -5,7 +5,15 @@ controlPlane:
   # https://github.com/giantswarm/giantswarm/issues/29353
   replicas: 1
   sizingPolicy: m1.large
-  template: ubuntu-2004-kube-v1.25.13
+  template: flatcar-stable-3602.2.1-kube-v1.25.16
+  dns:
+    imageRepository: gsoci.azurecr.io/giantswarm
+    imageTag: 1.9.4-giantswarm
+  etcd:
+    imageRepository: gsoci.azurecr.io/giantswarm
+    imageTag: 3.5.12-0-k8s
+  image:
+    repository: gsoci.azurecr.io/giantswarm
   oidc:
     clientId: "dex-k8s-authenticator"
     groupsClaim: "groups"
@@ -29,11 +37,12 @@ providerSpecific:
   ovdc: Org-GIANT-SWARM
   site: "https://cd.neoedge.cloud"
   ovdcNetwork: GS-ISOLATED
+  vmBootstrapFormat: ignition
   nodeClasses:
     default:
       catalog: giantswarm
       sizingPolicy: m1.large
-      template: ubuntu-2004-kube-v1.25.13
+      template: flatcar-stable-3602.2.1-kube-v1.25.16
   userContext:
     secretRef:
       secretName: vcd-credentials
@@ -41,4 +50,4 @@ metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
 internal:
-  kubernetesVersion: v1.25.13+vmware.1
+  kubernetesVersion: v1.25.16
