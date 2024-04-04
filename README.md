@@ -9,6 +9,7 @@
   * `capz` pointing to a valid CAPZ MC
   * `capv` pointing to a valid CAPV MC
   * `capvcd` pointing to a valid CAPVCD MC
+* Install [ginkgo](https://onsi.github.io/ginkgo/) on your machine: `go install github.com/onsi/ginkgo/v2/ginkgo`.
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
 * When `TELEPORT_IDENTITY_FILE` environment variable is set to point to the path of a valid teleport credential, the test will check if E2E WC is registered in Teleport cluster (`teleport.giantswarm.io`). If it isn't set, the test will be skipped.
