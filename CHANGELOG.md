@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.34.0] - 2024-04-04
+
 ### Added
 
 - Include the MCs api endpoint when logging out the "checking connection to MC" message
@@ -479,7 +481,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.33.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.34.0...HEAD
+[1.34.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.33.0...v1.34.0
 [1.33.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.32.0...v1.33.0
 [1.32.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.31.0...v1.32.0
 [1.31.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.30.1...v1.31.0
