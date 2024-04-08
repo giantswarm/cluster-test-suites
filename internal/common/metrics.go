@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	. "github.com/onsi/ginkgo/v2"
@@ -24,6 +25,9 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 	Context("metrics", func() {
 		var mcClient *client.Client
 		var metrics []string
+		var testPodName string
+		var testPodNamespace string
+		var prometheusBaseUrl string
 
 		BeforeEach(func() {
 			mcClient = state.GetFramework().MC()
@@ -68,11 +72,26 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 					"etcd_request_duration_seconds_bucket",
 				}...)
 			}
+
+			// Run a pod with alpine in the default namespace of the MC.
+			testPodName = fmt.Sprintf("%s-metrics-test", state.GetCluster().Name)
+			testPodNamespace = "default"
+
+			err := runTestPod(mcClient, testPodName, testPodNamespace)
+			Expect(err).NotTo(HaveOccurred())
+
+			prometheusBaseUrl, err = helper.DetectPrometheusBaseURL(context.TODO(), mcClient)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		AfterAll(func() {
+			err := cleanupTestPod(mcClient, testPodName, testPodNamespace)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("ensure key metrics are available on prometheus", func() {
 			for _, metric := range metrics {
-				Eventually(checkMetricPresent(mcClient, metric)).
+				Eventually(checkMetricPresent(mcClient, metric, prometheusBaseUrl, testPodName, testPodNamespace)).
 					WithTimeout(10 * time.Minute).
 					WithPolling(10 * time.Second).
 					Should(Succeed())
@@ -81,25 +100,14 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 	})
 }
 
-func checkMetricPresent(mcClient *client.Client, metric string) func() error {
+func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUrl string, testPodName string, testPodNamespace string) func() error {
 	return func() error {
 		query := fmt.Sprintf("absent(%[1]s{cluster_id=\"%[2]s\"}) or label_replace(vector(0), \"cluster_id\", \"%[2]s\", \"\", \"\")", metric, state.GetCluster().Name)
 
-		// Run a pod with alpine in the default namespace of the MC.
-		podName := fmt.Sprintf("%s-metrics-test", state.GetCluster().Name)
-		ns := "default"
-
-		err := runTestPod(mcClient, podName, ns)
+		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", prometheusBaseUrl, url.QueryEscape(query))}
+		stdout, _, err := mcClient.ExecInPod(context.Background(), testPodName, testPodNamespace, "test", cmd)
 		if err != nil {
-			return fmt.Errorf("can't run test pod %s: %s", podName, err)
-		}
-
-		baseUrl, err := helper.DetectPrometheusBaseURL(context.TODO(), mcClient)
-
-		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", baseUrl, url.QueryEscape(query))}
-		stdout, _, err := mcClient.ExecInPod(context.Background(), podName, ns, "test", cmd)
-		if err != nil {
-			return fmt.Errorf("can't exec command in pod %s: %s", podName, err)
+			return fmt.Errorf("can't exec command in pod %s: %s", testPodName, err)
 		}
 
 		// {"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1681718763.145,"1"]}]}}
@@ -154,40 +162,58 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 			Namespace: ns,
 		},
 		Spec: corev1.PodSpec{
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsNonRoot: to.BoolPtr(true),
+				SeccompProfile: &corev1.SeccompProfile{
+					Type: "RuntimeDefault",
+				},
+			},
 			Containers: []corev1.Container{
 				{
 					Name:  "test",
 					Image: "alpine:latest",
 					Args:  []string{"sleep", "99999999"},
+					SecurityContext: &corev1.SecurityContext{
+						Capabilities: &corev1.Capabilities{
+							Drop: []corev1.Capability{
+								"ALL",
+							},
+						},
+						AllowPrivilegeEscalation: to.BoolPtr(false),
+					},
 				},
 			},
 		},
 	}
-	// Delete any pod from previous runs
-	err := mcClient.Delete(context.Background(), &pod)
+	// Check if pods exists already.
+	create := false
+	existing := corev1.Pod{}
+	err := mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &existing)
 	if errors.IsNotFound(err) {
-		// Fallthrough.
+		create = true
 	} else if err != nil {
 		return fmt.Errorf("error ensuring test pod is deleted %s: %s", podName, err)
 	}
 
-	// Wait for pod to be deleted.
-	existing := corev1.Pod{}
-	for {
-		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &existing)
-		if errors.IsNotFound(err) {
-			break
-		} else if err != nil {
-			return fmt.Errorf("error ensuring test pod is deleted %s: %s", podName, err)
-		}
+	if !create {
+		// Check if pod is running.
+		if existing.Status.Phase != corev1.PodRunning {
+			// Pod unhealthy, delete and recreate it.
+			err := cleanupTestPod(mcClient, podName, ns)
+			if err != nil {
+				return err
+			}
 
-		logger.Log("Waiting for pod %s to be deleted", podName)
-		time.Sleep(5 * time.Second)
+			create = true
+		}
 	}
 
-	err = mcClient.Create(context.Background(), &pod)
-	if err != nil {
-		return fmt.Errorf("can't create test pod %s: %s", podName, err)
+	if create {
+		// Create the pod.
+		err = mcClient.Create(context.Background(), &pod)
+		if err != nil {
+			return fmt.Errorf("can't create test pod %s: %s", podName, err)
+		}
 	}
 
 	// Wait for pod to be running.
@@ -202,6 +228,38 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 		}
 
 		logger.Log("Waiting for pod %s to be running", podName)
+		time.Sleep(5 * time.Second)
+	}
+
+	return nil
+}
+
+func cleanupTestPod(mcClient *client.Client, podName string, ns string) error {
+	pod := corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      podName,
+			Namespace: ns,
+		},
+	}
+
+	// Pod unhealthy, delete and recreate it.
+	err := mcClient.Delete(context.Background(), &pod)
+	if errors.IsNotFound(err) {
+		// Fallthrough (in case the pod was deleting already).
+	} else if err != nil {
+		return fmt.Errorf("error deleting test pod %s: %s", podName, err)
+	}
+
+	// Wait for pod to be deleted.
+	for {
+		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &pod)
+		if errors.IsNotFound(err) {
+			break
+		} else if err != nil {
+			return fmt.Errorf("error ensuring test pod %s is deleted: %s", podName, err)
+		}
+
+		logger.Log("Waiting for pod %s to be deleted", podName)
 		time.Sleep(5 * time.Second)
 	}
 
