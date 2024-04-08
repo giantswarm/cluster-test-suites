@@ -159,6 +159,7 @@ func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUr
 func runTestPod(mcClient *client.Client, podName string, ns string) error {
 	t := true
 	f := false
+	userAndGroup := int64(35)
 
 	pod := corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -167,6 +168,8 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 		},
 		Spec: corev1.PodSpec{
 			SecurityContext: &corev1.PodSecurityContext{
+				RunAsUser:    &userAndGroup,
+				RunAsGroup:   &userAndGroup,
 				RunAsNonRoot: &t,
 				SeccompProfile: &corev1.SeccompProfile{
 					Type: "RuntimeDefault",
