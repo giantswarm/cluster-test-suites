@@ -11,7 +11,12 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	client2 "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -66,11 +71,8 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		})
 
 		It("ensure key metrics are available on prometheus", func() {
-			namespace := fmt.Sprintf("%s-prometheus", state.GetCluster().Name)
-			podName := fmt.Sprintf("prometheus-%s-0", state.GetCluster().Name)
-
 			for _, metric := range metrics {
-				Eventually(checkMetricPresent(mcClient, namespace, podName, metric)).
+				Eventually(checkMetricPresent(mcClient, metric)).
 					WithTimeout(10 * time.Minute).
 					WithPolling(10 * time.Second).
 					Should(Succeed())
@@ -79,11 +81,23 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 	})
 }
 
-func checkMetricPresent(mcClient *client.Client, namespace string, podName string, metric string) func() error {
+func checkMetricPresent(mcClient *client.Client, metric string) func() error {
 	return func() error {
-		query := fmt.Sprintf("absent(%s) or vector(0)", metric)
-		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("prometheus-operated.%s-prometheus:9090/%s/api/v1/query?query=%s", state.GetCluster().Name, state.GetCluster().Name, url.QueryEscape(query))}
-		stdout, _, err := mcClient.ExecInPod(context.Background(), podName, namespace, "prometheus", cmd)
+		query := fmt.Sprintf("absent(%[1]s{cluster_id=\"%[2]s\"}) or label_replace(vector(0), \"cluster_id\", \"%[2]s\", \"\", \"\")", metric, state.GetCluster().Name)
+
+		// Run a pod with alpine in the default namespace of the MC.
+		podName := fmt.Sprintf("%s-metrics-test", state.GetCluster().Name)
+		ns := "default"
+
+		err := runTestPod(mcClient, podName, ns)
+		if err != nil {
+			return fmt.Errorf("can't run test pod %s: %s", podName, err)
+		}
+
+		baseUrl, err := helper.DetectPrometheusBaseURL(context.TODO(), mcClient)
+
+		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", baseUrl, url.QueryEscape(query))}
+		stdout, _, err := mcClient.ExecInPod(context.Background(), podName, ns, "test", cmd)
 		if err != nil {
 			return fmt.Errorf("can't exec command in pod %s: %s", podName, err)
 		}
@@ -131,4 +145,65 @@ func checkMetricPresent(mcClient *client.Client, namespace string, podName strin
 		logger.Log("Metric %q was found", metric)
 		return nil
 	}
+}
+
+func runTestPod(mcClient *client.Client, podName string, ns string) error {
+	pod := corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      podName,
+			Namespace: ns,
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  "test",
+					Image: "alpine:latest",
+					Args:  []string{"sleep", "99999999"},
+				},
+			},
+		},
+	}
+	// Delete any pod from previous runs
+	err := mcClient.Delete(context.Background(), &pod)
+	if errors.IsNotFound(err) {
+		// Fallthrough.
+	} else if err != nil {
+		return fmt.Errorf("error ensuring test pod is deleted %s: %s", podName, err)
+	}
+
+	// Wait for pod to be deleted.
+	existing := corev1.Pod{}
+	for {
+		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &existing)
+		if errors.IsNotFound(err) {
+			break
+		} else if err != nil {
+			return fmt.Errorf("error ensuring test pod is deleted %s: %s", podName, err)
+		}
+
+		logger.Log("Waiting for pod %s to be deleted", podName)
+		time.Sleep(5 * time.Second)
+	}
+
+	err = mcClient.Create(context.Background(), &pod)
+	if err != nil {
+		return fmt.Errorf("can't create test pod %s: %s", podName, err)
+	}
+
+	// Wait for pod to be running.
+	for {
+		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &existing)
+		if err != nil {
+			return fmt.Errorf("error ensuring test pod is running %s: %s", podName, err)
+		}
+
+		if existing.Status.Phase == corev1.PodRunning {
+			break
+		}
+
+		logger.Log("Waiting for pod %s to be running", podName)
+		time.Sleep(5 * time.Second)
+	}
+
+	return nil
 }
