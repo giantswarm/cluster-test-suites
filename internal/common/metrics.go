@@ -224,19 +224,21 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 	}
 
 	// Wait for pod to be running.
-	for {
+	Eventually(func() (bool, error) {
 		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &existing)
 		if err != nil {
-			return fmt.Errorf("error ensuring test pod is running %s: %s", podName, err)
+			return false, fmt.Errorf("error ensuring test pod is running %s: %s", podName, err)
 		}
 
 		if existing.Status.Phase == corev1.PodRunning {
-			break
+			return true, nil
 		}
 
-		logger.Log("Waiting for pod %s to be running", podName)
-		time.Sleep(5 * time.Second)
-	}
+		return false, fmt.Errorf("waiting for pod %s to be running", podName)
+	}).
+		WithTimeout(5 * time.Minute).
+		WithPolling(5 * time.Second).
+		Should(BeTrue())
 
 	return nil
 }
@@ -258,17 +260,19 @@ func cleanupTestPod(mcClient *client.Client, podName string, ns string) error {
 	}
 
 	// Wait for pod to be deleted.
-	for {
+	Eventually(func() (bool, error) {
 		err = mcClient.Get(context.Background(), client2.ObjectKey{Namespace: ns, Name: podName}, &pod)
 		if errors.IsNotFound(err) {
-			break
+			return true, nil
 		} else if err != nil {
-			return fmt.Errorf("error ensuring test pod %s is deleted: %s", podName, err)
+			return false, fmt.Errorf("error ensuring test pod %s is deleted: %s", podName, err)
 		}
 
-		logger.Log("Waiting for pod %s to be deleted", podName)
-		time.Sleep(5 * time.Second)
-	}
+		return false, fmt.Errorf("waiting for pod %s to be deleted", podName)
+	}).
+		WithTimeout(5 * time.Minute).
+		WithPolling(5 * time.Second).
+		Should(BeTrue())
 
 	return nil
 }
