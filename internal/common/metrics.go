@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	. "github.com/onsi/ginkgo/v2"
@@ -156,6 +155,9 @@ func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUr
 }
 
 func runTestPod(mcClient *client.Client, podName string, ns string) error {
+	t := true
+	f := false
+
 	pod := corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
@@ -163,7 +165,7 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 		},
 		Spec: corev1.PodSpec{
 			SecurityContext: &corev1.PodSecurityContext{
-				RunAsNonRoot: to.BoolPtr(true),
+				RunAsNonRoot: &t,
 				SeccompProfile: &corev1.SeccompProfile{
 					Type: "RuntimeDefault",
 				},
@@ -179,7 +181,7 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 								"ALL",
 							},
 						},
-						AllowPrivilegeEscalation: to.BoolPtr(false),
+						AllowPrivilegeEscalation: &f,
 					},
 				},
 			},
