@@ -71,7 +71,9 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 					"etcd_request_duration_seconds_bucket",
 				}...)
 			}
+		})
 
+		It("creates test pod", func() {
 			// Run a pod with alpine in the default namespace of the MC.
 			testPodName = fmt.Sprintf("%s-metrics-test", state.GetCluster().Name)
 			testPodNamespace = "default"
@@ -83,11 +85,6 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		AfterAll(func() {
-			err := cleanupTestPod(mcClient, testPodName, testPodNamespace)
-			Expect(err).NotTo(HaveOccurred())
-		})
-
 		It("ensure key metrics are available on prometheus", func() {
 			for _, metric := range metrics {
 				Eventually(checkMetricPresent(mcClient, metric, prometheusBaseUrl, testPodName, testPodNamespace)).
@@ -95,6 +92,11 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 					WithPolling(10 * time.Second).
 					Should(Succeed())
 			}
+		})
+
+		It("clean up test pod", func() {
+			err := cleanupTestPod(mcClient, testPodName, testPodNamespace)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 }
