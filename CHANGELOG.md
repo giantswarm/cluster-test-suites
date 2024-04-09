@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Revert #169 by increasing CAPVCD CP nodes back to 3.
+
 ## [1.35.0] - 2024-04-08
 
 ### Added
