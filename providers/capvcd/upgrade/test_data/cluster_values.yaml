@@ -1,9 +1,7 @@
 baseDomain: test.gigantic.io
 controlPlane:
   catalog: giantswarm
-  # HA is disabled temporarily due to
-  # https://github.com/giantswarm/giantswarm/issues/29353
-  replicas: 1
+  replicas: 3
   sizingPolicy: m1.large
   template: flatcar-stable-3602.2.1-kube-v1.25.16
   image:
