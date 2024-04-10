@@ -1,16 +1,17 @@
-metadata:
-  name: "{{ .ClusterName }}"
-  description: "E2E Test cluster"
-  organization: "{{ .Organization }}"
-providerSpecific:
-  location: "westeurope"
-  subscriptionId: 6b1f6e4a-6d0e-4aa4-9a5a-fbaca65a23b3
-nodePools:
-# We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
-- name: nodepool-0
-  instanceType: Standard_D4s_v5
-  replicas: 2
-  rootVolumeSizeGB: 50
-connectivity:
-  bastion:
-    enabled: true
+global:
+  metadata:
+    name: "{{ .ClusterName }}"
+    description: "E2E Test cluster"
+    organization: "{{ .Organization }}"
+  providerSpecific:
+    location: "westeurope"
+    subscriptionId: 6b1f6e4a-6d0e-4aa4-9a5a-fbaca65a23b3
+  nodePools:
+  # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
+  - name: nodepool-0
+    instanceType: Standard_D4s_v5
+    replicas: 2
+    rootVolumeSizeGB: 50
+  connectivity:
+    bastion:
+      enabled: true
