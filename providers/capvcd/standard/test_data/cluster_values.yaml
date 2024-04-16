@@ -1,6 +1,7 @@
 baseDomain: test.gigantic.io
 controlPlane:
   replicas: 3
+  diskSizeGB: 30
   sizingPolicy: m1.large
   oidc:
     clientId: "dex-k8s-authenticator"
@@ -28,6 +29,7 @@ providerSpecific:
   nodeClasses:
     default:
       sizingPolicy: m1.large
+      diskSizeGB: 30
   userContext:
     secretRef:
       secretName: vcd-credentials
