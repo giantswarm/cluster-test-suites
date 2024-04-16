@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Revert #169 by increasing CAPVCD CP nodes back to 3.
+- Use default values of `cluster-cloud-director chart:v0.50.0`.
 
 ## [1.35.0] - 2024-04-08
 
