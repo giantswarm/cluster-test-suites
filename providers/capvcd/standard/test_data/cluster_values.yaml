@@ -1,11 +1,8 @@
 baseDomain: test.gigantic.io
 controlPlane:
-  catalog: giantswarm
   replicas: 3
+  diskSizeGB: 30
   sizingPolicy: m1.large
-  template: flatcar-stable-3602.2.1-kube-v1.25.16
-  image:
-    repository: gsoci.azurecr.io/giantswarm
   oidc:
     clientId: "dex-k8s-authenticator"
     groupsClaim: "groups"
@@ -29,17 +26,13 @@ providerSpecific:
   ovdc: Org-GIANT-SWARM
   site: "https://cd.neoedge.cloud"
   ovdcNetwork: GS-ISOLATED
-  vmBootstrapFormat: ignition
   nodeClasses:
     default:
-      catalog: giantswarm
       sizingPolicy: m1.large
-      template: flatcar-stable-3602.2.1-kube-v1.25.16
+      diskSizeGB: 30
   userContext:
     secretRef:
       secretName: vcd-credentials
 metadata:
   description: "E2E Test cluster"
   organization: "{{ .Organization }}"
-internal:
-  kubernetesVersion: v1.25.16
