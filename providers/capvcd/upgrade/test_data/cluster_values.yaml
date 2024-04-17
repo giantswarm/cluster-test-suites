@@ -2,6 +2,7 @@ baseDomain: test.gigantic.io
 controlPlane:
   replicas: 3
   sizingPolicy: m1.large
+  diskSizeGB: 30
   oidc:
     clientId: "dex-k8s-authenticator"
     groupsClaim: "groups"
@@ -27,6 +28,7 @@ providerSpecific:
   ovdcNetwork: GS-ISOLATED
   nodeClasses:
     default:
+      diskSizeGB: 30
       sizingPolicy: m1.large
   userContext:
     secretRef:
