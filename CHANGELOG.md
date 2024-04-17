@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Revert #169 by increasing CAPVCD CP nodes back to 3.
-- README example kubeconfig for CAPVCD to use `gerbil` as `guppy` is dead.
+- Update README example kubeconfig for CAPVCD to use `gerbil` as `guppy` is dead.
 
 ## [1.35.0] - 2024-04-08
 
