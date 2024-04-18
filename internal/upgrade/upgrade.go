@@ -106,13 +106,17 @@ func Run(cfg *TestConfig) {
 			controlPlaneRollingUpdateStarted := false
 
 			for i := 0; i < numberOfChecks; i++ {
-				time.Sleep(waitBetweenChecks)
 				controlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
 				Expect(err).NotTo(HaveOccurred())
+
+				if controlPlane == nil {
+					Skip("Control plane resource not found (assuming this is a managed cluster)")
+				}
 
 				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
 					capiconditions.GetReason(controlPlane, kubeadm.MachinesSpecUpToDateCondition) == kubeadm.RollingUpdateInProgressReason {
 					controlPlaneRollingUpdateStarted = true
+					break
 				} else {
 					machinesSpecUpToDateCondition := capiconditions.Get(controlPlane, kubeadm.MachinesSpecUpToDateCondition)
 					if machinesSpecUpToDateCondition == nil {
@@ -121,6 +125,8 @@ func Run(cfg *TestConfig) {
 						logger.Log("KubeadmControlPlane condition %s has Status='%s' and Reason='%s', expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, machinesSpecUpToDateCondition.Status, machinesSpecUpToDateCondition.Reason, kubeadm.RollingUpdateInProgressReason)
 					}
 				}
+
+				time.Sleep(waitBetweenChecks)
 			}
 
 			if !controlPlaneRollingUpdateStarted {
