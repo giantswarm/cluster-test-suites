@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.36.0] - 2024-04-18
+
 ### Changed
 
 - Revert #169 by increasing CAPVCD CP nodes back to 3.
@@ -493,7 +495,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.35.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.36.0...HEAD
+[1.36.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.35.0...v1.36.0
 [1.35.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.34.0...v1.35.0
 [1.34.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.33.0...v1.34.0
 [1.33.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.32.0...v1.33.0
