@@ -4,7 +4,12 @@ import (
 	"context"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
+	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
+
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
@@ -61,7 +66,7 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
-		It("should upgrade successfully", func() {
+		It("should apply new version successfully", func() {
 			// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
 			cluster = cluster.WithAppVersions("", "")
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
@@ -90,6 +95,43 @@ func Run(cfg *TestConfig) {
 			Eventually(
 				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace),
 				10*time.Minute, 5*time.Second,
+			).Should(BeTrue())
+		})
+
+		It("successfully finishes control plane nodes rolling update if it is needed", func() {
+			// Check MachinesSpecUpToDate condition on KubeadmControlPlane. Repeat the check 5 times, with some waiting time,
+			// so Cluster API controllers have time to react to upgrade (it is usually instantaneous).
+			numberOfChecks := 5
+			waitBetweenChecks := 5 * time.Second
+			controlPlaneRollingUpdateStarted := false
+
+			for i := 0; i < numberOfChecks; i++ {
+				time.Sleep(waitBetweenChecks)
+				controlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+				Expect(err).NotTo(HaveOccurred())
+
+				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
+					capiconditions.GetReason(controlPlane, kubeadm.MachinesSpecUpToDateCondition) == kubeadm.RollingUpdateInProgressReason {
+					controlPlaneRollingUpdateStarted = true
+				} else {
+					machinesSpecUpToDateCondition := capiconditions.Get(controlPlane, kubeadm.MachinesSpecUpToDateCondition)
+					if machinesSpecUpToDateCondition == nil {
+						logger.Log("KubeadmControlPlane condition %s is still not set on the KubeadmControlPlane resource, expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, kubeadm.RollingUpdateInProgressReason)
+					} else {
+						logger.Log("KubeadmControlPlane condition %s has Status='%s' and Reason='%s', expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, machinesSpecUpToDateCondition.Status, machinesSpecUpToDateCondition.Reason, kubeadm.RollingUpdateInProgressReason)
+					}
+				}
+			}
+
+			if !controlPlaneRollingUpdateStarted {
+				Skip("Control plane nodes rolling update is not happening")
+			}
+
+			mcClient := state.GetFramework().MC()
+			Eventually(
+				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
+				30*time.Minute,
+				30*time.Second,
 			).Should(BeTrue())
 		})
 
