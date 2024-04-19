@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.37.0] - 2024-04-19
+
 ### Added
 
 - Add common basic test that checks if Cluster Ready condition has Status=True.
@@ -500,7 +502,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.36.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.37.0...HEAD
+[1.37.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.36.0...v1.37.0
 [1.36.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.35.0...v1.36.0
 [1.35.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.34.0...v1.35.0
 [1.34.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.33.0...v1.34.0
