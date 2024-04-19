@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add common basic test that checks if Cluster Ready condition has Status=True.
+- Add upgrade test that checks if control plane rolling update has finished (if it has started).
+
 ## [1.36.0] - 2024-04-18
 
 ### Changed

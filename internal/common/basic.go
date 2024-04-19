@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -97,6 +99,15 @@ func runBasic() {
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
+		})
+
+		It("has Cluster Ready condition with Status='True'", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
 		})
 	})
 }
