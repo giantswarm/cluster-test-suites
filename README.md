@@ -33,8 +33,8 @@ contexts:
     user: gcapeverde-admin
   name: capv
 - context:
-    cluster: guppy
-    user: guppy-admin
+    cluster: gerbil
+    user: gerbil-admin
   name: capvcd
 clusters:
 - cluster:
@@ -52,7 +52,7 @@ clusters:
 - cluster:
     certificate-authority-data: [REDACTED]
     server: https://[REDACTED]:6443
-  name: guppy
+  name: gerbil
 current-context: grizzly
 preferences: {}
 users:
@@ -68,7 +68,7 @@ users:
   user:
     client-certificate-data: [REDACTED]
     client-key-data: [REDACTED]
-- name: guppy-admin
+- name: gerbil-admin
   user:
     client-certificate-data: [REDACTED]
     client-key-data: [REDACTED]
