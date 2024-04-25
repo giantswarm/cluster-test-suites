@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- CAPZ: Change Helm values structure where root-level properties are moved to `.Values.global`.
+
 ## [1.37.0] - 2024-04-19
 
 ### Added
