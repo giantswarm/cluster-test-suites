@@ -6,8 +6,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder/providers/capz"
+
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
-	"github.com/giantswarm/cluster-test-suites/providers/capz"
 )
 
 const KubeContext = "capz"

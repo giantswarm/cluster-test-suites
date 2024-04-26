@@ -1,9 +1,1 @@
-clusterName: "{{ .ClusterName }}"
-organization: "{{ .Organization }}"
-
-userConfig:
-  # We want to have external-dns watch for new ingress resources to speed up the DNS creation
-  externalDns:
-    configMap:
-      values:
-        triggerLoopOnEvent: true
+# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
