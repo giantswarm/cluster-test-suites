@@ -11,22 +11,16 @@ import (
 	cb "github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder"
 	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
 	"github.com/giantswarm/clustertest"
-	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
-// ClusterBuilder is an interface that provides a function for building provider-specific Cluster apps
-type ClusterBuilder interface {
-	NewClusterApp(clusterName string, orgName string, clusterValuesFile string, defaultAppsValuesFile string) *application.Cluster
-}
-
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
-func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+func Setup(isUpgrade bool, kubeContext string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade && strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
 			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
