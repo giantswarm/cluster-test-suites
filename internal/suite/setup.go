@@ -42,11 +42,10 @@ func Setup(isUpgrade bool, kubeContext string, clusterBuilder ClusterBuilder, cl
 		state.SetFramework(framework)
 
 		cluster := cb.LoadOrBuildCluster(framework, clusterBuilder)
+		state.SetCluster(cluster)
 
-		standupClient := standup.New(framework, isUpgrade, clusterReadyFns...)
-		cluster, err = standupClient.Standup(cluster)
+		cluster, err = standup.New(framework, isUpgrade, clusterReadyFns...).Standup(cluster)
 		Expect(err).NotTo(HaveOccurred())
-
 		state.SetCluster(cluster)
 	})
 
