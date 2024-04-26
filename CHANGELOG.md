@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Switched to using `cluster-standup-teardown` to handle cluster creation and deletion logic
+- Removed cluster and default-apps values in favour of defaults from `cluster-standup-teardown`
 
 ## [1.38.0] - 2024-04-25
 

@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/cluster-standup-teardown v1.0.0
+	github.com/giantswarm/cluster-standup-teardown v1.0.1
 	github.com/giantswarm/clustertest v0.18.0
 	github.com/gravitational/teleport/api v0.0.0-20240221014947-7cec562a5fe2
 	github.com/onsi/ginkgo/v2 v2.17.1
@@ -19,6 +19,7 @@ require (
 
 require (
 	cloud.google.com/go v0.97.0 // indirect
+	dario.cat/mergo v1.0.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
