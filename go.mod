@@ -2,8 +2,6 @@ module github.com/giantswarm/cluster-test-suites
 
 go 1.21
 
-replace github.com/giantswarm/cluster-standup-teardown => github.com/giantswarm/cluster-standup-teardown v0.0.0-20240426074914-3870735834b4
-
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
 	github.com/giantswarm/cluster-standup-teardown v1.0.0
@@ -197,5 +195,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/giantswarm/clustertest v0.17.0 => /Users/nikola/src/giantswarm/clustertest
