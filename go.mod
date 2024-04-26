@@ -2,13 +2,15 @@ module github.com/giantswarm/cluster-test-suites
 
 go 1.21
 
+replace github.com/giantswarm/cluster-standup-teardown => github.com/giantswarm/cluster-standup-teardown v0.0.0-20240426074914-3870735834b4
+
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
+	github.com/giantswarm/cluster-standup-teardown v1.0.0
 	github.com/giantswarm/clustertest v0.18.0
 	github.com/gravitational/teleport/api v0.0.0-20240221014947-7cec562a5fe2
 	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.33.0
-	github.com/spf13/cobra v1.8.0
 	k8s.io/api v0.26.3
 	k8s.io/apiextensions-apiserver v0.26.3
 	k8s.io/apimachinery v0.26.3
@@ -141,6 +143,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
+	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
