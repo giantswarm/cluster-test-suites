@@ -16,10 +16,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
 )
 
-const KubeContext = "eks"
-
 func TestEKSStandard(t *testing.T) {
-	suite.Setup(false, KubeContext, &capa.ManagedClusterBuilder{}, func(client *client.Client) {
+	suite.Setup(false, &capa.ManagedClusterBuilder{}, func(client *client.Client) {
 		Eventually(
 			wait.AreNumNodesReady(state.GetContext(), client, 2, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
 			20*time.Minute, 15*time.Second,

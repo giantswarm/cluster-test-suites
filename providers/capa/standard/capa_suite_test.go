@@ -11,10 +11,8 @@ import (
 	"github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder/providers/capa"
 )
 
-const KubeContext = "capa"
-
 func TestCAPAStandard(t *testing.T) {
-	suite.Setup(false, KubeContext, &capa.ClusterBuilder{})
+	suite.Setup(false, &capa.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Standard Suite")
