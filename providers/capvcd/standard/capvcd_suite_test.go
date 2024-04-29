@@ -11,10 +11,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
 )
 
-const KubeContext = "capvcd"
-
 func TestCAPVCDStandard(t *testing.T) {
-	suite.Setup(false, KubeContext, &capvcd.ClusterBuilder{})
+	suite.Setup(false, &capvcd.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPVCD Standard Suite")

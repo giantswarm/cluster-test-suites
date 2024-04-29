@@ -11,10 +11,8 @@ import (
 	"github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder/providers/capa"
 )
 
-const KubeContext = "capa-private-proxy"
-
 func TestCAPAPrivate(t *testing.T) {
-	suite.Setup(false, KubeContext, &capa.PrivateClusterBuilder{})
+	suite.Setup(false, &capa.PrivateClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Private Suite")

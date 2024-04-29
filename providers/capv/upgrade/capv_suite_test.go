@@ -11,10 +11,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
 )
 
-const KubeContext = "capv"
-
 func TestCAPVUpgrade(t *testing.T) {
-	suite.Setup(true, KubeContext, &capv.ClusterBuilder{})
+	suite.Setup(true, &capv.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPV Upgrade Suite")

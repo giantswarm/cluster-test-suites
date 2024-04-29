@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated cluster-standup-teardown to v1.0.2
+- Made use of new `clusterbuilder.KubeContext()` function
+- Updated readme requirements
+
+### Removed
+
+- Removed KubeContext const from each test suite
+
 ## [1.39.0] - 2024-04-26
 
 ### Changed
