@@ -65,7 +65,7 @@ Example:
 E2E_KUBECONFIG=/path/to/kubeconfig.yaml E2E_WC_NAME=mn-test E2E_WC_NAMESPACE=org-giantswarm ginkgo -v -r ./providers/capa/standard
 ```
 
-If you'd like to create a workload cluster test using the same configuration as the test suites you can make use of the [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs available in this repo.
+If you'd like to create a workload cluster test using the same configuration as the test suites you can make use of the `standup` & `teardown` CLIs available in [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown).
 
 ### Testing changes to `clustertest`
 
@@ -76,7 +76,20 @@ module github.com/giantswarm/cluster-test-suites
 
 go 1.20
 
-replace github.com/giantswarm/clustertest v0.10.0 => /path/to/clustertest
+replace github.com/giantswarm/clustertest => /path/to/clustertest
+
+```
+
+### Testing changes to `cluster-standup-teardown`
+
+To test out changes to [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) without needing to create a new release you can add a `replace` directive to your `go.mod` to point to your local copy of `cluster-standup-teardown`.
+
+```
+module github.com/giantswarm/cluster-test-suites
+
+go 1.20
+
+replace github.com/giantswarm/cluster-standup-teardown => /path/to/cluster-standup-teardown
 
 ```
 
