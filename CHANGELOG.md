@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Make error messages actionable for Prometheus metrics query test failures
+
 ## [1.39.1] - 2024-04-29
 
 ### Changed
