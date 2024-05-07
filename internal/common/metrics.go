@@ -105,10 +105,10 @@ func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUr
 	return func() error {
 		query := fmt.Sprintf("absent(%[1]s{cluster_id=\"%[2]s\"}) or label_replace(vector(0), \"cluster_id\", \"%[2]s\", \"\", \"\")", metric, state.GetCluster().Name)
 
-		cmd := []string{"wget", "-q", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", prometheusBaseUrl, url.QueryEscape(query))}
-		stdout, _, err := mcClient.ExecInPod(context.Background(), testPodName, testPodNamespace, "test", cmd)
+		cmd := []string{"wget", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", prometheusBaseUrl, url.QueryEscape(query))}
+		stdout, stderr, err := mcClient.ExecInPod(context.Background(), testPodName, testPodNamespace, "test", cmd)
 		if err != nil {
-			return fmt.Errorf("can't exec command in pod %s: %s", testPodName, err)
+			return fmt.Errorf("can't exec command in pod %s: %s (stderr: %q)", testPodName, err, stderr)
 		}
 
 		// {"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1681718763.145,"1"]}]}}
@@ -127,28 +127,28 @@ func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUr
 
 		err = json.Unmarshal([]byte(stdout), &response)
 		if err != nil {
-			return fmt.Errorf("Can't parse prometheus query output: %s", err)
+			return fmt.Errorf("can't parse prometheus query output: %s (output: %q)", err, stdout)
 		}
 
 		if response.Status != "success" {
-			return fmt.Errorf("Unexpected response status %s when running query %q", response.Status, query)
+			return fmt.Errorf("unexpected response status %q when running query %q (output: %q)", response.Status, query, stdout)
 		}
 
 		if response.Data.ResultType != "vector" {
-			return fmt.Errorf("Unexpected response type %s when running query %q (wanted vector)", response.Status, query)
+			return fmt.Errorf("unexpected response type %q when running query %q (wanted vector,  output: %q)", response.Status, query, stdout)
 		}
 
 		if len(response.Data.Result) != 1 {
-			return fmt.Errorf("Unexpected count of results when running query %q (wanted 1, got %d)", query, len(response.Data.Result))
+			return fmt.Errorf("unexpected count of results when running query %q (wanted 1, got %d; output: %q)", query, len(response.Data.Result), stdout)
 		}
 
 		// Second field of first result is the metric value. [1681718763.145,"1"] => "1"
 		str, ok := (response.Data.Result[0].Value[1]).(string)
 		if !ok {
-			return fmt.Errorf("Cannot cast result value to string when running query %q", query)
+			return fmt.Errorf("cannot cast result value to string when running query %q (output: %q)", query, stdout)
 		}
 		if str != "0" {
-			return fmt.Errorf("Unexpected value for query %q (wanted '0', got %q)", query, str)
+			return fmt.Errorf("unexpected value for query %q (wanted '0', got %q; output: %q)", query, str, stdout)
 		}
 
 		logger.Log("Metric %q was found", metric)

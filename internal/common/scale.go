@@ -84,7 +84,7 @@ func runScale(autoScalingSupported bool) {
 				Should(BeTrue())
 		})
 
-		It("scales node by creating anti-affiniy pods", func() {
+		It("scales node by creating anti-affinity pods", func() {
 			if !autoScalingSupported {
 				Skip("autoscaling is not supported")
 			}
