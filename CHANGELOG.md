@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Added
+
+- CAPV on CAPZ tests.
+
 ### Changed
 
 - Make error messages actionable for Prometheus metrics query test failures
