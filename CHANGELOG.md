@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Private CAPZ tests.
+- CAPV on CAPZ tests.
+
 ## [1.39.1] - 2024-04-29
 
 ### Changed
