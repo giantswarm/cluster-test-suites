@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Make error messages actionable for Prometheus metrics query test failures
+- Disabled `capa-private` until we have fixed the userdata issue with MachinePools on `goat`
 
 ## [1.39.1] - 2024-04-29
 
