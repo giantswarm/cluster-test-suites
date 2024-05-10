@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/cluster-standup-teardown v1.0.2
-	github.com/giantswarm/clustertest v0.19.0
+	github.com/giantswarm/cluster-standup-teardown v1.0.3
+	github.com/giantswarm/clustertest v0.19.1
 	github.com/gravitational/teleport/api v0.0.0-20240507021047-6ce4fdd96671
 	github.com/onsi/ginkgo/v2 v2.17.2
 	github.com/onsi/gomega v1.33.1
@@ -163,7 +163,7 @@ require (
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/oauth2 v0.19.0 // indirect
+	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
