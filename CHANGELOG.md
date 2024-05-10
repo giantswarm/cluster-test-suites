@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Get base domain from Cluster values instead of default-apps values
+
 ## [1.40.0] - 2024-05-10
 
 ### Changed

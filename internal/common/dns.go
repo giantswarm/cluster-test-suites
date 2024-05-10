@@ -19,7 +19,7 @@ func runDNS(bastionSuppoted bool) {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
-			values   *application.DefaultAppsValues
+			values   *application.ClusterValues
 		)
 		getARecords := func(domain string) ([]net.IP, error) {
 			records, err := resolver.LookupIP(context.Background(), "ip", domain)
@@ -33,9 +33,8 @@ func runDNS(bastionSuppoted bool) {
 		}
 
 		BeforeEach(func() {
-			values = &application.DefaultAppsValues{}
-			defaultAppsName := fmt.Sprintf("%s-default-apps", state.GetCluster().Name)
-			err := state.GetFramework().MC().GetHelmValues(defaultAppsName, state.GetCluster().GetNamespace(), values)
+			values = &application.ClusterValues{}
+			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
 			resolver = &net.Resolver{
