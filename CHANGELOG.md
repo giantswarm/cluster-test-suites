@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.40.0] - 2024-05-10
+
 ### Changed
 
 - Make error messages actionable for Prometheus metrics query test failures
@@ -532,7 +534,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.40.0...HEAD
+[1.40.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.1...v1.40.0
 [1.39.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.0...v1.39.1
 [1.39.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.38.0...v1.39.0
 [1.38.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.37.0...v1.38.0
