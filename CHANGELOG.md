@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Added
+
+- CAPV on CAPZ tests.
+
 ### Changed
 
 - Get base domain from Cluster values instead of default-apps values
