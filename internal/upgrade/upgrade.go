@@ -82,10 +82,15 @@ func Run(cfg *TestConfig) {
 				10*time.Minute, 5*time.Second,
 			).Should(BeTrue())
 
-			Eventually(
-				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace),
-				10*time.Minute, 5*time.Second,
-			).Should(BeTrue())
+			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
+			Expect(err).NotTo(HaveOccurred())
+
+			if !skipDefaultAppsApp {
+				Eventually(
+					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace),
+					10*time.Minute, 5*time.Second,
+				).Should(BeTrue())
+			}
 
 			Eventually(
 				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace, clusterApp.Spec.Version),
