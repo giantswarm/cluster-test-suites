@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `security-bundle` test in the common/apps.go file.
+- Wait and test for `security-bundle` apps to be deployed.
 
 ## [1.42.0] - 2024-05-14
 
