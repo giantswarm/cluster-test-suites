@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.42.0] - 2024-05-14
+
+### Added
+
+- Add support for unified cluster-aws app. With cluster-aws v0.76.0 and newer, default apps are deployed with cluster-aws and default-apps-aws app is not deployed anymore.
+
 ## [1.41.0] - 2024-05-13
 
 
@@ -17,10 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Get base domain from Cluster values instead of default-apps values
-
-### Added
-
-- Add support for unified cluster-aws app. With cluster-aws v0.76.0 and newer, default apps are deployed with cluster-aws and default-apps-aws app is not deployed anymore.
 
 ## [1.40.0] - 2024-05-10
 
@@ -549,7 +551,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.41.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.42.0...HEAD
+[1.42.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.41.0...v1.42.0
 [1.41.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.40.0...v1.41.0
 [1.40.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.1...v1.40.0
 [1.39.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.0...v1.39.1
