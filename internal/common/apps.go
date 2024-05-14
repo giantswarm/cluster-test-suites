@@ -89,4 +89,31 @@ func runApps() {
 				Should(BeTrue())
 		})
 	})
+	Context("security-bundle apps", func() {
+		It("all security-bundle apps are deployed without issues", func() {
+
+			// We need to wait for the security-bundle app to be deployed before we can check the apps it deploys.
+			securityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
+
+			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), securityAppsAppName, state.GetCluster().GetNamespace())).
+				WithTimeout(30 * time.Second).
+				WithPolling(50 * time.Millisecond).
+				Should(BeTrue())
+
+			// Wait for all security-bundle apps to be deployed
+			appList := &v1alpha1.AppList{}
+			err := state.GetFramework().MC().List(state.GetContext(), appList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()), ctrl.MatchingLabels{"giantswarm.io/managed-by": securityAppsAppName})
+			Expect(err).NotTo(HaveOccurred())
+
+			appNamespacedNames := []types.NamespacedName{}
+			for _, app := range appList.Items {
+				appNamespacedNames = append(appNamespacedNames, types.NamespacedName{Name: app.Name, Namespace: app.Namespace})
+			}
+
+			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(10 * time.Second).
+				Should(BeTrue())
+		})
+	})
 }
