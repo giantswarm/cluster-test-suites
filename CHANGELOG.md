@@ -7,19 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<<<<<<< add-sec-bundle
 ### Added
-=======
+
+- Add `security-bundle` test in the common/apps.go file.
+
 ## [1.42.0] - 2024-05-14
 
 ### Added
 
 - Add support for unified cluster-aws app. With cluster-aws v0.76.0 and newer, default apps are deployed with cluster-aws and default-apps-aws app is not deployed anymore.
-
-## [1.41.0] - 2024-05-13
->>>>>>> main
-
-- Add `security-bundle` test in the common/apps.go file.
 
 ## [1.41.0] - 2024-05-13
 
