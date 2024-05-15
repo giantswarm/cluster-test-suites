@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Wait and test for `security-bundle` apps to be deployed.
 
+### Changed
+
+- Increase `kubeadmControlPlane` rollout timeout from 20min to 30min.
+
 ## [1.42.0] - 2024-05-14
 
 ### Added
