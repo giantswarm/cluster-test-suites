@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Increase `kubeadmControlPlane` rollout timeout from 20min to 30min.
 - Increase node roll check time to 180 seconds from 25 seconds in the upgrade test.
 - Reduce the timeout for default apps checks
 
