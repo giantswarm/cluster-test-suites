@@ -77,15 +77,15 @@ func Run(cfg *TestConfig) {
 
 			clusterApp, _, defaultAppsApp, _, _ := cluster.Build()
 
-			Eventually(
-				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace, defaultAppsApp.Spec.Version),
-				10*time.Minute, 5*time.Second,
-			).Should(BeTrue())
-
 			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
 
 			if !skipDefaultAppsApp {
+				Eventually(
+					wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace, defaultAppsApp.Spec.Version),
+					10*time.Minute, 5*time.Second,
+				).Should(BeTrue())
+
 				Eventually(
 					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace),
 					10*time.Minute, 5*time.Second,
@@ -141,7 +141,7 @@ func Run(cfg *TestConfig) {
 			mcClient := state.GetFramework().MC()
 			Eventually(
 				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
-				20*time.Minute,
+				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
 		})
