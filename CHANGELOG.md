@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.44.0] - 2024-05-16
 
+### Added
+
+- Add test for CAPA cluster in Cilium ENI mode
+
 ## [1.43.0] - 2024-05-16
 
 ### Added
