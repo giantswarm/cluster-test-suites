@@ -13,7 +13,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
-var _ = Describe("Cilium ENI mode tests", Ordered, func() {
+var _ = Describe("Cilium ENI mode tests", func() {
 	common.Run(&common.TestConfig{
 		AutoScalingSupported:         true,
 		BastionSupported:             false,
