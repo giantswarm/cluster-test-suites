@@ -84,7 +84,7 @@ func runApps() {
 			}
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
-				WithTimeout(25 * time.Minute).
+				WithTimeout(8 * time.Minute).
 				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})
@@ -111,7 +111,7 @@ func runApps() {
 			}
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(10 * time.Minute).
 				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})
