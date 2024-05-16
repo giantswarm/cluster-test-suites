@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.43.0] - 2024-05-16
+
 ### Added
 
 - Wait and test for `security-bundle` apps to be deployed.
@@ -564,7 +566,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.42.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.43.0...HEAD
+[1.43.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.42.0...v1.43.0
 [1.42.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.41.0...v1.42.0
 [1.41.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.40.0...v1.41.0
 [1.40.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.39.1...v1.40.0
