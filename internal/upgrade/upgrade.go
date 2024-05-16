@@ -106,8 +106,8 @@ func Run(cfg *TestConfig) {
 		It("successfully finishes control plane nodes rolling update if it is needed", func() {
 			// Check MachinesSpecUpToDate condition on KubeadmControlPlane. Repeat the check 5 times, with some waiting time,
 			// so Cluster API controllers have time to react to upgrade (it is usually instantaneous).
-			numberOfChecks := 5
-			waitBetweenChecks := 5 * time.Second
+			numberOfChecks := 18
+			waitBetweenChecks := 10 * time.Second
 			controlPlaneRollingUpdateStarted := false
 
 			for i := 0; i < numberOfChecks; i++ {
