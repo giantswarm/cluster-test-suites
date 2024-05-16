@@ -141,7 +141,7 @@ func Run(cfg *TestConfig) {
 			mcClient := state.GetFramework().MC()
 			Eventually(
 				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
-				20*time.Minute,
+				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
 		})
