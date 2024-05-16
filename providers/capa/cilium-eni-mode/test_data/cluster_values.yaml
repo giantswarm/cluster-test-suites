@@ -1,0 +1,10 @@
+# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  connectivity:
+    # These two settings enable Cilium ENI mode
+    network:
+      pods:
+        cidrBlocks:
+          - 10.1.0.0/16
+    cilium:
+      ipamMode: eni

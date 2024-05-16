@@ -43,7 +43,7 @@ Running a single test suite with teleport test enabled (e.g. the `capa` `standar
 ```sh
 kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
 
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENITTY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENTITY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
 ```
 
 Running with Docker:
