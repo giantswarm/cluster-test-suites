@@ -1,2 +1,4 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
-baseDomain: azuretest.gigantic.io
+global:
+  connectivity:
+    baseDomain: azuretest.gigantic.io
