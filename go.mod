@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/cluster-standup-teardown v1.3.0
-	github.com/giantswarm/clustertest v0.21.0
+	github.com/giantswarm/cluster-standup-teardown v1.4.0
+	github.com/giantswarm/clustertest v0.22.0
 	github.com/gravitational/teleport/api v0.0.0-20240513131144-33e80cd8f2ff
 	github.com/onsi/ginkgo/v2 v2.17.3
 	github.com/onsi/gomega v1.33.1
