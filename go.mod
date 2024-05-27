@@ -6,7 +6,7 @@ require (
 	github.com/giantswarm/apiextensions-application v0.6.1
 	github.com/giantswarm/cluster-standup-teardown v1.4.0
 	github.com/giantswarm/clustertest v0.22.0
-	github.com/gravitational/teleport/api v0.0.0-20240513131144-33e80cd8f2ff
+	github.com/gravitational/teleport/api v0.0.0-20240526154901-3776ae31d950
 	github.com/onsi/ginkgo/v2 v2.18.0
 	github.com/onsi/gomega v1.33.1
 	k8s.io/api v0.26.3
@@ -173,7 +173,7 @@ require (
 	gomodules.xyz/jsonpatch/v2 v2.3.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240325164216-beb30f47624b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240401170217-c3f982113cda // indirect
-	google.golang.org/grpc v1.63.2 // indirect
+	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
