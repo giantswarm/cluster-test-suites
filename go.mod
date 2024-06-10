@@ -4,14 +4,9 @@ go 1.22.3
 
 toolchain go1.22.4
 
-replace (
-	github.com/giantswarm/cluster-standup-teardown => /Users/marcus/Code/GiantSwarm/cluster-standup-teardown
-	github.com/giantswarm/clustertest => /Users/marcus/Code/GiantSwarm/clustertest
-)
-
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/cluster-standup-teardown v1.5.0
+	github.com/giantswarm/cluster-standup-teardown v1.6.0
 	github.com/giantswarm/clustertest v1.0.0
 	github.com/gravitational/teleport/api v0.0.0-20240607230303-55de5cf3f77f
 	github.com/onsi/ginkgo/v2 v2.19.0
