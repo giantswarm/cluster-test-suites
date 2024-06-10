@@ -75,30 +75,30 @@ func Run(cfg *TestConfig) {
 			_, err := state.GetFramework().ApplyCluster(applyCtx, cluster)
 			Expect(err).NotTo(HaveOccurred())
 
-			clusterApp, _, defaultAppsApp, _, _ := cluster.Build()
+			builtCluster, _ := cluster.Build()
 
 			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
 
 			if !skipDefaultAppsApp {
 				Eventually(
-					wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace, defaultAppsApp.Spec.Version),
+					wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace, builtCluster.DefaultApps.App.Spec.Version),
 					10*time.Minute, 5*time.Second,
 				).Should(BeTrue())
 
 				Eventually(
-					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsApp.Name, defaultAppsApp.Namespace),
+					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace),
 					10*time.Minute, 5*time.Second,
 				).Should(BeTrue())
 			}
 
 			Eventually(
-				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace, clusterApp.Spec.Version),
+				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.Cluster.App.Name, builtCluster.Cluster.App.Namespace, builtCluster.Cluster.App.Spec.Version),
 				10*time.Minute, 5*time.Second,
 			).Should(BeTrue())
 
 			Eventually(
-				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), clusterApp.Name, clusterApp.Namespace),
+				wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), builtCluster.Cluster.App.Name, builtCluster.Cluster.App.Namespace),
 				10*time.Minute, 5*time.Second,
 			).Should(BeTrue())
 		})
