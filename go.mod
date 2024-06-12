@@ -2,11 +2,13 @@ module github.com/giantswarm/cluster-test-suites
 
 go 1.22.3
 
+toolchain go1.22.4
+
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
-	github.com/giantswarm/cluster-standup-teardown v1.7.0
+	github.com/giantswarm/cluster-standup-teardown v1.6.0
 	github.com/giantswarm/clustertest v1.0.0
-	github.com/gravitational/teleport/api v0.0.0-20240604013112-d18ea813956a
+	github.com/gravitational/teleport/api v0.0.0-20240607230303-55de5cf3f77f
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	k8s.io/api v0.26.3

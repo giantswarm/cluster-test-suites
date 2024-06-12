@@ -809,8 +809,8 @@ github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyT
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/giantswarm/apiextensions-application v0.6.1 h1:X1uzWBSrF4QsyyzaV46QkPJa+rXKBr9e0p+6nd8aw3A=
 github.com/giantswarm/apiextensions-application v0.6.1/go.mod h1:O6mg+EdXC9CyTLgi0d3rf6QTXrQX/79iw4kjMJRinig=
-github.com/giantswarm/cluster-standup-teardown v1.7.0 h1:h4Kd/P1Uzh4txYGalsTahb7v7qk0itM98RZurcKy/h8=
-github.com/giantswarm/cluster-standup-teardown v1.7.0/go.mod h1:SWAai7NpNYs4n6173h+ynAp+6f59jZPqR93mG4y6rGI=
+github.com/giantswarm/cluster-standup-teardown v1.6.0 h1:yQgXSOh1/sELG75p/Bvb4gPp7XQ7ICVfnBbXoGRJLJg=
+github.com/giantswarm/cluster-standup-teardown v1.6.0/go.mod h1:SWAai7NpNYs4n6173h+ynAp+6f59jZPqR93mG4y6rGI=
 github.com/giantswarm/clustertest v1.0.0 h1:xwEC/gYbxw6B/Gq40ILVZZ509df85gEkQjKGFqX+5ko=
 github.com/giantswarm/clustertest v1.0.0/go.mod h1:y7LCXxNa6FVdLjzZzRwUtCTxuQfl1Undt5FsU4Wtta8=
 github.com/giantswarm/k8smetadata v0.23.0 h1:iGwa1Nb45Sfcd5wqJEKBvxY1u5yXFg3Sq5Fw62nyRGA=
@@ -1026,8 +1026,8 @@ github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoA
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/gravitational/teleport/api v0.0.0-20240604013112-d18ea813956a h1:ACr+1Lzs/VLD5eV4GcOeL4wr/EYuDVBb/Gc5VvV2a8M=
-github.com/gravitational/teleport/api v0.0.0-20240604013112-d18ea813956a/go.mod h1:z1WZGzNX6gYsjZu5d0vmFzp4vwg8ZHXCNUUl8Ns502w=
+github.com/gravitational/teleport/api v0.0.0-20240607230303-55de5cf3f77f h1:piM1H6nzUNyfdUbIR7iUcEcNnOoEtPOQMwCP4rrAWEY=
+github.com/gravitational/teleport/api v0.0.0-20240607230303-55de5cf3f77f/go.mod h1:z1WZGzNX6gYsjZu5d0vmFzp4vwg8ZHXCNUUl8Ns502w=
 github.com/gravitational/trace v1.4.0 h1:TtTeMElVwMX21Udb1nmK2tpWYAAMJoyjevzKOaxIFZQ=
 github.com/gravitational/trace v1.4.0/go.mod h1:g79NZzwCjWS/VVubYowaFAQsTjVTohGi0hFbIWSyGoY=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=

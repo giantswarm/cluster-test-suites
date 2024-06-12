@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.45.0] - 2024-06-10
+
+### Changed
+
+- Update `clustertest` to v1.0.0 to support Releases with cluster Apps
+- Update `cluster-standup-teardown` to v1.5.0 to support Releases with cluster Apps
+
+## [1.44.3] - 2024-06-10
+
+### Changed
+
+- Update `cluster-standup-teardown` to v1.5.0
+
 ## [1.44.2] - 2024-06-06
 
 ### Changed
@@ -584,7 +597,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.45.0...HEAD
+[1.45.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.3...v1.45.0
+[1.44.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.2...v1.44.3
 [1.44.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.1...v1.44.2
 [1.44.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.0...v1.44.1
 [1.44.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.43.0...v1.44.0
