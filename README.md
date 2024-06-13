@@ -23,19 +23,19 @@ If you need the current teleport identity file its best to pull it from the `tel
 Running the all test suites:
 
 ```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r .
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r .
 ```
 
 Running a single provider (e.g. `capa`):
 
 ```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa
 ```
 
 Running a single test suite (e.g. the `capa` `standard` test suite)
 
 ```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo -v -r ./providers/capa/standard
+E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa/standard
 ```
 
 Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
