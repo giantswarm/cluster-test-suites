@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update `clustertest` and `cluster-standup-teardown` to latest releases
+- Switch to using new `ApplyBuiltCluster` in upgrade tests to avoid building the cluster twice
+
 ## [1.45.0] - 2024-06-10
 
 ### Changed
