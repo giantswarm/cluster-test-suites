@@ -178,7 +178,7 @@ func runTestPod(mcClient *client.Client, podName string, ns string) error {
 			Containers: []corev1.Container{
 				{
 					Name:  "test",
-					Image: "alpine:latest",
+					Image: "gsoci.azurecr.io/giantswarm/alpine:latest",
 					Args:  []string{"sleep", "99999999"},
 					SecurityContext: &corev1.SecurityContext{
 						Capabilities: &corev1.Capabilities{

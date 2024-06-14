@@ -88,6 +88,37 @@ func runHelloWorld(externalDnsSupported bool) {
 				Should(BeTrue())
 		})
 
+		It("cluster wildcard ingress DNS must be resolvable", func() {
+			resolver := &net.Resolver{
+				PreferGo:     true,
+				StrictErrors: true,
+				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+					d := net.Dialer{
+						Timeout: time.Millisecond * time.Duration(10000),
+					}
+					return d.DialContext(ctx, "udp", "8.8.4.4:53")
+				},
+			}
+			Eventually(func() (bool, error) {
+				result, err := resolver.LookupIP(context.Background(), "ip", fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone()))
+				if err != nil {
+					return false, err
+				}
+				if len(result) == 0 {
+					return false, fmt.Errorf("no IP found for ingress.%s", getWorkloadClusterDnsZone())
+				}
+				var resultString []string
+				for _, ip := range result {
+					resultString = append(resultString, ip.String())
+				}
+				logger.Log("DNS record 'hello-world.%s' resolved to %s", getWorkloadClusterDnsZone(), resultString)
+				return true, nil
+			}).
+				WithTimeout(10 * time.Minute).
+				WithPolling(10 * time.Second).
+				Should(BeTrue())
+		})
+
 		It("should deploy the hello-world app", func() {
 			org := state.GetCluster().Organization
 
