@@ -22,6 +22,15 @@ func runApps() {
 			skipDefaultAppsApp, err := state.GetCluster().UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
 
+			var timeout time.Duration
+			t := state.GetContext().Value("deployedAppsTimeout")
+			if t != nil {
+				timeout = t.(time.Duration)
+			} else {
+				timeout = 15 * time.Minute
+			}
+			logger.Log("Waiting for all apps to be deployed. Timeout: %s", timeout.String())
+
 			// We need to wait for default-apps to be deployed before we can check all apps.
 			defaultAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "default-apps")
 
@@ -57,7 +66,7 @@ func runApps() {
 			}
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(timeout).
 				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})

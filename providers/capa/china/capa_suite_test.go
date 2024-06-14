@@ -1,12 +1,10 @@
 package china
 
 import (
-	"testing"
-
+	"github.com/giantswarm/cluster-test-suites/internal/suite"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/giantswarm/cluster-test-suites/internal/suite"
+	"testing"
 
 	"github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder/providers/capa"
 )
