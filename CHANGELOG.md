@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Remove node checks in the upgrade test, because the nodes are checked in the common tests before and after the upgrade.
+- Remove node checks in the CAPA upgrade suite, because the nodes are checked in the common tests before and after the upgrade.
 
 ## [1.46.0] - 2024-06-13
 
