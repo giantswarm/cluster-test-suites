@@ -9,8 +9,9 @@ type TestConfig struct {
 }
 
 func Run(cfg *TestConfig) {
+	runClusterBasic()
 	runApps()
-	runBasic()
+	runWorkloadBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)
 	runMetrics(cfg.ControlPlaneMetricsSupported)

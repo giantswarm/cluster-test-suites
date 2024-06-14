@@ -1,1 +1,11 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  nodePools:
+    # We are using a name with 10 chars which is the max number of characters allowed by our kyverno policies.
+    nodepool-0:
+      maxSize: 5
+      minSize: 3
+      rootVolumeSizeGB: 25
+      spotInstances:
+        enabled: true
+        maxPrice: 0.2960

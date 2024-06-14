@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Split common `basic` tests into `cluster basic` and `workload basic`.
+- Reorder common tests, so instead of running `default apps` and then `basic`, now it first runs `cluster basic`, then `default apps`, and then `workload basic`.
+- Run all common tests before the upgrade in the upgrade suite.
+- Increase node pool minSize from 2 to 3 in the CAPA upgrade suite, as we have noticed that 2 nodes are not enough for all the Pods after teh upgrade, and cluster-autoscaler does not scale up the cluster quickly enough for the test to pass.
+
+### Removed
+
+- Remove node checks in the upgrade test, because the nodes are checked in the common tests before and after the upgrade.
+
 ## [1.46.0] - 2024-06-13
 
 ### Changed
