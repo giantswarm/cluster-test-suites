@@ -11,7 +11,8 @@ import (
 
 var _ = Describe("Common tests", func() {
 	BeforeEach(func() {
-		state.SetContext(context.WithValue(state.GetContext(), "deployedAppsTimeout", time.Minute*20))
+		// Set the timeout for deploying apps to 25 minutes for China test
+		state.SetContext(context.WithValue(state.GetContext(), common.DeployAppsTimeoutContextKey, time.Minute*25))
 	})
 
 	common.Run(&common.TestConfig{

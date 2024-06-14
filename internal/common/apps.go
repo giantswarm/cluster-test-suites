@@ -16,19 +16,18 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
+const (
+	DeployAppsTimeoutContextKey = "deployAppsTimeout"
+	DefaultDeployAppsTimeout    = 15 * time.Minute
+)
+
 func runApps() {
 	Context("default apps", func() {
 		It("all default apps are deployed without issues", func() {
 			skipDefaultAppsApp, err := state.GetCluster().UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
 
-			var timeout time.Duration
-			t := state.GetContext().Value("deployedAppsTimeout")
-			if t != nil {
-				timeout = t.(time.Duration)
-			} else {
-				timeout = 15 * time.Minute
-			}
+			timeout := getTimeoutFromContext()
 			logger.Log("Waiting for all apps to be deployed. Timeout: %s", timeout.String())
 
 			// We need to wait for default-apps to be deployed before we can check all apps.
@@ -125,4 +124,17 @@ func runApps() {
 				Should(BeTrue())
 		})
 	})
+}
+
+// getTimeoutFromContext returns the timeout for deploying apps from the context.
+// If the timeout is not set, it returns the default value
+func getTimeoutFromContext() time.Duration {
+	var timeout time.Duration
+	t := state.GetContext().Value(DeployAppsTimeoutContextKey)
+	if t != nil {
+		timeout = t.(time.Duration)
+	} else {
+		timeout = DefaultDeployAppsTimeout
+	}
+	return timeout
 }
