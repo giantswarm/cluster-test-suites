@@ -42,7 +42,6 @@ func runHelloWorld(externalDnsSupported bool) {
 			if !externalDnsSupported {
 				Skip("external-dns is not supported")
 			}
-
 		})
 
 		It("should have cert-manager and external-dns deployed", func() {
@@ -115,10 +114,9 @@ func runHelloWorld(externalDnsSupported bool) {
 				logger.Log("DNS record 'hello-world.%s' resolved to %s", getWorkloadClusterDnsZone(), resultString)
 				return true, nil
 			}).
-				WithTimeout(5 * time.Minute).
+				WithTimeout(10 * time.Minute).
 				WithPolling(10 * time.Second).
 				Should(BeTrue())
-
 		})
 
 		It("should deploy the hello-world app", func() {
