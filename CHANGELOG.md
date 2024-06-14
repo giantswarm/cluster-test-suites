@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.47.0] - 2024-06-14
+
 ### Added
 
 - Add `china` test suite for `capa` provider.
@@ -609,7 +611,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.46.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.47.0...HEAD
+[1.47.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.46.0...v1.47.0
 [1.46.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.45.0...v1.46.0
 [1.45.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.3...v1.45.0
 [1.44.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.2...v1.44.3
