@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `china` test suite for `capa` provider.
-- Add wildcard DNS check test to the `hello` test.
+- Add wildcard ingress DNS check test to the `hello` test.
 
 ## [1.46.0] - 2024-06-13
 

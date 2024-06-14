@@ -101,14 +101,18 @@ func runHelloWorld(externalDnsSupported bool) {
 				},
 			}
 			Eventually(func() (bool, error) {
-				result, err := resolver.LookupIP(context.Background(), "ip", fmt.Sprintf("helloworld.%s", getWorkloadClusterDnsZone()))
+				result, err := resolver.LookupIP(context.Background(), "ip", fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone()))
 				if err != nil {
 					return false, err
 				}
 				if len(result) == 0 {
-					return false, fmt.Errorf("no IP found for helloworld.%s", getWorkloadClusterDnsZone())
+					return false, fmt.Errorf("no IP found for ingress.%s", getWorkloadClusterDnsZone())
 				}
-				logger.Log("DNS record 'helloworld.%s' resolved to %#v", getWorkloadClusterDnsZone(), result)
+				var resultString []string
+				for _, ip := range result {
+					resultString = append(resultString, ip.String())
+				}
+				logger.Log("DNS record 'hello-world.%s' resolved to %s", getWorkloadClusterDnsZone(), resultString)
 				return true, nil
 			}).
 				WithTimeout(5 * time.Minute).
