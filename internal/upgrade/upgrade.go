@@ -72,10 +72,10 @@ func Run(cfg *TestConfig) {
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
 			defer cancelApplyCtx()
 
-			_, err := state.GetFramework().ApplyCluster(applyCtx, cluster)
-			Expect(err).NotTo(HaveOccurred())
-
 			builtCluster, _ := cluster.Build()
+
+			_, err := state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
+			Expect(err).NotTo(HaveOccurred())
 
 			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
