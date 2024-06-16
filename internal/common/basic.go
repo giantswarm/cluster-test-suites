@@ -74,28 +74,28 @@ func runBasic() {
 		})
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(checkAllDeploymentsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllDeploymentsReady(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(checkAllStatefulSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllStatefulSetsReady(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
-			Eventually(wait.Consistent(checkAllDaemonSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllDaemonSetsReady(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(checkAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -157,7 +157,7 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 	}
 }
 
-func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
+func CheckAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 	return func() error {
 		podList := &corev1.PodList{}
 		err := wcClient.List(context.Background(), podList)
@@ -178,7 +178,7 @@ func checkAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 	}
 }
 
-func checkAllDeploymentsReady(wcClient *client.Client) func() error {
+func CheckAllDeploymentsReady(wcClient *client.Client) func() error {
 	return func() error {
 		deploymentList := &appsv1.DeploymentList{}
 		err := wcClient.List(context.Background(), deploymentList)
@@ -200,7 +200,7 @@ func checkAllDeploymentsReady(wcClient *client.Client) func() error {
 	}
 }
 
-func checkAllStatefulSetsReady(wcClient *client.Client) func() error {
+func CheckAllStatefulSetsReady(wcClient *client.Client) func() error {
 	return func() error {
 		statefulSetList := &appsv1.StatefulSetList{}
 		err := wcClient.List(context.Background(), statefulSetList)
@@ -222,7 +222,7 @@ func checkAllStatefulSetsReady(wcClient *client.Client) func() error {
 	}
 }
 
-func checkAllDaemonSetsReady(wcClient *client.Client) func() error {
+func CheckAllDaemonSetsReady(wcClient *client.Client) func() error {
 	return func() error {
 		daemonSetList := &appsv1.DaemonSetList{}
 		err := wcClient.List(context.Background(), daemonSetList)

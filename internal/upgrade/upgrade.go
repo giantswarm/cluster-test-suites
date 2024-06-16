@@ -5,10 +5,12 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
@@ -34,16 +36,19 @@ func NewTestConfigWithDefaults() *TestConfig {
 func Run(cfg *TestConfig) {
 	Context("upgrade", func() {
 		var cluster *application.Cluster
+		var wcClient *client.Client
 
 		BeforeEach(func() {
+			var err error
 			cluster = state.GetCluster()
+			wcClient, err = state.GetFramework().WC(cluster.Name)
+			if err != nil {
+				Fail(err.Error())
+			}
 		})
 
 		It("has all the control-plane nodes running", func() {
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
-			Expect(err).NotTo(HaveOccurred())
-
-			wcClient, err := state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
@@ -57,13 +62,47 @@ func Run(cfg *TestConfig) {
 			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
 			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
 				WithTimeout(cfg.WorkerNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
+		})
+
+		It("has all its Deployments Ready (means all replicas are running)", func() {
+			Eventually(wait.Consistent(common.CheckAllDeploymentsReady(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all its StatefulSets Ready (means all replicas are running)", func() {
+			Eventually(wait.Consistent(common.CheckAllStatefulSetsReady(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
+			Eventually(wait.Consistent(common.CheckAllDaemonSetsReady(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all of its Pods in the Running state", func() {
+			Eventually(wait.Consistent(common.CheckAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has Cluster Ready condition with Status='True'", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
 		})
 
 		It("should apply new version successfully", func() {
