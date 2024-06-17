@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated teleport api module to latest available.
+
 ## [1.47.0] - 2024-06-14
 
 ### Added
