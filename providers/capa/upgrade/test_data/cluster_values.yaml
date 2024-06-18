@@ -1,9 +1,15 @@
 global:
   nodePools:
-    # Here we override the default values from cluster-standup-teardown and increase min size from 2 to 3 because of
-    # issues discovered on 14/06/2024, where after the upgrade cluster-autoscaler scales down the cluster to min size
-    # (which is 2 by default) and after that a lot of Pods cannot be scheduled. The result is that Upgrade suite fails
-    # because WC Deployments are not ready, as test time-out passes more quickly than cluster-autoscaler can scale up
-    # the cluster.
+    # Here we override the default values from cluster-standup-teardown and make the following changes:
+    #
+    # 1. Increase min size from 2 to 3 because of issues discovered on 14/06/2024, where after the upgrade
+    #    cluster-autoscaler scales down the cluster to min size (which is 2 by default) and after that a lot of Pods
+    #    cannot be scheduled. The result is that Upgrade suite fails because WC Deployments are not ready, as test
+    #    time-out passes more quickly than cluster-autoscaler can scale up the cluster.
+    #
+    # 2. Disable spot instances for CAPA upgrade suite, as we suspect that using spot instances is causing Upgrade suite
+    #    failures. E.g. node pool gets scaled down to 1 instance only after the upgrade, while the min size is 3.
     nodepool-0:
       minSize: 3
+      spotInstances:
+        enabled: false
