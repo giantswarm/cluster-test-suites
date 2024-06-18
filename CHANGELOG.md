@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated teleport api module to latest available.
+- Increase node pool min size from 2 to 3 for CAPA upgrade test.
 
 ## [1.47.0] - 2024-06-14
 
