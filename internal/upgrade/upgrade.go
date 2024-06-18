@@ -42,9 +42,7 @@ func Run(cfg *TestConfig) {
 			var err error
 			cluster = state.GetCluster()
 			wcClient, err = state.GetFramework().WC(cluster.Name)
-			if err != nil {
-				Fail(err.Error())
-			}
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("has all the control-plane nodes running", func() {
