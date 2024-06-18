@@ -106,10 +106,10 @@ func Run(cfg *TestConfig) {
 		It("has all machine pools ready and running", func() {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
-			Eventually(wait.MachinePoolsAreReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace())).
+			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 10, time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(BeTrue())
+				Should(Succeed())
 		})
 
 		It("should apply new version successfully", func() {

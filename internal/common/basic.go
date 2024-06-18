@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
+	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -113,10 +114,10 @@ func runBasic() {
 		It("has all machine pools ready and running", func() {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
-			Eventually(wait.MachinePoolsAreReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace())).
+			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 10, time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(BeTrue())
+				Should(Succeed())
 		})
 	})
 }
@@ -249,6 +250,56 @@ func CheckAllDaemonSetsReady(wcClient *client.Client) func() error {
 		}
 
 		logger.Log("All (%d) daemonSets have all daemon pods running", len(daemonSetList.Items))
+		return nil
+	}
+}
+
+// CheckMachinePoolsReadyAndRunning checks if all MachinePool resources have Ready condition with Status True and are in
+// Running phase.
+func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
+	return func() error {
+		machinePools := &capiexp.MachinePoolList{}
+		machinePoolListOptions := []cr.ListOption{
+			cr.InNamespace(clusterNamespace),
+			cr.MatchingLabels{
+				"cluster.x-k8s.io/cluster-name": clusterName,
+			},
+		}
+		err := mcClient.List(context.Background(), machinePools, machinePoolListOptions...)
+		if err != nil {
+			return err
+		}
+
+		if len(machinePools.Items) == 0 {
+			logger.Log("MachinePools not found.")
+			return nil
+		}
+
+		allMachinePoolsAreReadyAndRunning := true
+		for _, machinePool := range machinePools.Items {
+			var machinePoolIsReady bool
+			machinePoolIsReady, err = wait.IsClusterApiObjectConditionSet(&machinePool, capi.ReadyCondition, corev1.ConditionTrue, "")
+			if err != nil {
+				return err
+			}
+			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsReady
+
+			currentMachinePoolPhase := capiexp.MachinePoolPhase(machinePool.Status.Phase)
+			machinePoolIsRunning := currentMachinePoolPhase == capiexp.MachinePoolPhaseRunning
+			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsRunning
+			if !machinePoolIsRunning {
+				logger.Log(
+					"Machine pool '%s/%s' expected to be in Running phase, but it's in '%s' phase.",
+					machinePool.Namespace,
+					machinePool.Name,
+					machinePool.Status.Phase)
+			}
+		}
+
+		if !allMachinePoolsAreReadyAndRunning {
+			return fmt.Errorf("not all MachinePools are ready and running")
+		}
+
 		return nil
 	}
 }
