@@ -115,7 +115,7 @@ func runBasic() {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
 
-			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace()
+			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 			if len(machinePools) == 0 {
 				Skip("Machine pools are not found")
