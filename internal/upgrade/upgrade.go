@@ -103,6 +103,15 @@ func Run(cfg *TestConfig) {
 				Should(BeTrue())
 		})
 
+		It("has all machine pools ready and running", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.MachinePoolsAreReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace())).
+				WithTimeout(30 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
+		})
+
 		It("should apply new version successfully", func() {
 			// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
 			cluster = cluster.WithAppVersions("", "")

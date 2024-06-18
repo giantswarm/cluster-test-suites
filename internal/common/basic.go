@@ -109,6 +109,15 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
 		})
+
+		It("has all machine pools ready and running", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.MachinePoolsAreReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace())).
+				WithTimeout(30 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
+		})
 	})
 }
 
