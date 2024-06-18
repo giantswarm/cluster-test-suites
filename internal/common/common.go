@@ -9,7 +9,7 @@ type TestConfig struct {
 }
 
 func Run(cfg *TestConfig) {
-	runApps()
+	RunApps()
 	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)

@@ -66,6 +66,33 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
+		It("has Cluster Ready condition with Status='True'", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
+		})
+
+		It("has all machine pools ready and running", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+
+			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace())
+			Expect(err).NotTo(HaveOccurred())
+			if len(machinePools) == 0 {
+				Skip("Machine pools are not found")
+			}
+
+			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
+				WithTimeout(30 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		common.RunApps()
+
 		It("has all its Deployments Ready (means all replicas are running)", func() {
 			Eventually(wait.Consistent(common.CheckAllDeploymentsReady(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
@@ -90,31 +117,6 @@ func Run(cfg *TestConfig) {
 		It("has all of its Pods in the Running state", func() {
 			Eventually(wait.Consistent(common.CheckAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-		})
-
-		It("has Cluster Ready condition with Status='True'", func() {
-			mcClient := state.GetFramework().MC()
-			cluster := state.GetCluster()
-			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
-				WithTimeout(15 * time.Minute).
-				WithPolling(wait.DefaultInterval).
-				Should(BeTrue())
-		})
-
-		It("has all machine pools ready and running", func() {
-			mcClient := state.GetFramework().MC()
-			cluster := state.GetCluster()
-
-			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace())
-			Expect(err).NotTo(HaveOccurred())
-			if len(machinePools) == 0 {
-				Skip("Machine pools are not found")
-			}
-
-			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
-				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
