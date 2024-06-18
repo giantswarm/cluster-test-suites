@@ -113,8 +113,7 @@ func Run(cfg *TestConfig) {
 				Skip("Machine pools are not found")
 			}
 
-			logger.Log("checking machine pools for cluster %s/%s", cluster.GetNamespace(), cluster.Name)
-			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 10, time.Second)).
+			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
