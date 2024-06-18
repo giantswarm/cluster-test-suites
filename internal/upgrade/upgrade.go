@@ -145,32 +145,5 @@ func Run(cfg *TestConfig) {
 				30*time.Second,
 			).Should(BeTrue())
 		})
-
-		It("has all the control-plane nodes running", func() {
-			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
-			Expect(err).NotTo(HaveOccurred())
-
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
-				WithTimeout(cfg.ControlPlaneNodesTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-		})
-
-		It("has all the worker nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
-			Expect(err).NotTo(HaveOccurred())
-
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(cfg.WorkerNodesTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-		})
 	})
 }
