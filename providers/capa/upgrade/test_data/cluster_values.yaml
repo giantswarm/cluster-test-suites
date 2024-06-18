@@ -1,1 +1,9 @@
-# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  nodePools:
+    # Here we override the default values from cluster-standup-teardown and increase min size from 2 to 3 because of
+    # issues discovered on 14/06/2024, where after the upgrade cluster-autoscaler scales down the cluster to min size
+    # (which is 2 by default) and after that a lot of Pods cannot be scheduled. The result is that Upgrade suite fails
+    # because WC Deployments are not ready, as test time-out passes more quickly than cluster-autoscaler can scale up
+    # the cluster.
+    nodepool-0:
+      minSize: 3
