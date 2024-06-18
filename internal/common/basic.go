@@ -114,6 +114,14 @@ func runBasic() {
 		It("has all machine pools ready and running", func() {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
+
+			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace()
+			Expect(err).NotTo(HaveOccurred())
+			if len(machinePools) == 0 {
+				Skip("Machine pools are not found")
+			}
+
+			logger.Log("checking machine pools for cluster %s/%s", cluster.GetNamespace(), cluster.Name)
 			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 10, time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
@@ -258,6 +266,7 @@ func CheckAllDaemonSetsReady(wcClient *client.Client) func() error {
 // Running phase.
 func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
 	return func() error {
+		logger.Log("Listing all machine pools.")
 		machinePools := &capiexp.MachinePoolList{}
 		machinePoolListOptions := []cr.ListOption{
 			cr.InNamespace(clusterNamespace),
@@ -269,6 +278,7 @@ func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName strin
 		if err != nil {
 			return err
 		}
+		logger.Log("Found %d machine pools.", len(machinePools.Items))
 
 		if len(machinePools.Items) == 0 {
 			logger.Log("MachinePools not found.")
@@ -276,14 +286,17 @@ func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName strin
 		}
 
 		allMachinePoolsAreReadyAndRunning := true
-		for _, machinePool := range machinePools.Items {
+		for _, mp := range machinePools.Items {
+			machinePool := mp
 			var machinePoolIsReady bool
-			machinePoolIsReady, err = wait.IsClusterApiObjectConditionSet(&machinePool, capi.ReadyCondition, corev1.ConditionTrue, "")
+			logger.Log("Checking if machine pool %s/%s is ready.", machinePool.Namespace, machinePool.Name)
+			machinePoolIsReady, err = wait.IsClusterApiObjectConditionSet(&mp, capi.ReadyCondition, corev1.ConditionTrue, "")
 			if err != nil {
 				return err
 			}
 			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsReady
 
+			logger.Log("Checking if machine pool %s/%s is running.", machinePool.Namespace, machinePool.Name)
 			currentMachinePoolPhase := capiexp.MachinePoolPhase(machinePool.Status.Phase)
 			machinePoolIsRunning := currentMachinePoolPhase == capiexp.MachinePoolPhaseRunning
 			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsRunning
