@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -47,6 +48,11 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		if isUpgrade && strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
 			return
 		}
+
+		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
+		ctx := state.GetContext()
+		ctx, _ = context.WithTimeout(ctx, 1*time.Hour)
+		state.SetContext(ctx)
 
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
