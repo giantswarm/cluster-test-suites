@@ -13,8 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Test if default apps are deployed before upgrading the cluster.
 - Test workload cluster's Deployments, DaemonSets, StatefulSets and Pods before upgrading the cluster.
 - Test if cluster is ready before upgrading the cluster (check Cluster resource Ready condition).
+- Test if machine pools are ready and running before upgrading the cluster.
+- Test if machine pools are ready and running in common tests.
 
 ### Changed
 
