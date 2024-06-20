@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update clustertest to v1.3.0 to support releases with cluster Apps for Azure.
 - Updated teleport api module to latest available.
 - Increase node pool min size from 2 to 3 for CAPA upgrade test.
 - Disable spot instances for CAPA upgrade suite, as we suspect that using spot instances is causing Upgrade suite failures lately.
