@@ -7,7 +7,7 @@ toolchain go1.22.4
 require (
 	github.com/giantswarm/apiextensions-application v0.6.1
 	github.com/giantswarm/cluster-standup-teardown v1.7.1
-	github.com/giantswarm/clustertest v1.3.0
+	github.com/giantswarm/clustertest v1.3.1
 	github.com/gravitational/teleport/api v0.0.0-20240614220737-2fb61939e6b1
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
