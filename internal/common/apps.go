@@ -21,7 +21,7 @@ const (
 	DefaultDeployAppsTimeout    = 15 * time.Minute
 )
 
-func runApps() {
+func RunApps() {
 	Context("default apps", func() {
 		It("all default apps are deployed without issues", func() {
 			skipDefaultAppsApp, err := state.GetCluster().UsesUnifiedClusterApp()
