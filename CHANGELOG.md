@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove node checks from CAPA upgrade suite because we already check nodes in common tests after the upgrade.
 
+### Added
+
+- Additional logging added to the deployment scale test to display conditions of the pods and taints of the worker nodes
+
 ## [1.47.0] - 2024-06-14
 
 ### Added

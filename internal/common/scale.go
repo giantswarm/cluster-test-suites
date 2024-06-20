@@ -92,24 +92,58 @@ func runScale(autoScalingSupported bool) {
 			ctx := context.Background()
 
 			expectedReplicas := helloAppValues["ReplicaCount"]
-			Eventually(func() (string, error) {
+			Eventually(func() (bool, error) {
+				deploymentName := "scale-hello-world"
 				helloDeployment := &v1.Deployment{}
 
 				err := wcClient.Get(ctx,
 					cr.ObjectKey{
-						Name:      "scale-hello-world",
+						Name:      deploymentName,
 						Namespace: helloApp.InstallNamespace,
 					},
 					helloDeployment,
 				)
 				if err != nil {
-					return "", err
+					return false, err
 				}
 
 				replicas := fmt.Sprint(helloDeployment.Status.ReadyReplicas)
 				logger.Log("Checking for increased replicas. Expected: %s, Actual: %s", expectedReplicas, replicas)
-				return replicas, nil
-			}, "15m", "10s").Should(Equal(expectedReplicas))
+				if replicas == expectedReplicas {
+					return true, nil
+				}
+
+				// Logging out information about pod conditions
+				pods := corev1.PodList{}
+				err = wcClient.List(ctx, &pods, cr.MatchingLabels{"app.kubernetes.io/instance": deploymentName})
+				if err != nil {
+					return false, err
+				}
+				podConditionMessages := []string{}
+				for _, pod := range pods.Items {
+					if pod.Status.Phase != corev1.PodRunning {
+						for _, condition := range pod.Status.Conditions {
+							if condition.Status != corev1.ConditionTrue && condition.Message != "" {
+								podConditionMessages = append(podConditionMessages, fmt.Sprintf("%s='%s'", pod.ObjectMeta.Name, condition.Message))
+							}
+						}
+					}
+				}
+				logger.Log("Condition messages from non-running deployment pods: %v", podConditionMessages)
+
+				// Logging out information about node status
+				nodes := corev1.NodeList{}
+				err = wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+				if err != nil {
+					return false, err
+				}
+				logger.Log("There are currently '%d' worker nodes", len(nodes.Items))
+				for _, node := range nodes.Items {
+					logger.Log("Worker node status: NodeName='%s', Taints='%s'", node.ObjectMeta.Name, node.Spec.Taints)
+				}
+
+				return false, nil
+			}, "15m", "10s").Should(BeTrue())
 		})
 
 		AfterEach(func() {
