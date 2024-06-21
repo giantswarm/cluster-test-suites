@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.49.0] - 2024-06-21
+
 ### Changed
 
 - Updated `clustertest` to latest with additional logging for node checks
@@ -645,7 +647,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.48.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.49.0...HEAD
+[1.49.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.48.0...v1.49.0
 [1.48.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.47.0...v1.48.0
 [1.47.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.46.0...v1.47.0
 [1.46.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.45.0...v1.46.0
