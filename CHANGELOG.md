@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `clustertest` to latest with additional logging for node checks
+- Updated `cluster-standup-teardown` to latest with cluster-autoscaler config for `scaleDownUnneededTime`
+
 ## [1.48.0] - 2024-06-20
 
 ### Fixed
