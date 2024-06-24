@@ -17,6 +17,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -199,6 +201,58 @@ func runHelloWorld(externalDnsSupported bool) {
 				WithTimeout(6 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(BeTrue())
+		})
+
+		It("should have a ready Certificate generated", func() {
+			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			certificateName := "hello-world-tls"
+			certificateNamespace := "giantswarm"
+
+			Eventually(func() error {
+				logger.Log("Checking for certificate '%s' in namespace '%s'", certificateName, certificateNamespace)
+
+				// TODO: Update `clustertest` client with cert-manager schema
+				u := &unstructured.Unstructured{}
+				u.SetGroupVersionKind(schema.GroupVersionKind{
+					Group:   "cert-manager.io",
+					Kind:    "Certificate",
+					Version: "v1",
+				})
+				err := wcClient.Get(state.GetContext(), ctrl.ObjectKey{Name: certificateName, Namespace: certificateNamespace}, u)
+				if err != nil {
+					return err
+				}
+
+				conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
+				if err != nil {
+					return err
+				}
+				if !found {
+					return fmt.Errorf("Certificate '%s' does not have status.conditions", certificateName)
+				}
+
+				conditionMessage := "(no status message found)"
+				for _, condition := range conditions {
+					c := condition.(map[string]interface{})
+					conditionType := c["type"]
+					status := c["status"]
+					if conditionType == "Ready" && status == "True" {
+						logger.Log("Found status.condition with type '%s' and status '%s' in Certificate '%s'", conditionType, status, certificateName)
+						return nil
+					} else if conditionType == "Ready" {
+						conditionMessage = c["message"].(string)
+					}
+				}
+
+				logger.Log("Certificate '%s' is not Ready - '%s'", certificateName, conditionMessage)
+
+				return fmt.Errorf("Certificate is not ready")
+			}).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
 		})
 
 		It("hello world app responds successfully", func() {
