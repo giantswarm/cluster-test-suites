@@ -248,7 +248,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				logger.Log("Certificate '%s' is not Ready - '%s'", certificateName, conditionMessage)
 
-				return nil
+				return fmt.Errorf("Certificate is not ready")
 			}).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
