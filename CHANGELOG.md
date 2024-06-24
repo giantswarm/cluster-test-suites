@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a test case to ensure the hello-world ingress has a ready Certificate
+- Included extra logging in ClusterIssuer test case to output the status and failing events of the post-install Helm Job.
 
 ## [1.49.0] - 2024-06-21
 
