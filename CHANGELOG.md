@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a test case to ensure the hello-world ingress has a ready Certificate
+
 ## [1.49.0] - 2024-06-21
 
 ### Changed
