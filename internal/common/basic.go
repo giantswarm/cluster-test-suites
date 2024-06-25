@@ -55,7 +55,7 @@ func runBasic() {
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
+			Eventually(wait.Consistent(CheckControlPlaneNodesReady(state.GetContext(), wcClient, int(replicas)), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -69,42 +69,42 @@ func runBasic() {
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+			Eventually(wait.Consistent(CheckWorkerNodesReady(state.GetContext(), wcClient, values), 12, 5*time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(CheckAllDeploymentsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllDeploymentsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(CheckAllStatefulSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllStatefulSetsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
-			Eventually(wait.Consistent(CheckAllDaemonSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllDaemonSetsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its Jobs completed successfully", func() {
-			Eventually(wait.Consistent(CheckAllJobsSucceeded(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllJobsSucceeded(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(CheckAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(CheckAllPodsSuccessfulPhase(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -123,13 +123,13 @@ func runBasic() {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
 
-			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace())
+			machinePools, err := state.GetFramework().GetMachinePools(state.GetContext(), cluster.Name, cluster.GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 			if len(machinePools) == 0 {
 				Skip("Machine pools are not found")
 			}
 
-			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
+			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -137,8 +137,8 @@ func runBasic() {
 	})
 }
 
-func CheckControlPlaneNodesReady(wcClient *client.Client, expectedNodes int) func() error {
-	controlPlaneFunc := wait.AreNumNodesReady(context.Background(), wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
+func CheckControlPlaneNodesReady(ctx context.Context, wcClient *client.Client, expectedNodes int) func() error {
+	controlPlaneFunc := wait.AreNumNodesReady(ctx, wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
 
 	return func() error {
 		ok, err := controlPlaneFunc()
@@ -149,7 +149,7 @@ func CheckControlPlaneNodesReady(wcClient *client.Client, expectedNodes int) fun
 	}
 }
 
-func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterValues) func() error {
+func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values *application.ClusterValues) func() error {
 	minNodes := 0
 	maxNodes := 0
 	for _, pool := range values.NodePools {
@@ -167,7 +167,7 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 		Max: maxNodes,
 	}
 
-	workersFunc := wait.AreNumNodesReadyWithinRange(context.Background(), wcClient, expectedNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+	workersFunc := wait.AreNumNodesReadyWithinRange(ctx, wcClient, expectedNodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
 
 	return func() error {
 		ok, err := workersFunc()
@@ -182,10 +182,10 @@ func CheckWorkerNodesReady(wcClient *client.Client, values *application.ClusterV
 	}
 }
 
-func CheckAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
+func CheckAllPodsSuccessfulPhase(ctx context.Context, wcClient *client.Client) func() error {
 	return func() error {
 		podList := &corev1.PodList{}
-		err := wcClient.List(context.Background(), podList)
+		err := wcClient.List(ctx, podList)
 		if err != nil {
 			return err
 		}
@@ -203,10 +203,10 @@ func CheckAllPodsSuccessfulPhase(wcClient *client.Client) func() error {
 	}
 }
 
-func CheckAllDeploymentsReady(wcClient *client.Client) func() error {
+func CheckAllDeploymentsReady(ctx context.Context, wcClient *client.Client) func() error {
 	return func() error {
 		deploymentList := &appsv1.DeploymentList{}
-		err := wcClient.List(context.Background(), deploymentList)
+		err := wcClient.List(ctx, deploymentList)
 		if err != nil {
 			return err
 		}
@@ -225,10 +225,10 @@ func CheckAllDeploymentsReady(wcClient *client.Client) func() error {
 	}
 }
 
-func CheckAllStatefulSetsReady(wcClient *client.Client) func() error {
+func CheckAllStatefulSetsReady(ctx context.Context, wcClient *client.Client) func() error {
 	return func() error {
 		statefulSetList := &appsv1.StatefulSetList{}
-		err := wcClient.List(context.Background(), statefulSetList)
+		err := wcClient.List(ctx, statefulSetList)
 		if err != nil {
 			return err
 		}
@@ -247,10 +247,10 @@ func CheckAllStatefulSetsReady(wcClient *client.Client) func() error {
 	}
 }
 
-func CheckAllJobsSucceeded(wcClient *client.Client) func() error {
+func CheckAllJobsSucceeded(ctx context.Context, wcClient *client.Client) func() error {
 	return func() error {
 		jobList := &batchv1.JobList{}
-		err := wcClient.List(context.Background(), jobList)
+		err := wcClient.List(ctx, jobList)
 		if err != nil {
 			return err
 		}
@@ -276,10 +276,10 @@ func CheckAllJobsSucceeded(wcClient *client.Client) func() error {
 	}
 }
 
-func CheckAllDaemonSetsReady(wcClient *client.Client) func() error {
+func CheckAllDaemonSetsReady(ctx context.Context, wcClient *client.Client) func() error {
 	return func() error {
 		daemonSetList := &appsv1.DaemonSetList{}
-		err := wcClient.List(context.Background(), daemonSetList)
+		err := wcClient.List(ctx, daemonSetList)
 		if err != nil {
 			return err
 		}
@@ -300,7 +300,7 @@ func CheckAllDaemonSetsReady(wcClient *client.Client) func() error {
 
 // CheckMachinePoolsReadyAndRunning checks if all MachinePool resources have Ready condition with Status True and are in
 // Running phase.
-func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
+func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
 	return func() error {
 		machinePools := &capiexp.MachinePoolList{}
 		machinePoolListOptions := []cr.ListOption{
@@ -309,7 +309,7 @@ func CheckMachinePoolsReadyAndRunning(mcClient *client.Client, clusterName strin
 				"cluster.x-k8s.io/cluster-name": clusterName,
 			},
 		}
-		err := mcClient.List(context.Background(), machinePools, machinePoolListOptions...)
+		err := mcClient.List(ctx, machinePools, machinePoolListOptions...)
 		if err != nil {
 			return err
 		}
