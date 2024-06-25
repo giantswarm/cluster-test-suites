@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
@@ -17,8 +18,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	networkingv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -213,36 +213,24 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(func() error {
 				logger.Log("Checking for certificate '%s' in namespace '%s'", certificateName, certificateNamespace)
 
-				// TODO: Update `clustertest` client with cert-manager schema
-				u := &unstructured.Unstructured{}
-				u.SetGroupVersionKind(schema.GroupVersionKind{
-					Group:   "cert-manager.io",
-					Kind:    "Certificate",
-					Version: "v1",
-				})
-				err := wcClient.Get(state.GetContext(), ctrl.ObjectKey{Name: certificateName, Namespace: certificateNamespace}, u)
+				cert := &certmanager.Certificate{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      certificateName,
+						Namespace: certificateNamespace,
+					},
+				}
+				err := wcClient.Get(state.GetContext(), ctrl.ObjectKeyFromObject(cert), cert)
 				if err != nil {
 					return err
-				}
-
-				conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
-				if err != nil {
-					return err
-				}
-				if !found {
-					return fmt.Errorf("Certificate '%s' does not have status.conditions", certificateName)
 				}
 
 				conditionMessage := "(no status message found)"
-				for _, condition := range conditions {
-					c := condition.(map[string]interface{})
-					conditionType := c["type"]
-					status := c["status"]
-					if conditionType == "Ready" && status == "True" {
-						logger.Log("Found status.condition with type '%s' and status '%s' in Certificate '%s'", conditionType, status, certificateName)
+				for _, condition := range cert.Status.Conditions {
+					if condition.Type == certmanager.CertificateConditionReady && condition.Status == "True" {
+						logger.Log("Found status.condition with type '%s' and status '%s' in Certificate '%s'", condition.Type, condition.Status, certificateName)
 						return nil
-					} else if conditionType == "Ready" {
-						conditionMessage = c["message"].(string)
+					} else if condition.Type == certmanager.CertificateConditionReady {
+						conditionMessage = condition.Message
 					}
 				}
 
