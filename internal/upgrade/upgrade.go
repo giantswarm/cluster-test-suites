@@ -49,7 +49,7 @@ func Run(cfg *TestConfig) {
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(state.GetContext(), wcClient, int(replicas)), 12, 5*time.Second)).
 				WithTimeout(cfg.ControlPlaneNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -60,7 +60,7 @@ func Run(cfg *TestConfig) {
 			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckWorkerNodesReady(state.GetContext(), wcClient, values), 12, 5*time.Second)).
 				WithTimeout(cfg.WorkerNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -79,13 +79,13 @@ func Run(cfg *TestConfig) {
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
 
-			machinePools, err := state.GetFramework().GetMachinePools(context.Background(), cluster.Name, cluster.GetNamespace())
+			machinePools, err := state.GetFramework().GetMachinePools(state.GetContext(), cluster.Name, cluster.GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 			if len(machinePools) == 0 {
 				Skip("Machine pools are not found")
 			}
 
-			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
 				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -94,28 +94,28 @@ func Run(cfg *TestConfig) {
 		common.RunApps()
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllDeploymentsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(common.CheckAllDeploymentsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllStatefulSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(common.CheckAllStatefulSetsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllDaemonSetsReady(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(common.CheckAllDaemonSetsReady(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(common.CheckAllPodsSuccessfulPhase(wcClient), 10, time.Second)).
+			Eventually(wait.Consistent(common.CheckAllPodsSuccessfulPhase(state.GetContext(), wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
