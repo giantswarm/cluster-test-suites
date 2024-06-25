@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.53.0] - 2024-06-25
+
 ### Added
 
 - Added a test case to check the status of all Jobs in the WC
@@ -675,7 +677,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.52.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.53.0...HEAD
+[1.53.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.52.0...v1.53.0
 [1.52.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.51.0...v1.52.0
 [1.51.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.50.0...v1.51.0
 [1.50.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.49.0...v1.50.0
