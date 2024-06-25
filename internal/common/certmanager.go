@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
@@ -18,8 +19,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var clusterIssuers = []string{"selfsigned-giantswarm", "letsencrypt-giantswarm"}
@@ -51,14 +51,13 @@ func runCertManager() {
 func checkClusterIssuer(ctx context.Context, wcClient *client.Client, clusterIssuerName string) func() error {
 	return func() error {
 		logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
-		// Using a unstructured object.
-		u := &unstructured.Unstructured{}
-		u.SetGroupVersionKind(schema.GroupVersionKind{
-			Group:   "cert-manager.io",
-			Kind:    "ClusterIssuer",
-			Version: "v1",
-		})
-		err := wcClient.Get(ctx, cr.ObjectKey{Name: clusterIssuerName}, u)
+
+		clusterIssuer := &certmanager.ClusterIssuer{
+			ObjectMeta: v1.ObjectMeta{
+				Name: clusterIssuerName,
+			},
+		}
+		err := wcClient.Get(ctx, cr.ObjectKeyFromObject(clusterIssuer), clusterIssuer)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				// Cluster Issuer was not found so we'll check the status of the Job that creates it
@@ -102,20 +101,9 @@ func checkClusterIssuer(ctx context.Context, wcClient *client.Client, clusterIss
 		}
 		logger.Log("ClusterIssuer '%s' is present", clusterIssuerName)
 
-		conditions, found, err := unstructured.NestedSlice(u.Object, "status", "conditions")
-		if err != nil {
-			return err
-		}
-		if !found {
-			return fmt.Errorf("ClusterIssuer '%s' does not have status.conditions", clusterIssuerName)
-		}
-
-		for _, condition := range conditions {
-			c := condition.(map[string]interface{})
-			conditionType := c["type"]
-			status := c["status"]
-			if conditionType == "Ready" && status == "True" {
-				logger.Log("Found status.condition with type '%s' and status '%s' in ClusterIssuer '%s'", conditionType, status, clusterIssuerName)
+		for _, condition := range clusterIssuer.Status.Conditions {
+			if condition.Type == certmanager.IssuerConditionReady && condition.Status == "True" {
+				logger.Log("Found status.condition with type '%s' and status '%s' in ClusterIssuer '%s'", condition.Type, condition.Status, clusterIssuerName)
 				return nil
 			}
 		}

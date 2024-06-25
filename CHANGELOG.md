@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use actual types from Cert-Manager instead of using `unstructured` for `Certificate` and `ClusterIssuer`
+
 ## [1.52.0] - 2024-06-25
 
 ### Changed
