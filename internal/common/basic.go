@@ -6,6 +6,7 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
@@ -90,6 +91,13 @@ func runBasic() {
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
 			Eventually(wait.Consistent(CheckAllDaemonSetsReady(wcClient), 10, time.Second)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all its Jobs completed successfully", func() {
+			Eventually(wait.Consistent(CheckAllJobsSucceeded(wcClient), 10, time.Second)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -235,6 +243,35 @@ func CheckAllStatefulSetsReady(wcClient *client.Client) func() error {
 		}
 
 		logger.Log("All (%d) statefulSets have all replicas running", len(statefulSetList.Items))
+		return nil
+	}
+}
+
+func CheckAllJobsSucceeded(wcClient *client.Client) func() error {
+	return func() error {
+		jobList := &batchv1.JobList{}
+		err := wcClient.List(context.Background(), jobList)
+		if err != nil {
+			return err
+		}
+
+		var loopErr error
+		for _, job := range jobList.Items {
+			if job.Status.Succeeded == 0 {
+				logger.Log("Job %s/%s has not succeeded. (Failed: '%d')", job.ObjectMeta.Namespace, job.ObjectMeta.Name, job.Status.Failed)
+				// We wrap the erros so that we can log out for all failures, not just the first found
+				if loopErr != nil {
+					loopErr = fmt.Errorf("%w, job %s/%s has not succeeded", loopErr, job.ObjectMeta.Namespace, job.ObjectMeta.Name)
+				} else {
+					loopErr = fmt.Errorf("job %s/%s has not succeeded", job.ObjectMeta.Namespace, job.ObjectMeta.Name)
+				}
+			}
+		}
+		if loopErr != nil {
+			return loopErr
+		}
+
+		logger.Log("All (%d) Jobs have completed successfully", len(jobList.Items))
 		return nil
 	}
 }

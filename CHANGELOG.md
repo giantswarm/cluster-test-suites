@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a test case to check the status of all Jobs in the WC
+
 ## [1.52.0] - 2024-06-25
 
 ### Changed
