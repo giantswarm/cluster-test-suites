@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a test case to check the status of all Jobs in the WC
 
+### Changed
+
+- Refactored some functions to explicitly take in a context instance instead of using `context.Background()` so that timeouts set on the context can be respected
+
 ## [1.52.0] - 2024-06-25
 
 ### Changed
