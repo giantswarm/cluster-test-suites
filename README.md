@@ -52,6 +52,15 @@ Running with Docker:
 docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
 ```
 
+### Testing with an in-progress Release CR
+
+To be able to create a workload cluster based on a not yet merged Release CR you can use the following two environment variables:
+
+* `E2E_RELEASE_VERSION` - The base Release version to use when creating the Workload Cluster.<br/>Must be used with `E2E_RELEASE_COMMIT`
+* `E2E_RELEASE_COMMIT` - The git commit from the `releases` repo that contains the Release version to use when creating the Workload Cluster.<br/>Must be used with `E2E_RELEASE_VERSION`
+
+The Release CR must at least be committed and pushed to a branch (e.g. a WiP PR) in the [Releases](https://github.com/giantswarm/releases) repo.
+
 ### Testing with an existing Workload Cluster
 
 It's possible to re-use an existing workload cluster to speed up development and to debug things after the tests have run. The Workload Cluster needs to be created manually in the relevant Management Cluster first and once ready you can set the following environment variables when running the tests to make use of your own WC:
