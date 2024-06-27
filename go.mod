@@ -10,7 +10,7 @@ require (
 	github.com/cert-manager/cert-manager v1.15.1
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown v1.10.0
-	github.com/giantswarm/clustertest v1.6.0
+	github.com/giantswarm/clustertest v1.7.0
 	github.com/gravitational/teleport/api v0.0.0-20240625042611-b3f46c4cd931
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
@@ -121,7 +121,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/mittwald/go-helm-client v0.12.9 // indirect
+	github.com/mittwald/go-helm-client v0.12.10 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/moby/term v0.5.0 // indirect
