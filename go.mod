@@ -7,7 +7,7 @@ toolchain go1.22.4
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.16
 
 require (
-	github.com/cert-manager/cert-manager v1.15.0
+	github.com/cert-manager/cert-manager v1.15.1
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown v1.10.0
 	github.com/giantswarm/clustertest v1.6.0
