@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update `clustertest` to v1.7.0 to support the new environment variable for controlling what Release to use when creating clusters
+
 ## [1.53.0] - 2024-06-25
 
 ### Added
