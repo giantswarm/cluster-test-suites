@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/clustertest/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
@@ -66,8 +67,11 @@ func RunApps() {
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
 				WithTimeout(timeout).
-				WithPolling(10 * time.Second).
-				Should(BeTrue())
+				WithPolling(10*time.Second).
+				Should(
+					BeTrue(),
+					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+				)
 		})
 	})
 	Context("observability-bundle apps", func() {
@@ -92,9 +96,12 @@ func RunApps() {
 			}
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
-				WithTimeout(8 * time.Minute).
-				WithPolling(10 * time.Second).
-				Should(BeTrue())
+				WithTimeout(8*time.Minute).
+				WithPolling(10*time.Second).
+				Should(
+					BeTrue(),
+					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+				)
 		})
 	})
 	Context("security-bundle apps", func() {
@@ -119,9 +126,12 @@ func RunApps() {
 			}
 
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
-				WithTimeout(10 * time.Minute).
-				WithPolling(10 * time.Second).
-				Should(BeTrue())
+				WithTimeout(10*time.Minute).
+				WithPolling(10*time.Second).
+				Should(
+					BeTrue(),
+					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+				)
 		})
 	})
 }
