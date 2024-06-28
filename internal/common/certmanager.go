@@ -12,8 +12,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/fields"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -79,20 +77,12 @@ func checkClusterIssuer(ctx context.Context, wcClient *client.Client, clusterIss
 				}
 
 				// Get events related to the cluster issuer post-install Job
-				events := &corev1.EventList{}
-				nestedErr = wcClient.List(ctx, events, cr.MatchingFieldsSelector{
-					Selector: fields.AndSelectors(
-						fields.OneTermEqualSelector("involvedObject.kind", "Job"),
-						fields.OneTermEqualSelector("involvedObject.name", clusterIssuerJob.ObjectMeta.Name),
-					),
-				})
+				events, nestedErr := wcClient.GetWarningEventsForResource(ctx, clusterIssuerJob)
 				if nestedErr != nil {
 					logger.Log("Failed to get events for cluster issuer Job: %v", nestedErr)
 				} else {
 					for _, event := range events.Items {
-						if event.Type != corev1.EventTypeNormal {
-							logger.Log("Event: Reason='%s', Message='%s', Last Occurred='%v'", event.Reason, event.Message, event.LastTimestamp)
-						}
+						logger.Log("Event: Reason='%s', Message='%s', Last Occurred='%v'", event.Reason, event.Message, event.LastTimestamp)
 					}
 				}
 			}

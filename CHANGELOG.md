@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Made use of `GetWarningEventsForResource` from `clustertest` for Cert-Manager tests
+
+### Added
+
+- Use `failurehandler.AppIssues` to provide extra debugging when App-related tests fail (timeout)
+
 ## [1.54.1] - 2024-06-27
 
 ## [1.54.0] - 2024-06-27
