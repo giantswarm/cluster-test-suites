@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.55.0] - 2024-06-28
+
 ### Changed
 
 - Made use of `GetWarningEventsForResource` from `clustertest` for Cert-Manager tests
@@ -693,7 +695,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.54.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.55.0...HEAD
+[1.55.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.54.1...v1.55.0
 [1.54.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.54.0...v1.54.1
 [1.54.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.53.0...v1.54.0
 [1.53.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.52.0...v1.53.0
