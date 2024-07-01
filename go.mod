@@ -11,7 +11,7 @@ require (
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown v1.10.0
 	github.com/giantswarm/clustertest v1.9.0
-	github.com/gravitational/teleport/api v0.0.0-20240625042611-b3f46c4cd931
+	github.com/gravitational/teleport/api v0.0.0-20240628180307-921884f4cd33
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	k8s.io/api v0.30.2
