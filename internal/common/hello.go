@@ -4,16 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
-	"net/url"
-	"os"
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/net"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -91,16 +89,7 @@ func runHelloWorld(externalDnsSupported bool) {
 		})
 
 		It("cluster wildcard ingress DNS must be resolvable", func() {
-			resolver := &net.Resolver{
-				PreferGo:     true,
-				StrictErrors: true,
-				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-					d := net.Dialer{
-						Timeout: time.Millisecond * time.Duration(10000),
-					}
-					return d.DialContext(ctx, "udp", "8.8.4.4:53")
-				},
-			}
+			resolver := net.NewResolver()
 			Eventually(func() (bool, error) {
 				result, err := resolver.LookupIP(context.Background(), "ip", fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone()))
 				if err != nil {
@@ -244,43 +233,7 @@ func runHelloWorld(externalDnsSupported bool) {
 		})
 
 		It("hello world app responds successfully", func() {
-			transport := &http.Transport{
-				DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-					dialer := &net.Dialer{
-						Resolver: &net.Resolver{
-							PreferGo: true,
-							Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-								if os.Getenv("HTTP_PROXY") != "" {
-									u, err := url.Parse(os.Getenv("HTTP_PROXY"))
-									if err != nil {
-										logger.Log("Error parsing HTTP_PROXY as a URL %s", os.Getenv("HTTP_PROXY"))
-									} else {
-										if addr == u.Host {
-											// always use coredns for proxy address resolution.
-											var d net.Dialer
-											return d.Dial(network, address)
-										}
-									}
-								}
-								d := net.Dialer{
-									Timeout: time.Millisecond * time.Duration(10000),
-								}
-								return d.DialContext(ctx, "udp", "8.8.4.4:53")
-							},
-						},
-					}
-					return dialer.DialContext(ctx, network, addr)
-				},
-			}
-
-			if os.Getenv("HTTP_PROXY") != "" {
-				logger.Log("Detected need to use PROXY as HTTP_PROXY env var was set to %s", os.Getenv("HTTP_PROXY"))
-				transport.Proxy = http.ProxyFromEnvironment
-			}
-
-			httpClient := &http.Client{
-				Transport: transport,
-			}
+			httpClient := net.NewHttpClient()
 
 			Eventually(func() (string, error) {
 				logger.Log("Trying to get a successful response from %s", helloWorldIngressUrl)

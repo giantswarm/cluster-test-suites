@@ -8,6 +8,7 @@ import (
 
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	clustertestnet "github.com/giantswarm/clustertest/pkg/net"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -37,16 +38,7 @@ func runDNS(bastionSuppoted bool) {
 			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
-			resolver = &net.Resolver{
-				PreferGo:     true,
-				StrictErrors: true,
-				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-					d := net.Dialer{
-						Timeout: time.Millisecond * time.Duration(10000),
-					}
-					return d.DialContext(ctx, "udp", "8.8.4.4:53")
-				},
-			}
+			resolver = clustertestnet.NewResolver()
 		})
 
 		It("sets up the api DNS records", func() {
