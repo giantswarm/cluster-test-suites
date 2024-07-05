@@ -12,8 +12,8 @@ import (
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
+	"github.com/giantswarm/clustertest/pkg/utils"
 
-	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -22,7 +22,7 @@ import (
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
-		if isUpgrade && helper.ShouldSkipUpgrade() {
+		if isUpgrade && utils.ShouldSkipUpgrade() {
 			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
 			return
 		}
@@ -44,7 +44,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	})
 
 	AfterSuite(func() {
-		if isUpgrade && helper.ShouldSkipUpgrade() {
+		if isUpgrade && utils.ShouldSkipUpgrade() {
 			return
 		}
 
