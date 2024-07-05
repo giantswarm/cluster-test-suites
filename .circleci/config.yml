@@ -12,3 +12,6 @@ workflows:
             # Trigger the job also on git tag.
             tags:
               only: /^v.*/
+          registries-data: |-
+            public gsoci.azurecr.io ACR_GSOCI_USERNAME ACR_GSOCI_PASSWORD true
+            public quay.io QUAY_USERNAME QUAY_PASSWORD true
