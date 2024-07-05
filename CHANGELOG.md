@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Switched to using DNS resolver and HTTP client from `clustertest`
+
 ## [1.56.0] - 2024-07-02
 
 ### Changed
