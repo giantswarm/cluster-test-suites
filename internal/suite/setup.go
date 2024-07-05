@@ -2,8 +2,6 @@ package suite
 
 import (
 	"context"
-	"os"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -15,6 +13,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -23,7 +22,7 @@ import (
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
-		if isUpgrade && strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
+		if isUpgrade && helper.ShouldSkipUpgrade() {
 			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
 			return
 		}
@@ -45,7 +44,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	})
 
 	AfterSuite(func() {
-		if isUpgrade && strings.TrimSpace(os.Getenv("E2E_OVERRIDE_VERSIONS")) == "" {
+		if isUpgrade && helper.ShouldSkipUpgrade() {
 			return
 		}
 
