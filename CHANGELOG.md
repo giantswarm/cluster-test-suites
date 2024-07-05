@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.57.2] - 2024-07-05
+
 ### Fixed
 
 - Switched to using `ShouldSkipUpgrade` from `clustertest`
@@ -717,7 +719,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.2...HEAD
+[1.57.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.1...v1.57.2
 [1.57.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.0...v1.57.1
 [1.57.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.56.0...v1.57.0
 [1.56.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.55.0...v1.56.0
