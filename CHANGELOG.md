@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Allow upgrade tests to be run from Releases test pipeline
+
 ## [1.57.0] - 2024-07-05
 
 ### Changed
