@@ -15,6 +15,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
@@ -77,23 +78,32 @@ func runBasic() {
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
 			Eventually(wait.Consistent(CheckAllDeploymentsReady(state.GetContext(), wcClient), 10, time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
 			Eventually(wait.Consistent(CheckAllStatefulSetsReady(state.GetContext(), wcClient), 10, time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.StatefulSetsNotReady(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
 			Eventually(wait.Consistent(CheckAllDaemonSetsReady(state.GetContext(), wcClient), 10, time.Second)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.DaemonSetsNotReady(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("has all its Jobs completed successfully", func() {

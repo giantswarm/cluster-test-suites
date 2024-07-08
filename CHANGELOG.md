@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added failure handling for Deployment, StatefulSet and DaemonSet not having expected number of ready replicas
+
 ## [1.57.2] - 2024-07-05
 
 ### Fixed

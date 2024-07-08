@@ -70,7 +70,7 @@ func RunApps() {
 				WithPolling(10*time.Second).
 				Should(
 					BeTrue(),
-					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
 	})
@@ -100,7 +100,7 @@ func RunApps() {
 				WithPolling(10*time.Second).
 				Should(
 					BeTrue(),
-					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
 	})
@@ -130,7 +130,7 @@ func RunApps() {
 				WithPolling(10*time.Second).
 				Should(
 					BeTrue(),
-					failurehandler.AppIssues(state.GetContext(), state.GetFramework(), state.GetCluster()),
+					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
 	})
