@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added failure handling for Deployment, StatefulSet and DaemonSet not having expected number of ready replicas
+- Updated `clustertest` to include logs when debugging failing pods
 
 ## [1.57.2] - 2024-07-05
 
