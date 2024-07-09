@@ -9,7 +9,7 @@ replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.16
 require (
 	github.com/cert-manager/cert-manager v1.15.1
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown v1.12.1
+	github.com/giantswarm/cluster-standup-teardown v1.13.0
 	github.com/giantswarm/clustertest v1.14.0
 	github.com/gravitational/teleport/api v0.0.0-20240705235643-4257daa0c447
 	github.com/onsi/ginkgo/v2 v2.19.0
