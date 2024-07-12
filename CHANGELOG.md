@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A framework for overriding default timeouts used by test cases. Introduces a new `timeout` internal package and new functions on the `state` that allows getting and setting a custom timeout per test suite.
+
 ## [1.59.0] - 2024-07-09
 
 ### Changed
