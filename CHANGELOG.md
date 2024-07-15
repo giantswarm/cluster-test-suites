@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A framework for overriding default timeouts used by test cases. Introduces a new `timeout` internal package and new functions on the `state` that allows getting and setting a custom timeout per test suite.
+- Re-enabled `capa-private` tests because EC2 user data limit issue should be solved now that we store Ignition bootstrap data in S3 ([issue](https://github.com/giantswarm/roadmap/issues/3442))
 
 ## [1.59.0] - 2024-07-09
 
