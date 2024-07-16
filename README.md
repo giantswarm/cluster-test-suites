@@ -119,7 +119,7 @@ When the pipeline runs against one of the provider-specific repos (e.g. cluster 
 
 ### Running a specific subset of test suites
 
-It's possible to specify the test suites you'd like to run in CI by providing the `TARGET_SUITES` parameter with your comment trigger. This is useful when a test suite has failed due to what seems to be a flakey tests as you can re-run just the failing without wasting resources on the other test suites.
+It's possible to specify the test suites you'd like to run in CI by providing the `TARGET_SUITES` parameter with your comment trigger. This is useful when a test suite has failed due to what seems to be a flakey test as you can re-run just the failing without wasting resources on the other test suites.
 
 E.g.
 
