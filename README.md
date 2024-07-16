@@ -117,6 +117,34 @@ When the pipeline runs against one of the provider-specific repos (e.g. cluster 
 * The pipeline will use the latest tagged release of the cluster-test-suites container image.
 * Only the tests associated with that provider will be run, including the `upgrade` tests.
 
+### Running a specific subset of test suites
+
+It's possible to specify the test suites you'd like to run in CI by providing the `TARGET_SUITES` parameter with your comment trigger. This is useful when a test suite has failed due to what seems to be a flakey tests as you can re-run just the failing without wasting resources on the other test suites.
+
+E.g.
+
+```
+/run cluster-test-suites TARGET_SUITES=./providers/capa/standard
+```
+
+This will only run the CAPA Standard test suite.
+
+If you need to target multiple test suites you can do so with a comma separated list, e.g.
+
+```
+/run cluster-test-suites TARGET_SUITES=./providers/capa/standard,./providers/capa/china
+```
+
+### Running against a specific Release version
+
+If you need to run the tests against a specific Release version that is not the latest you can do so by providing the `RELEASE_VERSION` parameter with your comment trigger.
+
+E.g.
+
+```
+/run cluster-test-suites RELEASE_VERSION=v25.0.0
+```
+
 ## ⬆️ Upgrade Tests
 
 Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of both the cluster App and the default-apps App. It then upgrades that cluster to whatever currently needs testing.
