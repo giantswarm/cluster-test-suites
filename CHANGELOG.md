@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.61.1] - 2024-07-23
+
 ### Fixed
 
 - Bump releases SDK to actually handle Azure
@@ -752,7 +754,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...HEAD
+[1.61.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...v1.61.1
 [1.61.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.60.0...v1.61.0
 [1.60.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.59.0...v1.60.0
 [1.59.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.58.0...v1.59.0
