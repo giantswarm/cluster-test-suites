@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.62.0] - 2024-07-24
+
 ### Changed
 
 - Re-enabled `capa-private` tests because EC2 user data limit issue should be solved now that we store Ignition bootstrap data in S3 ([issue](https://github.com/giantswarm/roadmap/issues/3442))
@@ -758,7 +760,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...HEAD
+[1.62.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...v1.62.0
 [1.61.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...v1.61.1
 [1.61.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.60.0...v1.61.0
 [1.60.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.59.0...v1.60.0
