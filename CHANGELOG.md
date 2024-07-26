@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.62.1] - 2024-07-26
+
 ### Fixed
 
 - Bump cluster-standup-teardown and clustertest with latest releases SDK to correctly get latest release
@@ -764,7 +766,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.1...HEAD
+[1.62.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...v1.62.1
 [1.62.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...v1.62.0
 [1.61.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...v1.61.1
 [1.61.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.60.0...v1.61.0
