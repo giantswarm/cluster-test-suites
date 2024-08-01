@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CAPV on CAPA tests.
+
 ## [1.62.1] - 2024-07-26
 
 ### Fixed
