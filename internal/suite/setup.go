@@ -17,11 +17,18 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
+const testing = true
+
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
+		if testing {
+			Skip("Skipping for test")
+			return
+		}
+
 		if isUpgrade && utils.ShouldSkipUpgrade() {
 			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
 			return
@@ -44,6 +51,11 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	})
 
 	AfterSuite(func() {
+		if testing {
+			Expect(testing).To(BeFalse())
+			return
+		}
+
 		if isUpgrade && utils.ShouldSkipUpgrade() {
 			return
 		}
