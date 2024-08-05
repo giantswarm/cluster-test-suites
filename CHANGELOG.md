@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Skip rolling update control plane tests if the control plane resource did not change
+
 ## [1.62.1] - 2024-07-26
 
 ### Fixed
