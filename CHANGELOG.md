@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.63.0] - 2024-08-06
+
 ### Changed
 
 - Skip rolling update control plane tests if the control plane resource did not change
@@ -771,7 +773,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.0...HEAD
+[1.63.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.1...v1.63.0
 [1.62.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...v1.62.1
 [1.62.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...v1.62.0
 [1.61.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...v1.61.1
