@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Skip rolling update control plane tests if the control plane resource did not change
+- Updated dependencies `clustertest`, `cluster-standup-teardown` and `teleport` to latest.
 
 ## [1.62.1] - 2024-07-26
 
