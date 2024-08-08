@@ -18,4 +18,5 @@ func Run(cfg *TestConfig) {
 	runHelloWorld(cfg.ExternalDnsSupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
+	runRequests()
 }
