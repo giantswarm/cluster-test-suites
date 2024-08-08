@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Upgraded `clustertest` to include fix for correctly handling Releases version prefixes.
+
 ## [1.63.0] - 2024-08-06
 
 ### Changed
