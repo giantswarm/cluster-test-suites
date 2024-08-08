@@ -37,6 +37,18 @@ func Run(cfg *TestConfig) {
 	Context("upgrade", func() {
 		var cluster *application.Cluster
 		var wcClient *client.Client
+		var preUpgradeControlPlaneResourceGeneration int64
+
+		BeforeAll(func() {
+			cluster = state.GetCluster()
+			preUpgradeControlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+			Expect(err).NotTo(HaveOccurred())
+			if preUpgradeControlPlane == nil {
+				preUpgradeControlPlaneResourceGeneration = 0
+			} else {
+				preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+			}
+		})
 
 		BeforeEach(func() {
 			var err error
@@ -174,6 +186,10 @@ func Run(cfg *TestConfig) {
 
 				if controlPlane == nil {
 					Skip("Control plane resource not found (assuming this is a managed cluster)")
+				}
+
+				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
+					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
 				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
