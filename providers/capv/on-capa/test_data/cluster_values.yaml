@@ -2,3 +2,5 @@
 global:
   connectivity:
     baseDomain: gaws.gigantic.io
+    proxy:
+      enabled: false
