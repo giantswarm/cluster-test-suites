@@ -14,10 +14,10 @@ require (
 	github.com/gravitational/teleport/api v0.0.0-20240809210340-82d73d45bc04
 	github.com/onsi/ginkgo/v2 v2.20.0
 	github.com/onsi/gomega v1.34.1
-	k8s.io/api v0.30.3
-	k8s.io/apiextensions-apiserver v0.30.3
-	k8s.io/apimachinery v0.30.3
-	k8s.io/client-go v0.30.3
+	k8s.io/api v0.31.0
+	k8s.io/apiextensions-apiserver v0.31.0
+	k8s.io/apimachinery v0.31.0
+	k8s.io/client-go v0.31.0
 	sigs.k8s.io/cluster-api v1.8.0
 	sigs.k8s.io/controller-runtime v0.18.5
 )
@@ -60,6 +60,7 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/giantswarm/k8smetadata v0.25.0 // indirect
 	github.com/giantswarm/kubectl-gs/v2 v2.57.0 // indirect
 	github.com/giantswarm/microerror v0.4.1 // indirect
@@ -150,6 +151,7 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.6-0.20210604193023-d5e0c0615ace // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
@@ -186,10 +188,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.15.3 // indirect
-	k8s.io/apiserver v0.30.3 // indirect
+	k8s.io/apiserver v0.31.0 // indirect
 	k8s.io/cli-runtime v0.30.3 // indirect
 	k8s.io/cluster-bootstrap v0.30.3 // indirect
-	k8s.io/component-base v0.30.3 // indirect
+	k8s.io/component-base v0.31.0 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240730131305-7a9a4e85957e // indirect
 	k8s.io/kubectl v0.30.3 // indirect
