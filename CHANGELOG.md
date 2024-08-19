@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPV on CAPA tests.
 
+## [1.64.0] - 2024-08-16
+
+### Changed
+
+- Updated all modules to latest (including support for Kubernetes v1.31)
+
+### Fixed
+
+- Replace `containerdVolumeSizeGB` and `kubeletVolumeSizeGB` with `libVolumeSizeGB` (from cluster-standup-teardown upgrade)
+
 ## [1.63.1] - 2024-08-08
 
 ### Fixed
@@ -783,7 +793,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.64.0...HEAD
+[1.64.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.1...v1.64.0
 [1.63.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.0...v1.63.1
 [1.63.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.1...v1.63.0
 [1.62.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...v1.62.1
