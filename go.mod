@@ -11,8 +11,8 @@ replace github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.4.2
 require (
 	github.com/cert-manager/cert-manager v1.15.3
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown v1.19.0
-	github.com/giantswarm/clustertest v1.18.0
+	github.com/giantswarm/cluster-standup-teardown v1.20.0
+	github.com/giantswarm/clustertest v1.19.0
 	github.com/gravitational/teleport/api v0.0.0-20240817175532-6f7156d8b214
 	github.com/onsi/ginkgo/v2 v2.20.0
 	github.com/onsi/gomega v1.34.1
@@ -25,7 +25,7 @@ require (
 )
 
 require (
-	dario.cat/mergo v1.0.0 // indirect
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect

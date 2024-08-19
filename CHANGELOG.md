@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPV on CAPA tests.
 
+### Changed
+
+- Updated `clustertest` and `cluster-standup-teardown` to latest to make use of Teleport kubeconfig if available
+
 ## [1.64.0] - 2024-08-16
 
 ### Changed
