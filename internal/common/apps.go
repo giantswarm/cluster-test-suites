@@ -31,8 +31,6 @@ func RunApps() {
 			defaultAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "default-apps")
 
 			if skipDefaultAppsApp {
-				// FIX ME: For private CAPZ tests, comment out the log line below.
-				// It cause a runtime error: invalid memory address or nil pointer dereference. Yet to know why.
 				logger.Log("Checking default apps deployed from the unified %s app (with default apps), so skipping check of %s App resource as it does not exist.", state.GetCluster().ClusterApp.AppName, state.GetCluster().DefaultAppsApp.AppName)
 			} else {
 				Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), defaultAppsAppName, state.GetCluster().Organization.GetNamespace())).
