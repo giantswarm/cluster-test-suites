@@ -1,1 +1,4 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  providerSpecific:
+    awsClusterRoleIdentityName: team-tinkerers-giantswarm-goat-wc-e2e
