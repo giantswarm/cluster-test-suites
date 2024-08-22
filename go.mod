@@ -11,7 +11,7 @@ replace github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.4.2
 require (
 	github.com/cert-manager/cert-manager v1.15.3
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown v1.20.0
+	github.com/giantswarm/cluster-standup-teardown v1.21.0
 	github.com/giantswarm/clustertest v1.19.0
 	github.com/gravitational/teleport/api v0.0.0-20240817175532-6f7156d8b214
 	github.com/onsi/ginkgo/v2 v2.20.0
