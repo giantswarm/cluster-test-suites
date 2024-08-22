@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.66.0] - 2024-08-22
+
 ### Added
 
 - Support for Private CAPZ tests
@@ -807,7 +809,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.65.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.0...HEAD
+[1.66.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.65.0...v1.66.0
 [1.65.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.64.0...v1.65.0
 [1.64.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.1...v1.64.0
 [1.63.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.0...v1.63.1
