@@ -1,6 +1,6 @@
 # Main / Shared
 * @giantswarm/team-tinkerers
-/internal @giantswarm/team-phoenix @giantswarm/team-rocket
+/internal @giantswarm/team-phoenix @giantswarm/team-rocket @giantswarm/team-turtles
 /internal/teleport @giantswarm/team-bigmac
 
 # Teams:
