@@ -1,12 +1,10 @@
 # Main / Shared
 * @giantswarm/team-tinkerers
-/internal @giantswarm/team-phoenix @giantswarm/team-rocket @giantswarm/team-turtles
-/internal/teleport @giantswarm/team-bigmac
+/common @giantswarm/team-phoenix @giantswarm/team-rocket
 
 # Teams:
 /providers/capz @giantswarm/team-phoenix
 /providers/capa @giantswarm/team-phoenix
-/providers/eks @giantswarm/team-phoenix
 /providers/capvcd @giantswarm/team-rocket
 /providers/capv @giantswarm/team-rocket
 
