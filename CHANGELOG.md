@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Output some debug logging when Cluster fails to standup during `BeforeSuite`
+
 ## [1.66.0] - 2024-08-22
 
 ### Added
