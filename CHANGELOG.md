@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.67.0] - 2024-08-27
+
 ### Added
 
 - Updated `clustertest` with support for unified cluster-vsphere app.
@@ -819,7 +821,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.67.0...HEAD
+[1.67.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.1...v1.67.0
 [1.66.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.0...v1.66.1
 [1.66.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.65.0...v1.66.0
 [1.65.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.64.0...v1.65.0
