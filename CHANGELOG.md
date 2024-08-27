@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Updated `clustertest` with support for unified cluster-vsphere app.
+
 ## [1.66.1] - 2024-08-23
 
 ### Fixed
