@@ -12,7 +12,7 @@ require (
 	github.com/cert-manager/cert-manager v1.15.3
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown v1.23.0
-	github.com/giantswarm/clustertest v1.21.0
+	github.com/giantswarm/clustertest v1.21.1
 	github.com/gravitational/teleport/api v0.0.0-20240901155901-a1b2afc62ad9
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
