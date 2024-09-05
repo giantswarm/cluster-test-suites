@@ -1,4 +1,6 @@
 global:
+  providerSpecific:
+    awsClusterRoleIdentityName: team-tinkerers-giantswarm-grizzly-wc-e2e
   nodePools:
     # Here we override the default values from cluster-standup-teardown and make the following changes:
     #
