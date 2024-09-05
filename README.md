@@ -4,53 +4,60 @@
 
 ## ☑️ Requirements
 
-* A valid Kubeconfig with the required context defined. (See [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) for more details.)
+* A valid Kubeconfig, pointing at a `stable-testing` MC, with the required context defined. (See [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) for more details.)
 * Install [ginkgo](https://onsi.github.io/ginkgo/) on your machine: `go install github.com/onsi/ginkgo/v2/ginkgo`.
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 
 Optional:
+
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
 * When `TELEPORT_IDENTITY_FILE` environment variable is set to point to the path of a valid teleport credential, the test will check if E2E WC is registered in Teleport cluster (`teleport.giantswarm.io`). If it isn't set, the test will be skipped.
 
 ## 🏃 Running Tests
 
-Assuming the above requirements are fulfilled:
-
 > [!NOTE]
 > If you need the current kubeconfig its best to pull it from the `cluster-test-suites-mc-kubeconfig` Secret on the Tekton cluster.
-If you need the current teleport identity file its best to pull it from the `teleport-identity-output` Secret on the Tekton cluster.
+>
+> If you need the current teleport identity file its best to pull it from the `teleport-identity-output` Secret on the Tekton cluster.
 
-Running the all test suites:
+> [!IMPORTANT]
+> The test suites are designed to be run against `stable-testing` MCs and possibly require some config or resources that already exists on those MCs.
+>
+> If you require running the tests against a different MC please reach out to [#Team-Tenet](https://gigantic.slack.com/archives/C07KSM2E51A) to discuss any pre-requisites that might be needed.
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r .
-```
+Assuming the above requirements are fulfilled:
 
-Running a single provider (e.g. `capa`):
+* Running all the test suites:
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa
-```
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r .
+  ```
 
-Running a single test suite (e.g. the `capa` `standard` test suite)
+* Running a single provider (e.g. `capa`):
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa/standard
-```
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa
+  ```
 
-Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
+* Running a single test suite (e.g. the `capa` `standard` test suite)
 
-```sh
-kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa/standard
+  ```
 
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENTITY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
-```
+* Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
 
-Running with Docker:
+  ```sh
+  kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
 
-```sh
-docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
-```
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENTITY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
+  ```
+
+* Running with Docker:
+
+  ```sh
+  docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
+  ```
 
 ### Testing with an in-progress Release CR
 
