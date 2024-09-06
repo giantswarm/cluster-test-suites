@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use dedicated AWS Accounts for the different CAPA test suites (Private, EKS and "normal")
+
 ## [1.68.0] - 2024-09-06
 
 ### Fixed
