@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.69.0] - 2024-09-06
+
 ### Changed
 
 - Use dedicated AWS Accounts for the different CAPA test suites (Private, EKS and "normal")
@@ -835,7 +837,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.68.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.69.0...HEAD
+[1.69.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.68.0...v1.69.0
 [1.68.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.67.0...v1.68.0
 [1.67.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.1...v1.67.0
 [1.66.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.0...v1.66.1
