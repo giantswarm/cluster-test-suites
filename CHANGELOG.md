@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Moved common functions into `clustertest` to share between repos
+
 ## [1.70.1] - 2024-09-19
 
 ### Fixed
