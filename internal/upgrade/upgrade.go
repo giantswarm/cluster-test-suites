@@ -8,6 +8,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
@@ -61,7 +62,12 @@ func Run(cfg *TestConfig) {
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(state.GetContext(), wcClient, int(replicas)), 12, 5*time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreNumNodesReady(state.GetContext(), wcClient, int(replicas), &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+					12,
+					5*time.Second,
+				)).
 				WithTimeout(cfg.ControlPlaneNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -106,28 +112,48 @@ func Run(cfg *TestConfig) {
 		common.RunApps()
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllDeploymentsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDeploymentsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllStatefulSetsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllStatefulSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
-			Eventually(wait.Consistent(common.CheckAllDaemonSetsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDaemonSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(common.CheckAllPodsSuccessfulPhase(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllPodsInSuccessfulPhase(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())

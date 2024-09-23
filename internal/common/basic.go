@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
@@ -56,7 +54,12 @@ func runBasic() {
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).NotTo(HaveOccurred())
 
-			Eventually(wait.Consistent(CheckControlPlaneNodesReady(state.GetContext(), wcClient, int(replicas)), 12, 5*time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreNumNodesReady(state.GetContext(), wcClient, int(replicas), &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+					5,
+					5*time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -77,7 +80,12 @@ func runBasic() {
 		})
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(CheckAllDeploymentsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDeploymentsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(
@@ -87,7 +95,12 @@ func runBasic() {
 		})
 
 		It("has all its StatefulSets Ready (means all replicas are running)", func() {
-			Eventually(wait.Consistent(CheckAllStatefulSetsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllStatefulSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(
@@ -97,7 +110,12 @@ func runBasic() {
 		})
 
 		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
-			Eventually(wait.Consistent(CheckAllDaemonSetsReady(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDaemonSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(
@@ -107,14 +125,24 @@ func runBasic() {
 		})
 
 		It("has all its Jobs completed successfully", func() {
-			Eventually(wait.Consistent(CheckAllJobsSucceeded(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllJobsSucceeded(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
 		It("has all of its Pods in the Running state", func() {
-			Eventually(wait.Consistent(CheckAllPodsSuccessfulPhase(state.GetContext(), wcClient), 10, time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllPodsInSuccessfulPhase(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -147,18 +175,6 @@ func runBasic() {
 	})
 }
 
-func CheckControlPlaneNodesReady(ctx context.Context, wcClient *client.Client, expectedNodes int) func() error {
-	controlPlaneFunc := wait.AreNumNodesReady(ctx, wcClient, expectedNodes, &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""})
-
-	return func() error {
-		ok, err := controlPlaneFunc()
-		if !ok {
-			return fmt.Errorf("unexpected number of nodes")
-		}
-		return err
-	}
-}
-
 func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values *application.ClusterValues) func() error {
 	minNodes := 0
 	maxNodes := 0
@@ -188,122 +204,6 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 		if !ok {
 			return fmt.Errorf("unexpected number of nodes")
 		}
-		return nil
-	}
-}
-
-func CheckAllPodsSuccessfulPhase(ctx context.Context, wcClient *client.Client) func() error {
-	return func() error {
-		podList := &corev1.PodList{}
-		err := wcClient.List(ctx, podList)
-		if err != nil {
-			return err
-		}
-
-		for _, pod := range podList.Items {
-			phase := pod.Status.Phase
-			if phase != corev1.PodRunning && phase != corev1.PodSucceeded {
-				logger.Log("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
-				return fmt.Errorf("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
-			}
-		}
-
-		logger.Log("All (%d) pods currently in a running or completed state", len(podList.Items))
-		return nil
-	}
-}
-
-func CheckAllDeploymentsReady(ctx context.Context, wcClient *client.Client) func() error {
-	return func() error {
-		deploymentList := &appsv1.DeploymentList{}
-		err := wcClient.List(ctx, deploymentList)
-		if err != nil {
-			return err
-		}
-
-		for _, deployment := range deploymentList.Items {
-			available := deployment.Status.AvailableReplicas
-			desired := *deployment.Spec.Replicas
-			if available != desired {
-				logger.Log("deployment %s/%s has %d/%d replicas available", deployment.Namespace, deployment.Name, available, desired)
-				return fmt.Errorf("deployment %s/%s has %d/%d replicas available", deployment.Namespace, deployment.Name, available, desired)
-			}
-		}
-
-		logger.Log("All (%d) deployments have all replicas running", len(deploymentList.Items))
-		return nil
-	}
-}
-
-func CheckAllStatefulSetsReady(ctx context.Context, wcClient *client.Client) func() error {
-	return func() error {
-		statefulSetList := &appsv1.StatefulSetList{}
-		err := wcClient.List(ctx, statefulSetList)
-		if err != nil {
-			return err
-		}
-
-		for _, statefulSet := range statefulSetList.Items {
-			available := statefulSet.Status.AvailableReplicas
-			desired := *statefulSet.Spec.Replicas
-			if available != desired {
-				logger.Log("statefulSet %s/%s has %d/%d replicas available", statefulSet.Namespace, statefulSet.Name, available, desired)
-				return fmt.Errorf("statefulSet %s/%s has %d/%d replicas available", statefulSet.Namespace, statefulSet.Name, available, desired)
-			}
-		}
-
-		logger.Log("All (%d) statefulSets have all replicas running", len(statefulSetList.Items))
-		return nil
-	}
-}
-
-func CheckAllJobsSucceeded(ctx context.Context, wcClient *client.Client) func() error {
-	return func() error {
-		jobList := &batchv1.JobList{}
-		err := wcClient.List(ctx, jobList)
-		if err != nil {
-			return err
-		}
-
-		var loopErr error
-		for _, job := range jobList.Items {
-			if job.Status.Succeeded == 0 {
-				logger.Log("Job %s/%s has not succeeded. (Failed: '%d')", job.ObjectMeta.Namespace, job.ObjectMeta.Name, job.Status.Failed)
-				// We wrap the erros so that we can log out for all failures, not just the first found
-				if loopErr != nil {
-					loopErr = fmt.Errorf("%w, job %s/%s has not succeeded", loopErr, job.ObjectMeta.Namespace, job.ObjectMeta.Name)
-				} else {
-					loopErr = fmt.Errorf("job %s/%s has not succeeded", job.ObjectMeta.Namespace, job.ObjectMeta.Name)
-				}
-			}
-		}
-		if loopErr != nil {
-			return loopErr
-		}
-
-		logger.Log("All (%d) Jobs have completed successfully", len(jobList.Items))
-		return nil
-	}
-}
-
-func CheckAllDaemonSetsReady(ctx context.Context, wcClient *client.Client) func() error {
-	return func() error {
-		daemonSetList := &appsv1.DaemonSetList{}
-		err := wcClient.List(ctx, daemonSetList)
-		if err != nil {
-			return err
-		}
-
-		for _, daemonSet := range daemonSetList.Items {
-			current := daemonSet.Status.CurrentNumberScheduled
-			desired := daemonSet.Status.DesiredNumberScheduled
-			if current != desired {
-				logger.Log("daemonSet %s/%s has %d/%d daemon pods available", daemonSet.Namespace, daemonSet.Name, current, desired)
-				return fmt.Errorf("daemonSet %s/%s has %d/%d daemon pods available", daemonSet.Namespace, daemonSet.Name, current, desired)
-			}
-		}
-
-		logger.Log("All (%d) daemonSets have all daemon pods running", len(daemonSetList.Items))
 		return nil
 	}
 }
