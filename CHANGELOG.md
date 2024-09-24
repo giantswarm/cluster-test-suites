@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.71.1] - 2024-09-24
 
+### Changed
+
+- Upgraded `cluster-standup-teardown` to remove node classes from capvcd test values 
+
 ## [1.71.0] - 2024-09-23
 
 ### Changed
