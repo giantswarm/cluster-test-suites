@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded `cluster-standup-teardown` to add name property to the capvcd test values
+
 ## [1.71.1] - 2024-09-24
 
 ### Changed
