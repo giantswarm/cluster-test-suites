@@ -983,8 +983,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/gravitational/teleport/api v0.0.0-20240921192342-ed26cb119227 h1:X+Z/gzgT5F9DGw/M4vjoBIseQ7cMWEjGjcqybl/PZeE=
-github.com/gravitational/teleport/api v0.0.0-20240921192342-ed26cb119227/go.mod h1:9jhKcAmtkx7hO/BlbChY8Bhm78/LnfN16waIZ9wZq54=
+github.com/gravitational/teleport/api v0.0.0-20240928100213-82fb33db7680 h1:x+q5T8u1asOrrmYi89OSFSwKU6MLm3z+z9x1JRqfQZo=
+github.com/gravitational/teleport/api v0.0.0-20240928100213-82fb33db7680/go.mod h1:9jhKcAmtkx7hO/BlbChY8Bhm78/LnfN16waIZ9wZq54=
 github.com/gravitational/trace v1.4.0 h1:TtTeMElVwMX21Udb1nmK2tpWYAAMJoyjevzKOaxIFZQ=
 github.com/gravitational/trace v1.4.0/go.mod h1:g79NZzwCjWS/VVubYowaFAQsTjVTohGi0hFbIWSyGoY=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=
