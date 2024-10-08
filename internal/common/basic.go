@@ -131,9 +131,12 @@ func runBasic() {
 					10,
 					time.Second,
 				)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.JobsUnsuccessful(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("has all of its Pods in the Running state", func() {
@@ -143,9 +146,12 @@ func runBasic() {
 					10,
 					time.Second,
 				)).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("has Cluster Ready condition with Status='True'", func() {
