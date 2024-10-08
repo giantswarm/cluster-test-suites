@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.72.0] - 2024-10-08
+
 ### Added
 
 - Added test to CAPA test suites to test pulling private images from ECR
@@ -872,7 +874,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.72.0...HEAD
+[1.72.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.2...v1.72.0
 [1.71.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.1...v1.71.2
 [1.71.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.0...v1.71.1
 [1.71.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.70.1...v1.71.0
