@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped `cluster-standup-teardown` to v1.25.4 to add proxy vars to CAPVCD test values
+
 ## [1.72.0] - 2024-10-08
 
 ### Added
