@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added test to CAPA test suites to test pulling private images from ECR
+- Extra failure handlers to some of the basic tests
 
 ## [1.71.2] - 2024-09-26
 
