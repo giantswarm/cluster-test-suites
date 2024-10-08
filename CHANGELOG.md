@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added test to CAPA test suites to test pulling private images from ECR
+
 ## [1.71.2] - 2024-09-26
 
 ### Changed
@@ -17,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upgraded `cluster-standup-teardown` to remove node classes from capvcd test values 
+- Upgraded `cluster-standup-teardown` to remove node classes from capvcd test values
 
 ## [1.71.0] - 2024-09-23
 

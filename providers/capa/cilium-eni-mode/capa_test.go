@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/internal/ecr"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -21,6 +22,9 @@ var _ = Describe("Cilium ENI mode tests", func() {
 		ExternalDnsSupported:         true,
 		ControlPlaneMetricsSupported: true,
 	})
+
+	// ECR Credential Provider specific tests
+	ecr.Run()
 
 	runSecondaryPodIPs()
 })

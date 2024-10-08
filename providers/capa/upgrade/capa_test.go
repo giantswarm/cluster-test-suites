@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/internal/ecr"
 	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
 )
 
@@ -18,4 +19,7 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 		ExternalDnsSupported:         true,
 		ControlPlaneMetricsSupported: true,
 	})
+
+	// ECR Credential Provider specific tests
+	ecr.Run()
 })
