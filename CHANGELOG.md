@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Change number of reserved IPs for LB in vSphere pool to 1.
+
 ## [1.72.0] - 2024-10-08
 
 ### Added
