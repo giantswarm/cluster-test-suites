@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped `cluster-standup-teardown` to v1.25.6 to change number of reserved IPs for LB in vSphere pool to 1.
+
 ### Fixed
 
 - Bumped `cluster-standup-teardown` to v1.25.5 to add proxy vars to CAPVCD test values
