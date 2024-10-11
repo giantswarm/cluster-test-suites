@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bumped `cluster-standup-teardown` to v1.25.6 to change number of reserved IPs for LB in vSphere pool to 1.
+- Bumped `cluster-standup-teardown` to v1.25.7 to update the values used for CAPV and CAPVCD clusters.
 - Bumped `sigs.k8s.io/cluster-api` to v1.8.4
 - Bumped `github.com/cert-manager/cert-manager` to v1.16.1
 
