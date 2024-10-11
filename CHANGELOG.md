@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.73.0] - 2024-10-11
+
 ### Changed
 
 - Bumped `cluster-standup-teardown` to v1.25.7 to update the values used for CAPV and CAPVCD clusters.
@@ -885,7 +887,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.72.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.73.0...HEAD
+[1.73.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.72.0...v1.73.0
 [1.72.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.2...v1.72.0
 [1.71.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.1...v1.71.2
 [1.71.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.0...v1.71.1
