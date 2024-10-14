@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Debug the Cluster CR status when the workload cluster fails to standup correctly during `BeforeSuite`
+
 ## [1.73.0] - 2024-10-11
 
 ### Changed

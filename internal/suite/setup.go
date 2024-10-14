@@ -6,6 +6,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 
 	cb "github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder"
 	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
@@ -13,6 +15,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
@@ -70,13 +74,41 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 				events, err := framework.MC().GetEventsForResource(ctx, clusterApp)
 				if err != nil {
 					logger.Log("Failed to get events for App: %v", err)
-					return
+				} else {
+					if len(events.Items) == 0 {
+						logger.Log("No events found for Cluster App")
+					}
+					for _, event := range events.Items {
+						logger.Log("Event: Reason='%s', Message='%s', Last Occurred='%v'", event.Reason, event.Message, event.LastTimestamp)
+					}
 				}
-				if len(events.Items) == 0 {
-					logger.Log("No events found for Cluster App")
-				}
-				for _, event := range events.Items {
-					logger.Log("Event: Reason='%s', Message='%s', Last Occurred='%v'", event.Reason, event.Message, event.LastTimestamp)
+
+				if clusterApp.Status.Release.Status == "deployed" {
+					logger.Log("Getting Cluster CR for the Cluster App")
+					cl := &capi.Cluster{
+						ObjectMeta: v1.ObjectMeta{
+							Name:      cluster.Name,
+							Namespace: cluster.GetNamespace(),
+						},
+					}
+
+					err = framework.MC().Get(ctx, cr.ObjectKeyFromObject(cl), cl)
+					if err != nil {
+						logger.Log("Failed to get Cluster CR: %v", err)
+					} else {
+						logger.Log(
+							"Cluster status: Phase='%s', InfrastructureReady='%t', ControlPlaneReady='%t', FailureReason='%s', FailureMessage='%s'",
+							cl.Status.Phase,
+							cl.Status.InfrastructureReady,
+							cl.Status.ControlPlaneReady,
+							ptr.Deref(cl.Status.FailureReason, ""),
+							ptr.Deref(cl.Status.FailureMessage, ""),
+						)
+
+						for _, condition := range cl.Status.Conditions {
+							logger.Log("Cluster condition with type '%s' and status '%s' - Message='%s', Reason='%s', Last Occurred='%v'", condition.Type, condition.Status, condition.Message, condition.Reason, condition.LastTransitionTime)
+						}
+					}
 				}
 			}
 		})()
