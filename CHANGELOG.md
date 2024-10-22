@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `clustertest` and `cluster-standup-teardown` to support `cluster-cloud-director` as a unified app
+
 ## [1.74.0] - 2024-10-15
 
 ### Added
