@@ -13,7 +13,7 @@ require (
 	github.com/giantswarm/clustertest v1.29.0
 	github.com/gravitational/teleport/api v0.0.0-20241020172545-fc7bd616613a
 	github.com/onsi/ginkgo/v2 v2.21.0
-	github.com/onsi/gomega v1.35.0
+	github.com/onsi/gomega v1.35.1
 	k8s.io/api v0.31.2
 	k8s.io/apiextensions-apiserver v0.31.2
 	k8s.io/apimachinery v0.31.2
