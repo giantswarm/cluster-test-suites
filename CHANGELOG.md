@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `cluster-standup-teardown` to 1.27.0
+- Updated `cluster-test` to 1.30.0
+
 ## [1.75.1] - 2024-10-31
 
 ### Changed
