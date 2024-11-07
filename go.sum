@@ -784,10 +784,10 @@ github.com/fxamacker/cbor/v2 v2.7.0/go.mod h1:pxXPTn3joSm21Gbwsv0w9OSA2y1HFR9qXE
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/giantswarm/apiextensions-application v0.6.2 h1:XL86OrpprWl5Wp38EUvUXt3ztTo25+V63oDVlFwDpNg=
 github.com/giantswarm/apiextensions-application v0.6.2/go.mod h1:8ylqSmDSzFblCppRQTFo8v9s/F6MX6RTusVVoDDfWso=
-github.com/giantswarm/cluster-standup-teardown v1.27.1 h1:U1Sf4+pxg++G0ZWQiI3YgkvCNd5NzoP+vpyLRB04dI4=
-github.com/giantswarm/cluster-standup-teardown v1.27.1/go.mod h1:szu1QvP+It9F3wvVxZgmIW3GjNP1frqTrNAu2E4ID/E=
-github.com/giantswarm/clustertest v1.30.1 h1:SfzAGpShGSjd0G6o3XfhUxAbTMGnyw6qv4UbF+dkVSc=
-github.com/giantswarm/clustertest v1.30.1/go.mod h1:41BvUGnuAXlTT5cbGLuZCSUSMVO7zz46qpvfhdK2nV8=
+github.com/giantswarm/cluster-standup-teardown v1.27.2 h1:KUbDa5/rEZAjrVMo6bDrs1DaT2bp3hTGd1KmAv6atAs=
+github.com/giantswarm/cluster-standup-teardown v1.27.2/go.mod h1:VJQQBx7hQpR9QnFDWunocVJUuVcAsYieocR+/eOGevo=
+github.com/giantswarm/clustertest v1.30.2 h1:zPiXAf12AG5lU/SBG7aoN/JohaZFnE0OIzMG9rgjOlQ=
+github.com/giantswarm/clustertest v1.30.2/go.mod h1:41BvUGnuAXlTT5cbGLuZCSUSMVO7zz46qpvfhdK2nV8=
 github.com/giantswarm/k8smetadata v0.25.0 h1:6mKmmm4xHPuBvxDMAkIhU5oj6KJkJSaR2s5esIsnHs4=
 github.com/giantswarm/k8smetadata v0.25.0/go.mod h1:QiQAyaZnwco1U0lENLF0Kp4bSN4dIPwIlHWEvUo3ES8=
 github.com/giantswarm/kubectl-gs/v2 v2.57.0 h1:IMmho55Qq+WE+frJXcTBhx19+J54xwu/j4+pGU5YecA=
