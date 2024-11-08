@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Marked the EKS tests as skipped / pending until we re-focus on them again
+
 ## [1.76.2] - 2024-11-07
 
 ### Changed
