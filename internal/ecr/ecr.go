@@ -35,8 +35,9 @@ func Run() {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
-			var err error
+			helper.SetResponsibleTeam(helper.TeamPhoenix)
 
+			var err error
 			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
 			if err != nil {
 				Fail(err.Error())

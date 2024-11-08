@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Introduced a new `SetResponsibleTeam` function to annotate test cases with the team responsible for their functionality passing.
+
 ## [1.79.0] - 2024-11-19
 
 ### Changed
 
-- Increase CAPVCD `ClusterReady` timeout to 40Min 
+- Increase CAPVCD `ClusterReady` timeout to 40Min
 
 ## [1.78.0] - 2024-11-19
 
