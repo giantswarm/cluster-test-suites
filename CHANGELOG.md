@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Skip `capv-on-capa` and `capv-on-capz` tests until we can figure out VPN routing to the new vSphere provider
+
 ## [1.76.3] - 2024-11-08
 
 ### Changed
