@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Skip `capv-on-capa` and `capv-on-capz` tests until we can figure out VPN routing to the new vSphere provider
+- Bump `cluster-standup-teardown` to v1.27.3 to update CAPV cluster values for the new vSphere provider
 
 ## [1.76.3] - 2024-11-08
 
