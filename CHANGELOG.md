@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.76.4] - 2024-11-14
+
 ### Changed
 
 - Skip `capv-on-capa` and `capv-on-capz` tests until we can figure out VPN routing to the new vSphere provider
@@ -941,7 +943,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.3...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.4...HEAD
+[1.76.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.3...v1.76.4
 [1.76.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.2...v1.76.3
 [1.76.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.1...v1.76.2
 [1.76.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.0...v1.76.1
