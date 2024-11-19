@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
 - Increase CAPVCD `ClusterReady` timeout to 40Min 
 
 ## [1.78.0] - 2024-11-19
