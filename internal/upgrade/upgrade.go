@@ -86,8 +86,8 @@ func Run(cfg *TestConfig) {
 		})
 
 		It("has Cluster Ready condition with Status='True'", func() {
-			// Overriding the default timeout, when upgradeClusterReadyTimeout is set
-			timeout := state.GetTestTimeout(timeout.UpgradeClusterReadyTimeout, 15*time.Minute)
+			// Overriding the default timeout, when clusterReadyTimeout is set
+			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
 
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
