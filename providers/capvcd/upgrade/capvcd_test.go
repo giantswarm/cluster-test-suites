@@ -6,10 +6,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
+	BeforeEach(func() {
+		// Set the timeout for cluster ready to 25 minutes for CAPVCD
+		state.SetTestTimeout(timeout.UpgradeClusterReadyTimeout, time.Minute*25)
+	})
 	// it is better to get defaults at first and then customize
 	// further changes in defaults will be effective here.
 	cfg := upgrade.NewTestConfigWithDefaults()

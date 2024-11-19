@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Allow to override `ClusterReady` timeout for cluster upgrade test
+- Set CAPVCD `ClusterReady` timeout to 25Min in upgrade test
 
 ## [1.76.4] - 2024-11-14
 
