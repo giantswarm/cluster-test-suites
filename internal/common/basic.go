@@ -11,6 +11,7 @@ import (
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/failurehandler"
@@ -155,10 +156,13 @@ func runBasic() {
 		})
 
 		It("has Cluster Ready condition with Status='True'", func() {
+			// Overriding the default timeout, when ClusterReadyTimeout is set
+			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
+
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
 			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
 		})
