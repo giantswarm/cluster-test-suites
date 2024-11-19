@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.78.0] - 2024-11-19
+
 ### Changed
 
 - Set CAPVCD `ClusterReady` timeout to 25Min in basic test
@@ -954,7 +956,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.77.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.78.0...HEAD
+[1.78.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.77.0...v1.78.0
 [1.77.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.4...v1.77.0
 [1.76.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.3...v1.76.4
 [1.76.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.2...v1.76.3
