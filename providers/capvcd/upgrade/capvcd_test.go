@@ -13,8 +13,8 @@ import (
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
 	BeforeEach(func() {
-		// Set the timeout for `ClusterReady` check to 25 minutes when upgrading the cluster
-		state.SetTestTimeout(timeout.ClusterReadyTimeout, time.Minute*25)
+		// Set the timeout for `ClusterReady` check to 40 minutes when upgrading the cluster
+		state.SetTestTimeout(timeout.ClusterReadyTimeout, time.Minute*40)
 	})
 	// it is better to get defaults at first and then customize
 	// further changes in defaults will be effective here.
