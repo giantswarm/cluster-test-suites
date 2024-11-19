@@ -17,6 +17,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -85,10 +86,13 @@ func Run(cfg *TestConfig) {
 		})
 
 		It("has Cluster Ready condition with Status='True'", func() {
+			// Overriding the default timeout, when upgradeClusterReadyTimeout is set
+			timeout := state.GetTestTimeout(timeout.UpgradeClusterReadyTimeout, 15*time.Minute)
+
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
 			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
 		})
