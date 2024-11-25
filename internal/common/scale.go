@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -32,6 +33,8 @@ func runScale(autoScalingSupported bool) {
 			if !autoScalingSupported {
 				Skip("autoscaling is not supported")
 			}
+
+			helper.SetResponsibleTeam(helper.TeamTenet)
 
 			var err error
 

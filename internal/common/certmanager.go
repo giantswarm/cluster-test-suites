@@ -6,6 +6,7 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
@@ -27,6 +28,8 @@ func runCertManager() {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
+			helper.SetResponsibleTeam(helper.TeamShield)
+
 			var err error
 
 			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)

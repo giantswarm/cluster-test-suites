@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/cluster-test-suites/internal/teleport"
 	"github.com/giantswarm/clustertest/pkg/logger"
@@ -21,6 +22,8 @@ func runTeleport(teleportSupported bool) {
 		var teleportClient *tc.Client
 
 		BeforeEach(func() {
+			helper.SetResponsibleTeam(helper.TeamShield)
+
 			if !teleportSupported {
 				Skip("Teleport is not supported.")
 			}

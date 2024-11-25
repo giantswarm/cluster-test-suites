@@ -29,6 +29,8 @@ func runStorage() {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
+			helper.SetResponsibleTeam(helper.TeamTenet)
+
 			var err error
 
 			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
