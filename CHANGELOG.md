@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Re-enable `capv-on-capa` and `capv-on-capz` tests
+
 ## [1.80.0] - 2024-11-25
 
 ### Added
