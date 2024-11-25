@@ -34,7 +34,7 @@ func runScale(autoScalingSupported bool) {
 				Skip("autoscaling is not supported")
 			}
 
-			helper.SetResponsibleTeam(helper.TeamPhoenix)
+			helper.SetResponsibleTeam(helper.TeamTenet)
 
 			var err error
 
