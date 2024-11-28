@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Attempt to get the owner team of any failing Apps and report them with test failures for use in notifications
+
+### Fixed
+
+- Set responsible teams for observability-bundle and security-bundle test cases
+
 ## [1.80.0] - 2024-11-25
 
 ### Added
