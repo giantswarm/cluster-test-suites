@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.81.0] - 2024-11-29
+
 ### Added
 
 - Attempt to get the owner team of any failing Apps and report them with test failures for use in notifications
@@ -976,7 +978,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.80.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.81.0...HEAD
+[1.81.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.80.0...v1.81.0
 [1.80.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.79.0...v1.80.0
 [1.79.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.78.0...v1.79.0
 [1.78.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.77.0...v1.78.0
