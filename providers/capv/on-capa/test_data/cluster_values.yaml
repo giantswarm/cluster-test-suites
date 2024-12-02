@@ -4,3 +4,7 @@ global:
     baseDomain: gaws.gigantic.io
     proxy:
       enabled: false
+  components:
+    containerd:
+      managementClusterRegistryCache:
+        enabled: false
