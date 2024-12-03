@@ -2,3 +2,7 @@
 global:
   connectivity:
     baseDomain: azuretest.gigantic.io
+  components:
+    containerd:
+      managementClusterRegistryCache:
+        enabled: false
