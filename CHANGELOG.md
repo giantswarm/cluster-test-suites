@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump `cluster-standup-teardown` to v1.27.4 to use lower lifecycle hooks heartbeat timeout to allow spot instances to terminate more quickly (CAPA)
+
 ## [1.81.0] - 2024-11-29
 
 ### Added
