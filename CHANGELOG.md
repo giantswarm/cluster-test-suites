@@ -7,6 +7,381 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.82.0] - 2024-12-11
+
+### Changed
+
+- Bump `cluster-standup-teardown` to v1.27.4 to use lower lifecycle hooks heartbeat timeout to allow spot instances to terminate more quickly (CAPA)
+
+## [1.81.0] - 2024-11-29
+
+### Added
+
+- Attempt to get the owner team of any failing Apps and report them with test failures for use in notifications
+
+### Fixed
+
+- Set responsible teams for observability-bundle and security-bundle test cases
+
+## [1.80.0] - 2024-11-25
+
+### Added
+
+- Introduced a new `SetResponsibleTeam` function to annotate test cases with the team responsible for their functionality passing.
+
+## [1.79.0] - 2024-11-19
+
+### Changed
+
+- Increase CAPVCD `ClusterReady` timeout to 40Min
+
+## [1.78.0] - 2024-11-19
+
+### Changed
+
+- Set CAPVCD `ClusterReady` timeout to 25Min in basic test
+
+## [1.77.0] - 2024-11-19
+
+### Changed
+
+- Allow to override `ClusterReady` timeout for cluster upgrade test
+- Set CAPVCD `ClusterReady` timeout to 25Min in upgrade test
+
+## [1.76.4] - 2024-11-14
+
+### Changed
+
+- Skip `capv-on-capa` and `capv-on-capz` tests until we can figure out VPN routing to the new vSphere provider
+- Bump `cluster-standup-teardown` to v1.27.3 to update CAPV cluster values for the new vSphere provider
+
+## [1.76.3] - 2024-11-08
+
+### Changed
+
+- Marked the EKS tests as skipped / pending until we re-focus on them again
+
+## [1.76.2] - 2024-11-07
+
+### Changed
+
+- Updated `cluster-standup-teardown` to 1.27.2
+- Updated `cluster-test` to 1.30.2
+
+## [1.76.1] - 2024-11-07
+
+### Changed
+
+- Updated `cluster-standup-teardown` to 1.27.1
+- Updated `cluster-test` to 1.30.1
+
+## [1.76.0] - 2024-11-07
+
+### Changed
+
+- Updated `cluster-standup-teardown` to 1.27.0
+- Updated `cluster-test` to 1.30.0
+
+## [1.75.1] - 2024-10-31
+
+### Changed
+
+- Updated `cluster-standup-teardown` to 1.26.1
+
+## [1.75.0] - 2024-10-22
+
+### Changed
+
+- Updated `clustertest` and `cluster-standup-teardown` to support `cluster-cloud-director` as a unified app
+
+## [1.74.0] - 2024-10-15
+
+### Added
+
+- Debug the Cluster CR status when the workload cluster fails to standup correctly during `BeforeSuite`
+
+### Fixed
+
+- Updated `clustertest` to include latest supported Release providers
+
+## [1.73.0] - 2024-10-11
+
+### Changed
+
+- Bumped `cluster-standup-teardown` to v1.25.7 to update the values used for CAPV and CAPVCD clusters.
+- Bumped `sigs.k8s.io/cluster-api` to v1.8.4
+- Bumped `github.com/cert-manager/cert-manager` to v1.16.1
+
+### Fixed
+
+- Bumped `cluster-standup-teardown` to v1.25.5 to add proxy vars to CAPVCD test values
+- Bumped `clustertest` to `v1.27.3` to include Provider fix when loading existing workload cluster
+
+## [1.72.0] - 2024-10-08
+
+### Added
+
+- Added test to CAPA test suites to test pulling private images from ECR
+- Extra failure handlers to some of the basic tests
+
+## [1.71.2] - 2024-09-26
+
+### Changed
+
+- Upgraded `cluster-standup-teardown` to add name property to the capvcd test values
+
+## [1.71.1] - 2024-09-24
+
+### Changed
+
+- Upgraded `cluster-standup-teardown` to remove node classes from capvcd test values
+
+## [1.71.0] - 2024-09-23
+
+### Changed
+
+- Moved common functions into `clustertest` to share between repos
+
+## [1.70.1] - 2024-09-19
+
+### Fixed
+
+- Update `clustertest` with GitHub latest release fix
+
+## [1.70.0] - 2024-09-17
+
+### Changed
+
+- Upgraded Go to v1.23.1 and updated all modules to match
+
+## [1.69.0] - 2024-09-06
+
+### Changed
+
+- Use dedicated AWS Accounts for the different CAPA test suites (Private, EKS and "normal")
+
+## [1.68.0] - 2024-09-06
+
+### Fixed
+
+- Updated clustertest with fix for version prefix on releases
+
+## Changed
+
+- Updated all dependencies to latest versions
+
+## [1.67.0] - 2024-08-27
+
+### Added
+
+- Updated `clustertest` with support for unified cluster-vsphere app.
+
+## [1.66.1] - 2024-08-23
+
+### Fixed
+
+- Output some debug logging when Cluster fails to standup during `BeforeSuite`
+
+## [1.66.0] - 2024-08-22
+
+### Added
+
+- Added support for private CAPZ tests.
+
+### Changed
+
+- Updated `cluster-standup-teardown` to latest to make use of private CAPZ cluster builder.
+
+## [1.65.0] - 2024-08-19
+
+### Added
+
+- CAPV on CAPA tests.
+
+### Changed
+
+- Updated `clustertest` and `cluster-standup-teardown` to latest to make use of Teleport kubeconfig if available
+
+## [1.64.0] - 2024-08-16
+
+### Changed
+
+- Updated all modules to latest (including support for Kubernetes v1.31)
+
+### Fixed
+
+- Replace `containerdVolumeSizeGB` and `kubeletVolumeSizeGB` with `libVolumeSizeGB` (from cluster-standup-teardown upgrade)
+
+## [1.63.1] - 2024-08-08
+
+### Fixed
+
+- Upgraded `clustertest` to include fix for correctly handling Releases version prefixes.
+
+## [1.63.0] - 2024-08-06
+
+### Changed
+
+- Skip rolling update control plane tests if the control plane resource did not change
+- Updated dependencies `clustertest`, `cluster-standup-teardown` and `teleport` to latest.
+
+## [1.62.1] - 2024-07-26
+
+### Fixed
+
+- Bump cluster-standup-teardown and clustertest with latest releases SDK to correctly get latest release
+
+## [1.62.0] - 2024-07-24
+
+### Changed
+
+- Re-enabled `capa-private` tests because EC2 user data limit issue should be solved now that we store Ignition bootstrap data in S3 ([issue](https://github.com/giantswarm/roadmap/issues/3442))
+
+## [1.61.1] - 2024-07-23
+
+### Fixed
+
+- Bump releases SDK to actually handle Azure
+
+## [1.61.0] - 2024-07-23
+
+### Changed
+
+- Bumped `clustertest` and `cluster-standup-teardown` to support Releases with CAPZ
+
+## [1.60.0] - 2024-07-22
+
+### Added
+
+- A framework for overriding default timeouts used by test cases. Introduces a new `timeout` internal package and new functions on the `state` that allows getting and setting a custom timeout per test suite.
+
+### Changed
+
+- Update `cluster-standup-teardown` to `v0.15.0`
+
+## [1.59.0] - 2024-07-09
+
+### Changed
+
+- Updated `cluster-standup-teardown` to the latest release.
+
+## [1.58.0] - 2024-07-08
+
+### Added
+
+- Added failure handling for Deployment, StatefulSet and DaemonSet not having expected number of ready replicas
+- Updated `clustertest` to include logs when debugging failing pods
+
+## [1.57.2] - 2024-07-05
+
+### Fixed
+
+- Switched to using `ShouldSkipUpgrade` from `clustertest`
+
+## [1.57.1] - 2024-07-05
+
+### Fixed
+
+- Allow upgrade tests to be run from Releases test pipeline
+
+## [1.57.0] - 2024-07-05
+
+### Changed
+
+- Switched to using DNS resolver and HTTP client from `clustertest`
+
+## [1.56.0] - 2024-07-02
+
+### Changed
+
+- Updated upgrade tests so they can test upgrades to Releases
+
+## [1.55.0] - 2024-06-28
+
+### Changed
+
+- Made use of `GetWarningEventsForResource` from `clustertest` for Cert-Manager tests
+
+### Added
+
+- Use `failurehandler.AppIssues` to provide extra debugging when App-related tests fail (timeout)
+
+## [1.54.1] - 2024-06-27
+
+## [1.54.0] - 2024-06-27
+
+### Changed
+
+- Update `clustertest` to v1.7.0 to support the new environment variable for controlling what Release to use when creating clusters
+
+## [1.53.0] - 2024-06-25
+
+### Added
+
+- Added a test case to check the status of all Jobs in the WC
+
+### Changed
+
+- Use actual types from Cert-Manager instead of using `unstructured` for `Certificate` and `ClusterIssuer`
+- Refactored some functions to explicitly take in a context instance instead of using `context.Background()` so that timeouts set on the context can be respected
+
+## [1.52.0] - 2024-06-25
+
+### Changed
+
+- Updated all dependencies to latest version
+
+## [1.51.0] - 2024-06-24
+
+### Changed
+
+- Updated all depenedncies to latest version
+
+## [1.50.0] - 2024-06-24
+
+### Added
+
+- Added a test case to ensure the hello-world ingress has a ready Certificate
+- Included extra logging in ClusterIssuer test case to output the status and failing events of the post-install Helm Job.
+
+## [1.49.0] - 2024-06-21
+
+### Changed
+
+- Updated `clustertest` to latest with additional logging for node checks
+- Updated `cluster-standup-teardown` to latest with cluster-autoscaler config for `scaleDownUnneededTime`
+
+## [1.48.0] - 2024-06-20
+
+### Fixed
+
+- Ensure timeout is always reset on the context in the AfterSuite to ensure enough time is given for cleanup
+
+### Added
+
+- Test if default apps are deployed before upgrading the cluster.
+- Test workload cluster's Deployments, DaemonSets, StatefulSets and Pods before upgrading the cluster.
+- Test if cluster is ready before upgrading the cluster (check Cluster resource Ready condition).
+- Test if machine pools are ready and running before upgrading the cluster.
+- Test if machine pools are ready and running in common tests.
+
+### Changed
+
+- Update clustertest to v1.3.0 to support releases with cluster Apps for Azure.
+- Updated teleport api module to latest available.
+- Increase node pool min size from 2 to 3 for CAPA upgrade test.
+- Disable spot instances for CAPA upgrade suite, as we suspect that using spot instances is causing Upgrade suite failures lately.
+
+### Removed
+
+- Remove node checks from CAPA upgrade suite because we already check nodes in common tests after the upgrade.
+
+### Added
+
+- Additional logging added to the deployment scale test to display conditions of the pods and taints of the worker nodes
+
+## [1.47.0] - 2024-06-14
+
 ### Added
 
 - Add `china` test suite for `capa` provider.
@@ -609,7 +984,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.46.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.82.0...HEAD
+[1.82.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.81.0...v1.82.0
+[1.81.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.80.0...v1.81.0
+[1.80.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.79.0...v1.80.0
+[1.79.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.78.0...v1.79.0
+[1.78.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.77.0...v1.78.0
+[1.77.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.4...v1.77.0
+[1.76.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.3...v1.76.4
+[1.76.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.2...v1.76.3
+[1.76.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.1...v1.76.2
+[1.76.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.76.0...v1.76.1
+[1.76.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.75.1...v1.76.0
+[1.75.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.75.0...v1.75.1
+[1.75.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.74.0...v1.75.0
+[1.74.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.73.0...v1.74.0
+[1.73.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.72.0...v1.73.0
+[1.72.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.2...v1.72.0
+[1.71.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.1...v1.71.2
+[1.71.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.71.0...v1.71.1
+[1.71.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.70.1...v1.71.0
+[1.70.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.70.0...v1.70.1
+[1.70.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.69.0...v1.70.0
+[1.69.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.68.0...v1.69.0
+[1.68.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.67.0...v1.68.0
+[1.67.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.1...v1.67.0
+[1.66.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.66.0...v1.66.1
+[1.66.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.65.0...v1.66.0
+[1.65.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.64.0...v1.65.0
+[1.64.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.1...v1.64.0
+[1.63.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.63.0...v1.63.1
+[1.63.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.1...v1.63.0
+[1.62.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.62.0...v1.62.1
+[1.62.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.1...v1.62.0
+[1.61.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.61.0...v1.61.1
+[1.61.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.60.0...v1.61.0
+[1.60.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.59.0...v1.60.0
+[1.59.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.58.0...v1.59.0
+[1.58.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.2...v1.58.0
+[1.57.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.1...v1.57.2
+[1.57.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.57.0...v1.57.1
+[1.57.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.56.0...v1.57.0
+[1.56.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.55.0...v1.56.0
+[1.55.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.54.1...v1.55.0
+[1.54.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.54.0...v1.54.1
+[1.54.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.53.0...v1.54.0
+[1.53.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.52.0...v1.53.0
+[1.52.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.51.0...v1.52.0
+[1.51.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.50.0...v1.51.0
+[1.50.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.49.0...v1.50.0
+[1.49.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.48.0...v1.49.0
+[1.48.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.47.0...v1.48.0
+[1.47.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.46.0...v1.47.0
 [1.46.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.45.0...v1.46.0
 [1.45.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.3...v1.45.0
 [1.44.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.44.2...v1.44.3

@@ -3,6 +3,9 @@ package state
 import (
 	"context"
 	"sync"
+	"time"
+
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/application"
@@ -55,4 +58,22 @@ func SetCluster(framework *application.Cluster) {
 
 func GetCluster() *application.Cluster {
 	return get().cluster
+}
+
+// SetTestTImeout sets the provided timeout against the given TestKey in the current state context to be used by tests
+func SetTestTimeout(testKey timeout.TestKey, timeout time.Duration) {
+	s := get()
+	ctx := context.WithValue(s.ctx, testKey, timeout)
+	SetContext(ctx)
+}
+
+// GetTestTimeout returns the timeout from the context for the given TestKey or the defaultTimeout if not found
+func GetTestTimeout(testKey timeout.TestKey, defaultTimeout time.Duration) time.Duration {
+	s := get()
+	val, ok := s.ctx.Value(testKey).(time.Duration)
+	if ok {
+		return val
+	}
+
+	return defaultTimeout
 }

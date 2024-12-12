@@ -11,4 +11,4 @@ shift
 REPORT_DIR=${REPORT_DIR:-/tmp/reports}
 mkdir -p ${REPORT_DIR}
 
-ginkgo --output-dir=${REPORT_DIR} --junit-report=test-results.xml --timeout 4h --keep-going -v -r $@ ${SUITES_TO_RUN}
+ginkgo --output-dir=${REPORT_DIR} --junit-report=test-results.xml --json-report=test-results.json --timeout 4h --keep-going -v -r $@ ${SUITES_TO_RUN}

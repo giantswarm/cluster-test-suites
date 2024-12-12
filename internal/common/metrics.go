@@ -29,6 +29,8 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		var prometheusBaseUrl string
 
 		BeforeEach(func() {
+			helper.SetResponsibleTeam(helper.TeamAtlas)
+
 			mcClient = state.GetFramework().MC()
 
 			// List of metrics that must be present.

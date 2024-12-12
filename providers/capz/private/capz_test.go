@@ -6,13 +6,13 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/common"
 )
 
-var _ = XDescribe("Common tests", func() {
+var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
-		// No autoscaling on-prem
+		// Disabled until https://github.com/giantswarm/roadmap/issues/2693
 		AutoScalingSupported: false,
 		BastionSupported:     false,
 		TeleportSupported:    true,
-		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
+		// Disabled until wildcard ingress support is added
 		ExternalDnsSupported:         false,
 		ControlPlaneMetricsSupported: true,
 	})

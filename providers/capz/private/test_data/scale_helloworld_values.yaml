@@ -1,0 +1,15 @@
+clusterName: {{ .ClusterName }}
+organization: {{ .Organization }}
+autoscaling:
+  enabled: false
+replicaCount: {{ index .ExtraValues "ReplicaCount" }}
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/instance
+          operator: In
+          values:
+          - scale-hello-world
+      topologyKey: "kubernetes.io/hostname"

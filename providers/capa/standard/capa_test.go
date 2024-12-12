@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/internal/ecr"
 )
 
 var _ = Describe("Common tests", func() {
@@ -14,4 +15,7 @@ var _ = Describe("Common tests", func() {
 		ExternalDnsSupported:         true,
 		ControlPlaneMetricsSupported: true,
 	})
+
+	// ECR Credential Provider specific tests
+	ecr.Run()
 })

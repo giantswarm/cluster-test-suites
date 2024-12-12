@@ -5,15 +5,19 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
+	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -34,19 +38,37 @@ func NewTestConfigWithDefaults() *TestConfig {
 func Run(cfg *TestConfig) {
 	Context("upgrade", func() {
 		var cluster *application.Cluster
+		var wcClient *client.Client
+		var preUpgradeControlPlaneResourceGeneration int64
+
+		BeforeAll(func() {
+			cluster = state.GetCluster()
+			preUpgradeControlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+			Expect(err).NotTo(HaveOccurred())
+			if preUpgradeControlPlane == nil {
+				preUpgradeControlPlaneResourceGeneration = 0
+			} else {
+				preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+			}
+		})
 
 		BeforeEach(func() {
+			var err error
 			cluster = state.GetCluster()
+			wcClient, err = state.GetFramework().WC(cluster.Name)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("has all the control-plane nodes running", func() {
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
 
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreNumNodesReady(state.GetContext(), wcClient, int(replicas), &cr.MatchingLabels{"node-role.kubernetes.io/control-plane": ""}),
+					12,
+					5*time.Second,
+				)).
 				WithTimeout(cfg.ControlPlaneNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
@@ -57,18 +79,96 @@ func Run(cfg *TestConfig) {
 			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
 			Expect(err).NotTo(HaveOccurred())
 
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
+			Eventually(wait.Consistent(common.CheckWorkerNodesReady(state.GetContext(), wcClient, values), 12, 5*time.Second)).
 				WithTimeout(cfg.WorkerNodesTimeout).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
 
+		It("has Cluster Ready condition with Status='True'", func() {
+			// Overriding the default timeout, when clusterReadyTimeout is set
+			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
+
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
+				WithTimeout(timeout).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
+		})
+
+		It("has all machine pools ready and running", func() {
+			mcClient := state.GetFramework().MC()
+			cluster := state.GetCluster()
+
+			machinePools, err := state.GetFramework().GetMachinePools(state.GetContext(), cluster.Name, cluster.GetNamespace())
+			Expect(err).NotTo(HaveOccurred())
+			if len(machinePools) == 0 {
+				Skip("Machine pools are not found")
+			}
+
+			Eventually(wait.Consistent(common.CheckMachinePoolsReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
+				WithTimeout(30 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		common.RunApps()
+
+		It("has all its Deployments Ready (means all replicas are running)", func() {
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDeploymentsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all its StatefulSets Ready (means all replicas are running)", func() {
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllStatefulSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all its DaemonSets Ready (means all daemon pods are running)", func() {
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllDaemonSetsReady(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
+		It("has all of its Pods in the Running state", func() {
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreAllPodsInSuccessfulPhase(state.GetContext(), wcClient),
+					10,
+					time.Second,
+				)).
+				WithTimeout(15 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(Succeed())
+		})
+
 		It("should apply new version successfully", func() {
-			// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
-			cluster = cluster.WithAppVersions("", "")
+			cluster = cluster.
+				// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
+				WithAppVersions("", "").
+				// Set release versions to `""` so that it makes use of the overrides set in the `E2E_RELEASE_VERSION` environment var
+				WithRelease(application.ReleasePair{Version: "", Commit: ""})
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
 			defer cancelApplyCtx()
 
@@ -118,6 +218,10 @@ func Run(cfg *TestConfig) {
 					Skip("Control plane resource not found (assuming this is a managed cluster)")
 				}
 
+				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
+					Skip("Control plane resource generation did not change, skipping rolling update test")
+				}
+
 				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
 					capiconditions.GetReason(controlPlane, kubeadm.MachinesSpecUpToDateCondition) == kubeadm.RollingUpdateInProgressReason {
 					controlPlaneRollingUpdateStarted = true
@@ -144,33 +248,6 @@ func Run(cfg *TestConfig) {
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
-		})
-
-		It("has all the control-plane nodes running", func() {
-			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
-			Expect(err).NotTo(HaveOccurred())
-
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckControlPlaneNodesReady(wcClient, int(replicas)), 12, 5*time.Second)).
-				WithTimeout(cfg.ControlPlaneNodesTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
-		})
-
-		It("has all the worker nodes running", func() {
-			values := &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(cluster.Name, cluster.GetNamespace(), values)
-			Expect(err).NotTo(HaveOccurred())
-
-			wcClient, err := state.GetFramework().WC(cluster.Name)
-			Expect(err).NotTo(HaveOccurred())
-
-			Eventually(wait.Consistent(common.CheckWorkerNodesReady(wcClient, values), 12, 5*time.Second)).
-				WithTimeout(cfg.WorkerNodesTimeout).
-				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
 		})
 	})
 }

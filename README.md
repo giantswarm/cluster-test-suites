@@ -4,53 +4,69 @@
 
 ## ☑️ Requirements
 
-* A valid Kubeconfig with the required context defined. (See [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) for more details.)
+* A valid Kubeconfig, pointing at a `stable-testing` MC, with the required context defined. (See [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) for more details.)
 * Install [ginkgo](https://onsi.github.io/ginkgo/) on your machine: `go install github.com/onsi/ginkgo/v2/ginkgo`.
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 
 Optional:
+
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
 * When `TELEPORT_IDENTITY_FILE` environment variable is set to point to the path of a valid teleport credential, the test will check if E2E WC is registered in Teleport cluster (`teleport.giantswarm.io`). If it isn't set, the test will be skipped.
 
 ## 🏃 Running Tests
 
-Assuming the above requirements are fulfilled:
-
 > [!NOTE]
 > If you need the current kubeconfig its best to pull it from the `cluster-test-suites-mc-kubeconfig` Secret on the Tekton cluster.
-If you need the current teleport identity file its best to pull it from the `teleport-identity-output` Secret on the Tekton cluster.
+>
+> If you need the current teleport identity file its best to pull it from the `teleport-identity-output` Secret on the Tekton cluster.
 
-Running the all test suites:
+> [!IMPORTANT]
+> The test suites are designed to be run against `stable-testing` MCs and possibly require some config or resources that already exists on those MCs.
+>
+> If you require running the tests against a different MC please reach out to [#Team-Tenet](https://gigantic.slack.com/archives/C07KSM2E51A) to discuss any pre-requisites that might be needed.
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r .
-```
+Assuming the above requirements are fulfilled:
 
-Running a single provider (e.g. `capa`):
+* Running all the test suites:
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa
-```
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r .
+  ```
 
-Running a single test suite (e.g. the `capa` `standard` test suite)
+* Running a single provider (e.g. `capa`):
 
-```sh
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa/standard
-```
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa
+  ```
 
-Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
+* Running a single test suite (e.g. the `capa` `standard` test suite)
 
-```sh
-kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
+  ```sh
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml ginkgo --timeout 4h -v -r ./providers/capa/standard
+  ```
 
-E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENTITY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
-```
+* Running a single test suite with teleport test enabled (e.g. the `capa` `standard` test suite):
 
-Running with Docker:
+  ```sh
+  kubectl get secrets teleport-identity-output -n tekton-pipelines --template='{{.data.identity}}' | base64 -D > teleport-identity-file.pem
 
-```sh
-docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
-```
+  E2E_KUBECONFIG=/path/to/kubeconfig.yaml TELEPORT_IDENTITY_FILE=/path/to/teleport-identity-file.pem -v -r ./providers/capa/standard
+  ```
+
+* Running with Docker:
+
+  ```sh
+  docker run --rm -it -v /path/to/kubeconfig.yaml:/kubeconfig.yaml -e E2E_KUBECONFIG=/kubeconfig.yaml quay.io/giantswarm/cluster-test-suites ./
+  ```
+
+### Testing with an in-progress Release CR
+
+To be able to create a workload cluster based on a not yet merged Release CR you can use the following two environment variables:
+
+* `E2E_RELEASE_VERSION` - The base Release version to use when creating the Workload Cluster.<br/>Must be used with `E2E_RELEASE_COMMIT`
+* `E2E_RELEASE_COMMIT` - The git commit from the `releases` repo that contains the Release version to use when creating the Workload Cluster.<br/>Must be used with `E2E_RELEASE_VERSION`
+
+The Release CR must at least be committed and pushed to a branch (e.g. a WiP PR) in the [Releases](https://github.com/giantswarm/releases) repo.
 
 ### Testing with an existing Workload Cluster
 
@@ -107,6 +123,34 @@ When the pipeline runs against PRs to the `cluster-test-suites` repo the followi
 When the pipeline runs against one of the provider-specific repos (e.g. cluster or default-apps repos) the following is of note:
 * The pipeline will use the latest tagged release of the cluster-test-suites container image.
 * Only the tests associated with that provider will be run, including the `upgrade` tests.
+
+### Running a specific subset of test suites
+
+It's possible to specify the test suites you'd like to run in CI by providing the `TARGET_SUITES` parameter with your comment trigger. This is useful when a test suite has failed due to what seems to be a flakey test as you can re-run just the failing without wasting resources on the other test suites.
+
+E.g.
+
+```
+/run cluster-test-suites TARGET_SUITES=./providers/capa/standard
+```
+
+This will only run the CAPA Standard test suite.
+
+If you need to target multiple test suites you can do so with a comma separated list, e.g.
+
+```
+/run cluster-test-suites TARGET_SUITES=./providers/capa/standard,./providers/capa/china
+```
+
+### Running against a specific Release version
+
+If you need to run the tests against a specific Release version that is not the latest you can do so by providing the `RELEASE_VERSION` parameter with your comment trigger.
+
+E.g.
+
+```
+/run cluster-test-suites RELEASE_VERSION=v25.0.0
+```
 
 ## ⬆️ Upgrade Tests
 
