@@ -155,6 +155,21 @@ func runBasic() {
 				)
 		})
 
+		It("doesn't have restarting pods", func() {
+			Eventually(
+				wait.ConsistentWaitCondition(
+					wait.AreNoPodsCrashLooping(state.GetContext(), wcClient, 3),
+					10,
+					time.Second,
+				)).
+				WithTimeout(15*time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(
+					Succeed(),
+					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+				)
+		})
+
 		It("has Cluster Ready condition with Status='True'", func() {
 			// Overriding the default timeout, when ClusterReadyTimeout is set
 			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
