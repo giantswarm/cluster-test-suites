@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.83.1] - 2025-01-09
+
 ### Fixed
 
 - Bump `clustertest` to [v1.32.1](https://github.com/giantswarm/clustertest/releases/tag/v1.32.1) to fix timeout not being respected during `AfterSuite`.
@@ -998,7 +1000,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...HEAD
+[1.83.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.0...v1.83.1
 [1.83.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.82.0...v1.83.0
 [1.82.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.81.0...v1.82.0
 [1.81.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.80.0...v1.81.0
