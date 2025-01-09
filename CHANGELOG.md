@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bump `clustertest` to [v1.32.1](https://github.com/giantswarm/clustertest/releases/tag/v1.32.1) to fix timeout not being respected during `AfterSuite`.
+
 ## [1.83.0] - 2025-01-07
 
 ### Added
