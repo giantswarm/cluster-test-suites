@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.84.0] - 2025-01-17
+
 ### Changed
 
 - Refactored the storage test with the following changes:
@@ -1007,7 +1009,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...HEAD
+[1.84.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...v1.84.0
 [1.83.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.0...v1.83.1
 [1.83.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.82.0...v1.83.0
 [1.82.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.81.0...v1.82.0
