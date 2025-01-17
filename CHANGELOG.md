@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactored the storage test with the following changes:
+  - Split into individual it block for more fine-grained failures
+  - Added logging to show progress of tests while running
+  - Ensured the PersistentVolume is deleted before continuing to ensure we don't accidentally leave behind disks
+
 ## [1.83.1] - 2025-01-09
 
 ### Fixed
