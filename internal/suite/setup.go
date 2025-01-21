@@ -15,6 +15,9 @@ import (
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
+	"github.com/giantswarm/clustertest/pkg/wait"
+	corev1 "k8s.io/api/core/v1"
+	apierror "k8s.io/apimachinery/pkg/api/errors"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -131,6 +134,49 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		ctx, _ = context.WithTimeout(ctx, 1*time.Hour)
 		state.SetContext(ctx)
 
+		err := cleanupPVs(ctx)
+		if err != nil {
+			logger.Log("Failed to cleanup PVs before delete - %v", err)
+		}
+
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
+}
+
+func cleanupPVs(ctx context.Context) error {
+	logger.Log("Ensuring all PVs are cleaned up before deleting cluster")
+	wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+	if err != nil {
+		logger.Log("Failed to get WC client, skipping PV cleanup - %v", err)
+		return err
+	}
+
+	pvs := &corev1.PersistentVolumeList{}
+	err = wcClient.List(ctx, pvs, &cr.ListOptions{})
+	if err != nil {
+		logger.Log("Failed to list all PVs - %v", err)
+		return err
+	}
+	logger.Log("Attempting to clean up %d PVs", len(pvs.Items))
+
+	for _, pv := range pvs.Items {
+		logger.Log("Deleting PV '%s'...", pv.ObjectMeta.Name)
+		logger.Log("%v", pv)
+		err := wcClient.Delete(state.GetContext(), &pv, &cr.DeleteOptions{})
+		if err != nil && !apierror.IsNotFound(err) {
+			logger.Log("Failed to delete PV '%s' - %v", pv.ObjectMeta.Name, err)
+		}
+
+		err = wait.For(
+			wait.IsResourceDeleted(ctx, wcClient, &pv),
+			wait.WithContext(ctx),
+			wait.WithTimeout(5*time.Minute),
+			wait.WithInterval(wait.DefaultInterval),
+		)
+		if err != nil {
+			logger.Log("Failed to delete PV '%s' - %v", pv.ObjectMeta.Name, err)
+		}
+	}
+
+	return nil
 }

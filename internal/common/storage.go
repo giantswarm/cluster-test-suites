@@ -182,12 +182,17 @@ func runStorage() {
 								logger.Log("Failed to delete PersistentVolume '%s'", pvName)
 								return err
 							}
+
+							Eventually(wait.IsResourceDeleted(state.GetContext(), wcClient, &corev1.PersistentVolume{ObjectMeta: metav1.ObjectMeta{Name: pvName}})).
+								WithTimeout(5 * time.Minute).
+								WithPolling(wait.DefaultInterval).
+								Should(BeTrue())
 						}
 
 						logger.Log("All associated resources deleted")
 						return nil
 					}).
-					WithTimeout(5 * time.Minute).
+					WithTimeout(15 * time.Minute).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})
