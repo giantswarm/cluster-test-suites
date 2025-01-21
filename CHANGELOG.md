@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.85.0] - 2025-01-21
+
 ### Fixed
 
 - Ensure the storage test waits until PV has been fully deleted
@@ -1021,7 +1023,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...HEAD
+[1.85.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...v1.85.0
 [1.84.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...v1.84.0
 [1.83.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.0...v1.83.1
 [1.83.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.82.0...v1.83.0
