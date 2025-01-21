@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ensure the storage test waits until PV has been fully deleted
+
+### Added
+
+- Attempt to delete any remaining PVs during `AfterSuite` before the cluster itself is removed to try to avoid leaving cloud volumes behind.
+
 ## [1.84.0] - 2025-01-17
 
 ### Changed
