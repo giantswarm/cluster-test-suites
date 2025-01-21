@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Attempt to delete any remaining PVs during `AfterSuite` before the cluster itself is removed to try to avoid leaving cloud volumes behind.
 
+### Changed
+
+- Updated `cluster-standup-teardown` to stop using spot instances for CAPA WCs
+
 ## [1.84.0] - 2025-01-17
 
 ### Changed
