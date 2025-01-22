@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump `cluster-standup-teardown` to `v1.29.0`, which increases the timeout when creating clusters.
+
 ## [1.85.0] - 2025-01-21
 
 ### Fixed
