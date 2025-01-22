@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.86.0] - 2025-01-22
+
 ### Changed
 
 - Bump `cluster-standup-teardown` to `v1.29.0`, which increases the timeout when creating clusters.
@@ -1027,7 +1029,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.86.0...HEAD
+[1.86.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...v1.86.0
 [1.85.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...v1.85.0
 [1.84.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...v1.84.0
 [1.83.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.0...v1.83.1
