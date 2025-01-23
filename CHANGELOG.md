@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Attempt to delete any remaining PVs during `AfterSuite` before the cluster itself is removed to try to avoid leaving cloud volumes behind.
+- Show debug info if `Deployment` with private ECR image failed
 
 ### Changed
 

@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	appsv1 "k8s.io/api/apps/v1"
@@ -83,9 +84,10 @@ func Run() {
 
 				return nil
 			}).
-				WithTimeout(2 * time.Minute).
+				WithTimeout(2*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(Succeed(),
+					failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()))
 
 			Eventually(func() error {
 				logger.Log("Deleting deployment...")
