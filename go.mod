@@ -12,7 +12,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown v1.30.0
 	github.com/giantswarm/clustertest v1.32.1
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20250125023825-6b6b0cd5514f
+	github.com/gravitational/teleport/api v0.0.0-20250201001819-2004893be0a8
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
 	k8s.io/api v0.32.1
@@ -171,7 +171,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect

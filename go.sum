@@ -983,8 +983,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/gravitational/teleport/api v0.0.0-20250125023825-6b6b0cd5514f h1:icK/p/xKhiS3KBDfZT8Obwn8UJ1FpDvfgA1HPdnIUCc=
-github.com/gravitational/teleport/api v0.0.0-20250125023825-6b6b0cd5514f/go.mod h1:qHSjeHrZ7hLd3+O7faik6tkZ6ugB8jbopxBja/0XY54=
+github.com/gravitational/teleport/api v0.0.0-20250201001819-2004893be0a8 h1:RJsWSKdpcl4EqQxMrYhcIKyGSpy007Ewo0ybzRZZlI0=
+github.com/gravitational/teleport/api v0.0.0-20250201001819-2004893be0a8/go.mod h1:OUcXLjJ/RzA+ohqiK6Lu0kqfytydb7y72mY74nmpD90=
 github.com/gravitational/trace v1.4.0 h1:TtTeMElVwMX21Udb1nmK2tpWYAAMJoyjevzKOaxIFZQ=
 github.com/gravitational/trace v1.4.0/go.mod h1:g79NZzwCjWS/VVubYowaFAQsTjVTohGi0hFbIWSyGoY=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=
@@ -1338,8 +1338,6 @@ golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
 golang.org/x/exp v0.0.0-20220827204233-334a2380cb91/go.mod h1:cyybsKvd6eL0RnXn6p/Grxp8F5bW7iYuBgsNCOHpMYE=
-golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 h1:yqrTHse8TCMW1M1ZCP+VAR/l0kKxwaAIqN/il7x4voA=
-golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8/go.mod h1:tujkw807nyEEAamNbDrEGzRav+ilXA7PCRAd6xsmwiU=
 golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81/go.mod h1:ux5Hcp/YLpHSI86hEcLt0YII63i6oz57MZXIpbrjZUs=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
