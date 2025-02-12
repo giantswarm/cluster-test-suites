@@ -1,4 +1,4 @@
-FROM golang:1.23 AS build-tests
+FROM golang:1.24 AS build-tests
 
 WORKDIR /app
 
