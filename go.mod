@@ -15,10 +15,10 @@ require (
 	github.com/gravitational/teleport/api v0.0.0-20250208034434-43038e456856
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
-	k8s.io/api v0.32.1
+	k8s.io/api v0.32.2
 	k8s.io/apiextensions-apiserver v0.32.1
-	k8s.io/apimachinery v0.32.1
-	k8s.io/client-go v0.32.1
+	k8s.io/apimachinery v0.32.2
+	k8s.io/client-go v0.32.2
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 	sigs.k8s.io/cluster-api v1.9.4
 	sigs.k8s.io/controller-runtime v0.20.1
