@@ -65,8 +65,8 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 					"workqueue_queue_duration_seconds_bucket",
 
 					// Scheduler
-					"scheduler_pod_scheduling_duration_seconds_count",
-					"scheduler_pod_scheduling_duration_seconds_bucket",
+					"scheduler_scheduling_attempt_duration_seconds_count",
+					"scheduler_scheduling_attempt_duration_seconds_bucket",
 
 					// ETCD
 					"etcd_request_duration_seconds_count",
