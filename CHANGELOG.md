@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.0] - 2025-02-20
+
 ### Changed
 
 - Metrics: Replace deprecated `pod_scheduling_duration_seconds` by `scheduling_attempt_duration_seconds`.
@@ -1034,7 +1036,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.86.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.0...HEAD
+[1.87.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.86.0...v1.87.0
 [1.86.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...v1.86.0
 [1.85.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...v1.85.0
 [1.84.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.83.1...v1.84.0
