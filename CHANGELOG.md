@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Metrics: Replace deprecated `pod_scheduling_duration_seconds` by `scheduling_attempt_duration_seconds`.
+
 ## [1.86.0] - 2025-01-22
 
 ### Changed
