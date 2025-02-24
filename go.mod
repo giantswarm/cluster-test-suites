@@ -9,8 +9,8 @@ replace github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.4.2
 require (
 	github.com/cert-manager/cert-manager v1.17.1
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown v1.30.0
-	github.com/giantswarm/clustertest v1.32.1
+	github.com/giantswarm/cluster-standup-teardown v1.31.0
+	github.com/giantswarm/clustertest v1.33.0
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20250221184403-eadbe2d8a1e2
 	github.com/onsi/ginkgo/v2 v2.22.2
@@ -61,9 +61,9 @@ require (
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fluxcd/helm-controller/api v1.1.0 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v1.6.1 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.6.1 // indirect
+	github.com/fluxcd/helm-controller/api v1.2.0 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v1.9.0 // indirect
+	github.com/fluxcd/pkg/apis/meta v1.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/giantswarm/kubectl-gs/v2 v2.57.0 // indirect
@@ -92,7 +92,7 @@ require (
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-github/v66 v66.0.0 // indirect
-	github.com/google/go-github/v68 v68.0.0 // indirect
+	github.com/google/go-github/v69 v69.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
@@ -151,8 +151,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
-	github.com/spf13/cobra v1.8.1 // indirect
-	github.com/spf13/pflag v1.0.6-0.20210604193023-d5e0c0615ace // indirect
+	github.com/spf13/cobra v1.9.1 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -172,11 +172,11 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/oauth2 v0.25.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/oauth2 v0.26.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
@@ -190,14 +190,14 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.16.4 // indirect
 	k8s.io/apiserver v0.32.2 // indirect
-	k8s.io/cli-runtime v0.32.0 // indirect
+	k8s.io/cli-runtime v0.32.2 // indirect
 	k8s.io/cluster-bootstrap v0.31.3 // indirect
 	k8s.io/component-base v0.32.2 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20241212222426-2c72e554b1e7 // indirect
-	k8s.io/kubectl v0.32.0 // indirect
+	k8s.io/kubectl v0.32.2 // indirect
 	oras.land/oras-go v1.2.6 // indirect
-	sigs.k8s.io/e2e-framework v0.5.0 // indirect
+	sigs.k8s.io/e2e-framework v0.6.0 // indirect
 	sigs.k8s.io/gateway-api v1.2.0 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/kustomize/api v0.18.0 // indirect
