@@ -39,7 +39,7 @@ func runBasic() {
 			Expect(state.GetFramework().MC().CheckConnection()).To(Succeed())
 		})
 
-		It("should be able to connect to the workload cluster", FlakeAttempts(3), func() {
+		It("should be able to connect to the workload cluster", FlakeAttempts(5), func() {
 			Expect(wcClient.CheckConnection()).To(Succeed())
 		})
 

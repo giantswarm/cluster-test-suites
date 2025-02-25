@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Basic: Increase connection check flake attempts. ([#625](https://github.com/giantswarm/cluster-test-suites/pull/625))
+
 ## [1.87.0] - 2025-02-20
 
 ### Changed
