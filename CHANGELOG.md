@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.1] - 2025-02-25
+
 ### Changed
 
 - Basic: Increase connection check flake attempts. ([#625](https://github.com/giantswarm/cluster-test-suites/pull/625))
@@ -1040,7 +1042,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.1...HEAD
+[1.87.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.0...v1.87.1
 [1.87.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.86.0...v1.87.0
 [1.86.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...v1.86.0
 [1.85.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.84.0...v1.85.0
