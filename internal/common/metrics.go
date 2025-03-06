@@ -107,7 +107,7 @@ func checkMetricPresent(mcClient *client.Client, metric string, mimirUrl string,
 	return func() error {
 		query := fmt.Sprintf("absent(%[1]s{cluster_id=\"%[2]s\"}) or label_replace(vector(0), \"cluster_id\", \"%[2]s\", \"\", \"\")", metric, state.GetCluster().Name)
 
-		cmd := []string{"wget", "-O-", "-Y", "off", "--header", `"X-Scope-OrgID: anonymous|giantswarm"`, fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", mimirUrl, url.QueryEscape(query))}
+		cmd := []string{"wget", "-O-", "-Y", "off", "--header", "\"X-Scope-OrgID: anonymous|giantswarm\"", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", mimirUrl, url.QueryEscape(query))}
 		stdout, stderr, err := mcClient.ExecInPod(context.Background(), testPodName, testPodNamespace, "test", cmd)
 		if err != nil {
 			return fmt.Errorf("can't exec command in pod %s: %s (stderr: %q)", testPodName, err, stderr)
