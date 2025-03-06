@@ -20,13 +20,14 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
+const mimirUrl = "mimir-gateway.mimir.svc:80/prometheus"
+
 func runMetrics(controlPlaneMetricsSupported bool) {
 	Context("metrics", func() {
 		var mcClient *client.Client
 		var metrics []string
 		var testPodName string
 		var testPodNamespace string
-		var prometheusBaseUrl string
 
 		BeforeEach(func() {
 			helper.SetResponsibleTeam(helper.TeamAtlas)
@@ -83,13 +84,12 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 			err := runTestPod(mcClient, testPodName, testPodNamespace)
 			Expect(err).NotTo(HaveOccurred())
 
-			prometheusBaseUrl, err = helper.DetectPrometheusBaseURL(context.TODO(), mcClient)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("ensure key metrics are available on prometheus", func() {
+		It("ensure key metrics are available on mimir", func() {
 			for _, metric := range metrics {
-				Eventually(checkMetricPresent(mcClient, metric, prometheusBaseUrl, testPodName, testPodNamespace)).
+				Eventually(checkMetricPresent(mcClient, metric, mimirUrl, testPodName, testPodNamespace)).
 					WithTimeout(10 * time.Minute).
 					WithPolling(10 * time.Second).
 					Should(Succeed())
@@ -103,11 +103,11 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 	})
 }
 
-func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUrl string, testPodName string, testPodNamespace string) func() error {
+func checkMetricPresent(mcClient *client.Client, metric string, mimirUrl string, testPodName string, testPodNamespace string) func() error {
 	return func() error {
 		query := fmt.Sprintf("absent(%[1]s{cluster_id=\"%[2]s\"}) or label_replace(vector(0), \"cluster_id\", \"%[2]s\", \"\", \"\")", metric, state.GetCluster().Name)
 
-		cmd := []string{"wget", "-O-", "-Y", "off", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", prometheusBaseUrl, url.QueryEscape(query))}
+		cmd := []string{"wget", "-O-", "-Y", "off", "--header=\"X-Scope-OrgID: anonymous|giantswarm", fmt.Sprintf("%[1]s/api/v1/query?query=%[2]s", mimirUrl, url.QueryEscape(query))}
 		stdout, stderr, err := mcClient.ExecInPod(context.Background(), testPodName, testPodNamespace, "test", cmd)
 		if err != nil {
 			return fmt.Errorf("can't exec command in pod %s: %s (stderr: %q)", testPodName, err, stderr)
@@ -129,7 +129,7 @@ func checkMetricPresent(mcClient *client.Client, metric string, prometheusBaseUr
 
 		err = json.Unmarshal([]byte(stdout), &response)
 		if err != nil {
-			return fmt.Errorf("can't parse prometheus query output: %s (output: %q)", err, stdout)
+			return fmt.Errorf("can't parse mimir query output: %s (output: %q)", err, stdout)
 		}
 
 		if response.Status != "success" {

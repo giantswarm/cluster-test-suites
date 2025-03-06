@@ -177,8 +177,7 @@ func runHelloWorld(externalDnsSupported bool) {
 					return false, err
 				}
 
-				if helloIngress.Status.LoadBalancer.Ingress != nil &&
-					len(helloIngress.Status.LoadBalancer.Ingress) > 0 &&
+				if len(helloIngress.Status.LoadBalancer.Ingress) > 0 &&
 					helloIngress.Status.LoadBalancer.Ingress[0].Hostname != "" {
 
 					logger.Log("Load balancer hostname found in ingress status: %s", helloIngress.Status.LoadBalancer.Ingress[0].Hostname)

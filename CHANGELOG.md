@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Fix metric test by setting the expected tenant in the Mimir query.
+
 ## [1.87.1] - 2025-02-25
 
 ### Changed
