@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.87.2] - 2025-03-08
+
 ### Changed
 
 - Fix metric test by setting the expected tenant in the Mimir query.
@@ -1046,7 +1048,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.2...HEAD
+[1.87.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.1...v1.87.2
 [1.87.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.87.0...v1.87.1
 [1.87.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.86.0...v1.87.0
 [1.86.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.85.0...v1.86.0
