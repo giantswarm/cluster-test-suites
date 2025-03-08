@@ -18,7 +18,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var clusterIssuers = []string{"selfsigned-giantswarm", "letsencrypt-giantswarm"}
@@ -54,7 +53,7 @@ func checkClusterIssuer(ctx context.Context, wcClient *client.Client, clusterIss
 		logger.Log("Checking ClusterIssuer '%s'", clusterIssuerName)
 
 		clusterIssuer := &certmanager.ClusterIssuer{
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: clusterIssuerName,
 			},
 		}
