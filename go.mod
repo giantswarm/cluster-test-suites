@@ -12,7 +12,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown v1.31.0
 	github.com/giantswarm/clustertest v1.33.0
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20250314171756-30213924820e
+	github.com/gravitational/teleport/api v0.0.0-20250323110028-8c8b3832c978
 	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.3
 	k8s.io/api v0.32.3
@@ -41,6 +41,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
+	github.com/charlievieth/strcase v0.0.5 // indirect
 	github.com/containerd/containerd v1.7.23 // indirect
 	github.com/containerd/errdefs v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
