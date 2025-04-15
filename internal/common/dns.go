@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	clustertestnet "github.com/giantswarm/clustertest/pkg/net"
 	"github.com/giantswarm/clustertest/pkg/wait"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+	. "github.com/onsi/gomega"    //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )

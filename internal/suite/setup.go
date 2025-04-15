@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
@@ -104,8 +104,8 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 							cl.Status.Phase,
 							cl.Status.InfrastructureReady,
 							cl.Status.ControlPlaneReady,
-							ptr.Deref(cl.Status.FailureReason, ""),
-							ptr.Deref(cl.Status.FailureMessage, ""),
+							ptr.Deref(cl.Status.FailureReason, ""),  //nolint:staticcheck // Ignore SA1019 this field is marked as deprecated.
+							ptr.Deref(cl.Status.FailureMessage, ""), //nolint:staticcheck // Ignore SA1019 this field is marked as deprecated.
 						)
 
 						for _, condition := range cl.Status.Conditions {
@@ -131,7 +131,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
-		ctx, _ = context.WithTimeout(ctx, 1*time.Hour)
+		ctx, _ = context.WithTimeout(ctx, 1*time.Hour) //nolint:govet
 		state.SetContext(ctx)
 
 		err := cleanupPVs(ctx)
@@ -160,11 +160,11 @@ func cleanupPVs(ctx context.Context) error {
 	logger.Log("Attempting to clean up %d PVs", len(pvs.Items))
 
 	for _, pv := range pvs.Items {
-		logger.Log("Deleting PV '%s'...", pv.ObjectMeta.Name)
+		logger.Log("Deleting PV '%s'...", pv.Name)
 		logger.Log("%v", pv)
 		err := wcClient.Delete(state.GetContext(), &pv, &cr.DeleteOptions{})
 		if err != nil && !apierror.IsNotFound(err) {
-			logger.Log("Failed to delete PV '%s' - %v", pv.ObjectMeta.Name, err)
+			logger.Log("Failed to delete PV '%s' - %v", pv.Name, err)
 		}
 
 		err = wait.For(
@@ -174,7 +174,7 @@ func cleanupPVs(ctx context.Context) error {
 			wait.WithInterval(wait.DefaultInterval),
 		)
 		if err != nil {
-			logger.Log("Failed to delete PV '%s' - %v", pv.ObjectMeta.Name, err)
+			logger.Log("Failed to delete PV '%s' - %v", pv.Name, err)
 		}
 	}
 

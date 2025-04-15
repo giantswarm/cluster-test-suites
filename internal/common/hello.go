@@ -13,8 +13,8 @@ import (
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/net"
 	"github.com/giantswarm/clustertest/pkg/wait"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+	. "github.com/onsi/gomega"    //nolint:staticcheck
 	networkingv1 "k8s.io/api/networking/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -224,7 +224,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				logger.Log("Certificate '%s' is not Ready - '%s'", certificateName, conditionMessage)
 
-				return fmt.Errorf("Certificate is not ready")
+				return fmt.Errorf("certificate is not ready")
 			}).
 				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
@@ -240,7 +240,7 @@ func runHelloWorld(externalDnsSupported bool) {
 				if err != nil {
 					return "", err
 				}
-				defer resp.Body.Close()
+				defer resp.Body.Close() // nolint:errcheck
 
 				if resp.StatusCode != http.StatusOK {
 					logger.Log("Was expecting status code '%d' but actually got '%d'", http.StatusOK, resp.StatusCode)
