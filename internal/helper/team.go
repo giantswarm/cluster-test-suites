@@ -1,6 +1,6 @@
 package helper
 
-import . "github.com/onsi/ginkgo/v2"
+import . "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
 type Team string
 

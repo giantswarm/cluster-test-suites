@@ -10,8 +10,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/logger"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+	. "github.com/onsi/gomega"    //nolint:staticcheck
 	batchv1 "k8s.io/api/batch/v1"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,7 +75,7 @@ func checkClusterIssuer(ctx context.Context, wcClient *client.Client, clusterIss
 				if nestedErr != nil {
 					logger.Log("Failed to get cluster issuer Job, it may have already completed: %v", nestedErr)
 				} else {
-					logger.Log("Status of cluster issuer Job '%s': Succeeded:%t", clusterIssuerJob.ObjectMeta.Name, clusterIssuerJob.Status.Succeeded > 0)
+					logger.Log("Status of cluster issuer Job '%s': Succeeded:%t", clusterIssuerJob.Name, clusterIssuerJob.Status.Succeeded > 0)
 				}
 
 				// Get events related to the cluster issuer post-install Job
