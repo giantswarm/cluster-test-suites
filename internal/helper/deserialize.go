@@ -9,8 +9,8 @@ import (
 )
 
 func Deserialize(data []byte) (runtime.Object, error) {
-	apiextensionsv1.AddToScheme(scheme.Scheme)
-	apiextensionsv1beta1.AddToScheme(scheme.Scheme)
+	apiextensionsv1.AddToScheme(scheme.Scheme)      // nolint:errcheck,gosec
+	apiextensionsv1beta1.AddToScheme(scheme.Scheme) // nolint:errcheck,gosec
 	decoder := scheme.Codecs.UniversalDeserializer()
 
 	runtimeObject, _, err := decoder.Decode(data, nil, nil)

@@ -8,8 +8,8 @@ import (
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+	. "github.com/onsi/gomega"    //nolint:staticcheck
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -163,7 +163,7 @@ func reportOwningTeams() failurehandler.FailureHandler {
 
 		for _, app := range appList.Items {
 			if app.Status.Release.Status != "deployed" {
-				teamLabel, ok := app.ObjectMeta.Annotations[annotation.AppTeam]
+				teamLabel, ok := app.Annotations[annotation.AppTeam]
 				if ok {
 					team := strings.TrimPrefix("team-", teamLabel)
 					team = strings.ToLower(team)
@@ -184,7 +184,7 @@ func reportOwningTeams() failurehandler.FailureHandler {
 					case "Tenet":
 						helper.SetResponsibleTeam(helper.TeamTenet)
 					default:
-						logger.Log("Unknown owner team - App='%s', TeamName='%s'", app.ObjectMeta.Name, team)
+						logger.Log("Unknown owner team - App='%s', TeamName='%s'", app.Name, team)
 					}
 				}
 			}
