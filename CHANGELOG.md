@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix linting issues.
 
+### Changed
+
+- Disable node-termination-handler in CAPA tests. See [giantswarm/giantswarm#32656](https://github.com/giantswarm/giantswarm/issues/32656)
+
 ## [1.87.2] - 2025-03-08
 
 ### Changed
