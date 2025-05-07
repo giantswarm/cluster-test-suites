@@ -2,6 +2,7 @@
 global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e
+    nodeTerminationHandlerEnabled: false # https://github.com/giantswarm/giantswarm/issues/32656
   connectivity:
     # These two settings enable Cilium ENI mode
     network:
