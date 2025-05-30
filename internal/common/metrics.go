@@ -53,7 +53,7 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 				metrics = append(metrics, []string{
 					// API server metrics in prometheus-rules
 					"apiserver_flowcontrol_dispatched_requests_total",
-					"apiserver_flowcontrol_request_concurrency_limit",
+					"apiserver_flowcontrol_nominal_limit_seats",
 					"apiserver_request_duration_seconds_bucket",
 					"apiserver_admission_webhook_request_total",
 					"apiserver_admission_webhook_admission_duration_seconds_sum",
