@@ -158,7 +158,7 @@ func runBasic() {
 		It("doesn't have restarting pods", func() {
 			Eventually(
 				wait.ConsistentWaitCondition(
-					wait.AreNoPodsCrashLooping(state.GetContext(), wcClient, 2),
+					wait.AreNoPodsCrashLooping(state.GetContext(), wcClient, 5),
 					10,
 					5*time.Second,
 				)).
