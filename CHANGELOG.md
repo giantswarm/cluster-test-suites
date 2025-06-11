@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Increase restart limit to 5. Some applications like cluster-autoscaler depend on IRSA and need additional time to start working properly.
+
 ## [1.88.0] - 2025-05-30
 
 ### Fixed
