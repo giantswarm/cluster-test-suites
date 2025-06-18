@@ -47,6 +47,9 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 
 				// Net exporter
 				"network_latency_seconds_sum",
+
+				// Cilium Agent metrics
+				"cilium_version",
 			}
 
 			if controlPlaneMetricsSupported {
