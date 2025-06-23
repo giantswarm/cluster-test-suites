@@ -164,8 +164,8 @@ github.com/go-openapi/jsonreference v0.21.0 h1:Rs+Y7hSXT83Jacb7kFyjn4ijOuVGSvOdF
 github.com/go-openapi/jsonreference v0.21.0/go.mod h1:LmZmgsrTkVg9LG4EaHeY8cBDslNPMo06cago5JNLkm4=
 github.com/go-openapi/swag v0.23.1 h1:lpsStH0n2ittzTnbaSloVZLuB5+fvSY/+hnagBjSNZU=
 github.com/go-openapi/swag v0.23.1/go.mod h1:STZs8TbRvEQQKUA+JZNAm3EWlgaOBGpyFDqQnDHMef0=
-github.com/go-piv/piv-go v1.11.0 h1:5vAaCdRTFSIW4PeqMbnsDlUZ7odMYWnHBDGdmtU/Zhg=
-github.com/go-piv/piv-go v1.11.0/go.mod h1:NZ2zmjVkfFaL/CF8cVQ/pXdXtuj110zEKGdJM6fJZZM=
+github.com/go-piv/piv-go/v2 v2.3.0 h1:kKkrYlgLQTMPA6BiSL25A7/x4CEh2YCG7rtb/aTkx+g=
+github.com/go-piv/piv-go/v2 v2.3.0/go.mod h1:ShZi74nnrWNQEdWzRUd/3cSig3uNOcEZp+EWl0oewnI=
 github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
 github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
@@ -223,8 +223,8 @@ github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 h1:JeSE6pjso5T
 github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674/go.mod h1:r4w70xmWCQKmi1ONH4KIaBptdivuRPyosB9RmPlGEwA=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/gravitational/teleport/api v0.0.0-20250613225801-8f43d61ae5ce h1:fiwoS+dVeKp+6PU52MBNPkxxISM3OyEMF6EIA1LhXLg=
-github.com/gravitational/teleport/api v0.0.0-20250613225801-8f43d61ae5ce/go.mod h1:MTUrBP8CeO9j9T61XjMmCSTTnsNZuzgxC9NcTfrAa+s=
+github.com/gravitational/teleport/api v0.0.0-20250622182222-c0ee6459e317 h1:r6laPQJC2jBJ2qVhQGJ74gK8Ffxa5D2lkf+kSwTrlX8=
+github.com/gravitational/teleport/api v0.0.0-20250622182222-c0ee6459e317/go.mod h1:fV5CIMdJmnUsKAHXNtF8Q8DOVNFLU9EdDAOjF1baHUg=
 github.com/gravitational/trace v1.5.1 h1:CdSymAjkE1VOef+lsC5x29jX9WbgI0fBtnRqeT4Fh+c=
 github.com/gravitational/trace v1.5.1/go.mod h1:sJKfJHIQ7IkG8kvYpFPEr6mj3WDEdZ0YAc7xAD8w7lw=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=

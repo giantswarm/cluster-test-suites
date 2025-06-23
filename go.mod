@@ -8,7 +8,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown v1.31.1
 	github.com/giantswarm/clustertest v1.34.0
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20250613225801-8f43d61ae5ce
+	github.com/gravitational/teleport/api v0.0.0-20250622182222-c0ee6459e317
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	k8s.io/api v0.33.2
@@ -76,7 +76,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.1 // indirect
-	github.com/go-piv/piv-go v1.11.0 // indirect
+	github.com/go-piv/piv-go/v2 v2.3.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gobuffalo/flect v1.0.3 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
