@@ -217,16 +217,16 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 			continue
 		}
 
-		// MachinePool node pool
-		if pool.MinSize > 0 && pool.MaxSize > 0 {
-			minNodes += pool.MinSize
-			maxNodes += pool.MaxSize
+		if pool.MinSize == 0 && pool.MaxSize == 0 {
+			// It's a Karpenter node pool, and we don't care about the number of workers.
+			// We set the min to 2 as we have some affinity rules that would require at least that.
+			minNodes += 2
+			maxNodes += 99
 		}
 
-		// Karpenter node pool, we don't care about the number
-		// We set the min to 2 as we have some affinity rules that would require at least that
-		minNodes += 2
-		maxNodes += 99
+		// MachinePool node pool
+		minNodes += pool.MinSize
+		maxNodes += pool.MaxSize
 	}
 	expectedNodes := wait.Range{
 		Min: minNodes,
