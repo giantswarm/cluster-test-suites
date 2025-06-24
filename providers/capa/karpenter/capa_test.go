@@ -13,7 +13,7 @@ import (
 var _ = Describe("Common tests", func() {
 	BeforeEach(func() {
 		// Set the timeout for deploying apps to 25 minutes for karpenter test, because workers take longer to come up
-		state.SetTestTimeout(timeout.DeployApps, time.Minute*25)
+		state.SetTestTimeout(timeout.DeployApps, time.Minute*30)
 	})
 
 	common.Run(&common.TestConfig{
