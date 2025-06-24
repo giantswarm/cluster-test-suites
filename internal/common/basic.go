@@ -224,7 +224,8 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 		}
 
 		// Karpenter node pool, we don't care about the number
-		minNodes += 1
+		// We set the min to 2 as we have some affinity rules that would require at least that
+		minNodes += 2
 		maxNodes += 99
 	}
 	expectedNodes := wait.Range{
