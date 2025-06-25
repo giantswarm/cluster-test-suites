@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- HelmRelease testing to ensure all HelmReleases are successful, similar to existing App CR testing
+
 ### Changed
 
 - Include Cilium in metrics test.
