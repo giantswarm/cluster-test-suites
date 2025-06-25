@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
@@ -164,28 +163,8 @@ func reportOwningTeams() failurehandler.FailureHandler {
 		for _, app := range appList.Items {
 			if app.Status.Release.Status != "deployed" {
 				teamLabel, ok := app.Annotations[annotation.AppTeam]
-				if ok {
-					team := strings.TrimPrefix("team-", teamLabel)
-					team = strings.ToLower(team)
-
-					switch team {
-					case "Atlas":
-						helper.SetResponsibleTeam(helper.TeamAtlas)
-					case "Cabbage":
-						helper.SetResponsibleTeam(helper.TeamCabbage)
-					case "Honeybadger":
-						helper.SetResponsibleTeam(helper.TeamHoneybadger)
-					case "Phoenix":
-						helper.SetResponsibleTeam(helper.TeamPhoenix)
-					case "Rocket":
-						helper.SetResponsibleTeam(helper.TeamRocket)
-					case "Shield":
-						helper.SetResponsibleTeam(helper.TeamShield)
-					case "Tenet":
-						helper.SetResponsibleTeam(helper.TeamTenet)
-					default:
-						logger.Log("Unknown owner team - App='%s', TeamName='%s'", app.Name, team)
-					}
+				if ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
+					logger.Log("Unknown owner team - App='%s', TeamLabel='%s'", app.Name, teamLabel)
 				}
 			}
 		}
