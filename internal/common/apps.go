@@ -209,36 +209,47 @@ func reportOwningTeams() failurehandler.FailureHandler {
 // areAllHelmReleasesReady checks if all HelmReleases in the list are ready
 func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleases []types.NamespacedName) func() error {
 	return func() error {
+		allReady := true
 		for _, hr := range helmReleases {
 			helmRelease := &helmv2beta2.HelmRelease{}
 			err := client.Get(ctx, hr, helmRelease)
 			if err != nil {
-				return fmt.Errorf("failed to get HelmRelease %s/%s: %w", hr.Namespace, hr.Name, err)
+				logger.Log("HelmRelease status for '%s' failed to retrieve: %v", hr.Name, err)
+				allReady = false
+				continue
 			}
 
 			ready := false
+			readyCondition := ""
+			readyReason := ""
+			readyMessage := ""
+
 			for _, condition := range helmRelease.Status.Conditions {
-				if condition.Type == "Ready" && condition.Status == metav1.ConditionTrue {
-					ready = true
+				if condition.Type == "Ready" {
+					if condition.Status == metav1.ConditionTrue {
+						ready = true
+					}
+					readyCondition = string(condition.Status)
+					readyReason = condition.Reason
+					readyMessage = condition.Message
 					break
 				}
 			}
 
-			if !ready {
-				// Log current condition details for debugging
-				conditionDetails := ""
-				for _, condition := range helmRelease.Status.Conditions {
-					if condition.Type == "Ready" {
-						conditionDetails = fmt.Sprintf("Ready condition: Status=%s, Reason=%s, Message=%s", condition.Status, condition.Reason, condition.Message)
-						break
-					}
+			if ready {
+				logger.Log("HelmRelease status for '%s' is as expected: expectedStatus='Ready' actualStatus='Ready'", hr.Name)
+			} else {
+				if readyCondition == "" {
+					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='Unknown' (reason: 'No Ready condition found')", hr.Name)
+				} else {
+					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='%s' (reason: '%s - %s')", hr.Name, readyCondition, readyReason, readyMessage)
 				}
-				if conditionDetails == "" {
-					conditionDetails = "No Ready condition found"
-				}
-
-				return fmt.Errorf("HelmRelease %s/%s is not ready: %s", hr.Namespace, hr.Name, conditionDetails)
+				allReady = false
 			}
+		}
+
+		if !allReady {
+			return fmt.Errorf("not all HelmReleases are ready")
 		}
 		return nil
 	}
