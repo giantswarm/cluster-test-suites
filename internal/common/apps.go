@@ -22,7 +22,7 @@ import (
 )
 
 func RunApps() {
-	Context("default apps", func() {
+	Context("default apps and helm releases", func() {
 		It("all default apps are deployed without issues", func() {
 			skipDefaultAppsApp, err := state.GetCluster().UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())

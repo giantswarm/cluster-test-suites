@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	helmv2beta1 "github.com/fluxcd/helm-controller/api/v2beta1"
+	helmv2beta2 "github.com/fluxcd/helm-controller/api/v2beta2"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	corev1 "k8s.io/api/core/v1"
@@ -23,13 +23,14 @@ import (
 )
 
 func RunHelmReleases() {
-	Context("helm releases", func() {
-		It("all HelmReleases are successful", func() {
+	// Add HelmRelease test to the default apps context to run them closer together
+	Context("default apps and helm releases", func() {
+		It("all HelmReleases are deployed without issues", func() {
 			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
-			logger.Log("Waiting for all HelmReleases to be ready. Timeout: %s", timeout.String())
+			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helmv2beta1.HelmReleaseList{}
+			helmReleaseList := &helmv2beta2.HelmReleaseList{}
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -37,8 +38,6 @@ func RunHelmReleases() {
 				logger.Log("No HelmReleases found in namespace %s", state.GetCluster().Organization.GetNamespace())
 				return
 			}
-
-			logger.Log("Found %d HelmReleases to check", len(helmReleaseList.Items))
 
 			helmReleaseNamespacedNames := []types.NamespacedName{}
 			for _, hr := range helmReleaseList.Items {
@@ -63,7 +62,7 @@ func RunHelmReleases() {
 func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleases []types.NamespacedName) func() error {
 	return func() error {
 		for _, hr := range helmReleases {
-			helmRelease := &helmv2beta1.HelmRelease{}
+			helmRelease := &helmv2beta2.HelmRelease{}
 			err := client.Get(ctx, hr, helmRelease)
 			if err != nil {
 				return fmt.Errorf("failed to get HelmRelease %s/%s: %w", hr.Namespace, hr.Name, err)
@@ -105,7 +104,7 @@ func helmReleaseIssues() failurehandler.FailureHandler {
 
 		logger.Log("Gathering HelmRelease status information for debugging")
 
-		helmReleaseList := &helmv2beta1.HelmReleaseList{}
+		helmReleaseList := &helmv2beta2.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -153,7 +152,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := &helmv2beta1.HelmReleaseList{}
+		helmReleaseList := &helmv2beta2.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
