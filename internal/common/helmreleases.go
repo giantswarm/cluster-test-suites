@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	helmv2beta2 "github.com/fluxcd/helm-controller/api/v2beta2"
+	helmv2beta1 "github.com/fluxcd/helm-controller/api/v2beta1"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	corev1 "k8s.io/api/core/v1"
@@ -29,7 +29,7 @@ func RunHelmReleases() {
 			logger.Log("Waiting for all HelmReleases to be ready. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helmv2beta2.HelmReleaseList{}
+			helmReleaseList := &helmv2beta1.HelmReleaseList{}
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -63,7 +63,7 @@ func RunHelmReleases() {
 func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleases []types.NamespacedName) func() error {
 	return func() error {
 		for _, hr := range helmReleases {
-			helmRelease := &helmv2beta2.HelmRelease{}
+			helmRelease := &helmv2beta1.HelmRelease{}
 			err := client.Get(ctx, hr, helmRelease)
 			if err != nil {
 				return fmt.Errorf("failed to get HelmRelease %s/%s: %w", hr.Namespace, hr.Name, err)
@@ -105,7 +105,7 @@ func helmReleaseIssues() failurehandler.FailureHandler {
 
 		logger.Log("Gathering HelmRelease status information for debugging")
 
-		helmReleaseList := &helmv2beta2.HelmReleaseList{}
+		helmReleaseList := &helmv2beta1.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -153,7 +153,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := &helmv2beta2.HelmReleaseList{}
+		helmReleaseList := &helmv2beta1.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -170,9 +170,12 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 			}
 
 			if !ready {
-				teamLabel, ok := hr.Labels["application.giantswarm.io/team"]
-				if ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
-					logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.Name, teamLabel)
+				// Get team label from labels
+				labels := hr.GetLabels()
+				if labels != nil {
+					if teamLabel, ok := labels["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
+						logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.GetName(), teamLabel)
+					}
 				}
 			}
 		}
