@@ -156,9 +156,14 @@ func runBasic() {
 		})
 
 		It("doesn't have restarting pods", func() {
+			filterLabels := []string{
+				// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
+				"app.kubernetes.io/name!=cluster-autoscaler-app",
+			}
+
 			Eventually(
 				wait.ConsistentWaitCondition(
-					wait.AreNoPodsCrashLooping(state.GetContext(), wcClient, 2),
+					wait.AreNoPodsCrashLoopingWithFilter(state.GetContext(), wcClient, 2, filterLabels),
 					10,
 					5*time.Second,
 				)).
