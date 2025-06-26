@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Include Cilium in metrics test.
+- Updated `cluster-standup-teardown` with changes to `instanceWarmup` for CAPA worker nodes
+- Excluded checking of `cluster-autoscaler` as part of the pod restarts test case.
 
 ## [1.88.0] - 2025-05-30
 
