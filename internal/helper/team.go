@@ -3,8 +3,8 @@ package helper
 import (
 	"strings"
 
-	. "github.com/onsi/ginkgo/v2"
-) //nolint:staticcheck
+	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
+)
 
 type Team string
 
