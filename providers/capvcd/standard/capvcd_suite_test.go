@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPVCDStandard(t *testing.T) {
-	suite.Setup(false, &capvcd.ClusterBuilder{})
+	suite.Setup(false, "cloud-director", &capvcd.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPVCD Standard Suite")

@@ -12,8 +12,8 @@ import (
 )
 
 func TestCAPACiliumEniMode(t *testing.T) {
-	suite.Setup(false, &capa.ClusterBuilder{})
+	suite.Setup(false, "capa", &capa.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CAPA 'Cilium ENI mode' Suite")
+	RunSpecs(t, "CAPA Cilium ENI Mode Suite")
 }

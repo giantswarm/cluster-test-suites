@@ -2,6 +2,8 @@ package suite
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -13,6 +15,7 @@ import (
 	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/env"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
@@ -27,11 +30,26 @@ import (
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
-func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
-		if isUpgrade && utils.ShouldSkipUpgrade() {
-			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
-			return
+		if isUpgrade {
+			// Check if we're doing a release-based upgrade.
+			if os.Getenv(env.ReleaseVersion) != "" {
+				// Yes, so run our new logic to determine the correct 'from' version.
+				from, to, err := utils.GetUpgradeReleasesToTest(provider)
+				if err != nil {
+					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
+					return
+				}
+				os.Setenv(env.ReleasePreUpgradeVersion, from)
+				os.Setenv(env.ReleaseVersion, to)
+			} else if os.Getenv(env.OverrideVersions) == "" {
+				// Not a release-based upgrade, and not an override-based upgrade either.
+				// There's no configuration, so we skip.
+				Skip("E2E_OVERRIDE_VERSIONS or E2E_RELEASE_VERSION env var not set, skipping upgrade test")
+				return
+			}
+			// If we reach here, it's a valid override-based upgrade, and we don't need to do anything.
 		}
 
 		logger.LogWriter = GinkgoWriter

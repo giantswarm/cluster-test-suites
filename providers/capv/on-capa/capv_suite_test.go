@@ -11,8 +11,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
 )
 
-func TestCAPVStandard(t *testing.T) {
-	suite.Setup(false, &capv.ClusterBuilder{CustomKubeContext: "capv-on-capa"})
+func TestCAPVOnCAPA(t *testing.T) {
+	suite.Setup(false, "vsphere", &capv.ClusterBuilder{CustomKubeContext: "capv-on-capa"})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPV on CAPA Suite")
