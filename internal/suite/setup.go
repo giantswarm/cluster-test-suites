@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -33,13 +34,21 @@ import (
 func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade {
-			if os.Getenv(env.OverrideVersions) == "" {
+			overrideVersions := strings.TrimSpace(os.Getenv(env.OverrideVersions))
+			if overrideVersions == "" {
 				// Try to automatically detect upgrade versions (with cross-major logic)
 				from, to, err := utils.GetUpgradeReleasesToTest(provider)
 				if err != nil {
 					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
 					return
 				}
+
+				// Skip if we don't have meaningful version information
+				if from == "" || to == "" {
+					Skip("No upgrade versions available - skipping upgrade test")
+					return
+				}
+
 				os.Setenv(env.ReleasePreUpgradeVersion, from)
 				os.Setenv(env.ReleaseVersion, to)
 			}
