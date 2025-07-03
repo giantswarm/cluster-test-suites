@@ -33,7 +33,8 @@ import (
 func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade {
-			if os.Getenv(env.ReleaseVersion) != "" {
+			if os.Getenv(env.OverrideVersions) == "" {
+				// Try to automatically detect upgrade versions (with cross-major logic)
 				from, to, err := utils.GetUpgradeReleasesToTest(provider)
 				if err != nil {
 					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
@@ -41,10 +42,6 @@ func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, cl
 				}
 				os.Setenv(env.ReleasePreUpgradeVersion, from)
 				os.Setenv(env.ReleaseVersion, to)
-			} else if os.Getenv(env.OverrideVersions) == "" {
-				// Not a release-based upgrade, and not an override-based upgrade either.
-				Skip("E2E_OVERRIDE_VERSIONS or E2E_RELEASE_VERSION env var not set, skipping upgrade test")
-				return
 			}
 		}
 
