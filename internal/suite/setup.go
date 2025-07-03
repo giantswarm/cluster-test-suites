@@ -33,9 +33,7 @@ import (
 func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade {
-			// Check if we're doing a release-based upgrade.
 			if os.Getenv(env.ReleaseVersion) != "" {
-				// Yes, so run our new logic to determine the correct 'from' version.
 				from, to, err := utils.GetUpgradeReleasesToTest(provider)
 				if err != nil {
 					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
@@ -45,11 +43,9 @@ func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, cl
 				os.Setenv(env.ReleaseVersion, to)
 			} else if os.Getenv(env.OverrideVersions) == "" {
 				// Not a release-based upgrade, and not an override-based upgrade either.
-				// There's no configuration, so we skip.
 				Skip("E2E_OVERRIDE_VERSIONS or E2E_RELEASE_VERSION env var not set, skipping upgrade test")
 				return
 			}
-			// If we reach here, it's a valid override-based upgrade, and we don't need to do anything.
 		}
 
 		logger.LogWriter = GinkgoWriter
