@@ -17,7 +17,7 @@ import (
 )
 
 func TestEKSStandard(t *testing.T) {
-	suite.Setup(false, &capa.ManagedClusterBuilder{}, func(client *client.Client) {
+	suite.Setup(false, "aws", &capa.ManagedClusterBuilder{}, func(client *client.Client) {
 		Eventually(
 			wait.AreNumNodesReady(state.GetContext(), client, 2, &cr.MatchingLabels{"node-role.kubernetes.io/worker": ""}),
 			20*time.Minute, 15*time.Second,

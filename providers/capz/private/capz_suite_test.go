@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPZPrivate(t *testing.T) {
-	suite.Setup(false, &capz.PrivateClusterBuilder{})
+	suite.Setup(false, "azure", &capz.PrivateClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPZ Private Suite")

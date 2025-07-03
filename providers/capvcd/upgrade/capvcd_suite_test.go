@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPVCDUpgrade(t *testing.T) {
-	suite.Setup(true, &capvcd.ClusterBuilder{})
+	suite.Setup(true, "cloud-director", &capvcd.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPVCD Upgrade Suite")
