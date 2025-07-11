@@ -2,7 +2,6 @@ package suite
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -34,23 +33,17 @@ import (
 func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade {
+			// An upgrade test is being run.
+			// We need to ensure that we have some version information to run the upgrade test.
+			// The values can be provided by either setting `E2E_OVERRIDE_VERSIONS` or by setting
+			// `E2E_RELEASE_VERSION` and `E2E_RELEASE_PRE_UPGRADE`.
+			// If none of these are set, we'll skip the test.
 			overrideVersions := strings.TrimSpace(os.Getenv(env.OverrideVersions))
-			if overrideVersions == "" {
-				// Try to automatically detect upgrade versions (with cross-major logic)
-				from, to, err := utils.GetUpgradeReleasesToTest(provider)
-				if err != nil {
-					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
-					return
-				}
+			releaseVersion := strings.TrimSpace(os.Getenv(env.ReleaseVersion))
 
-				// Skip if we don't have meaningful version information
-				if from == "" || to == "" {
-					Skip("No upgrade versions available - skipping upgrade test")
-					return
-				}
-
-				os.Setenv(env.ReleasePreUpgradeVersion, from)
-				os.Setenv(env.ReleaseVersion, to)
+			if overrideVersions == "" && releaseVersion == "" {
+				Skip("Skipping upgrade test as no override or release version was provided")
+				return
 			}
 		}
 
