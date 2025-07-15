@@ -11,7 +11,7 @@ import (
 )
 
 func TestCAPAChina(t *testing.T) {
-	suite.Setup(false, "capa", &capa.ChinaBuilder{})
+	suite.Setup(false, &capa.ChinaBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA China Suite")

@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPVOnCAPA(t *testing.T) {
-	suite.Setup(false, "vsphere", &capv.ClusterBuilder{CustomKubeContext: "capv-on-capa"})
+	suite.Setup(false, &capv.ClusterBuilder{CustomKubeContext: "capv-on-capa"})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPV on CAPA Suite")

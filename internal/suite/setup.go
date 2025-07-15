@@ -2,7 +2,9 @@ package suite
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -30,20 +32,35 @@ import (
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
-func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
 		if isUpgrade {
-			// An upgrade test is being run.
-			// We need to ensure that we have some version information to run the upgrade test.
-			// The values can be provided by either setting `E2E_OVERRIDE_VERSIONS` or by setting
-			// `E2E_RELEASE_VERSION` and `E2E_RELEASE_PRE_UPGRADE`.
-			// If none of these are set, we'll skip the test.
 			overrideVersions := strings.TrimSpace(os.Getenv(env.OverrideVersions))
-			releaseVersion := strings.TrimSpace(os.Getenv(env.ReleaseVersion))
+			if overrideVersions == "" {
+				// We're not using override versions, so we must be using release versions.
+				// We call GetUpgradeReleasesToTest to resolve the 'from' and 'to' versions.
+				// This function also handles the "previous_major" magic value.
+				provider, err := getProviderFromBuilder(clusterBuilder)
+				if err != nil {
+					Fail(fmt.Sprintf("failed to get provider from cluster builder: %s", err))
+				}
+				from, to, err := utils.GetUpgradeReleasesToTest(provider)
+				if err != nil {
+					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
+					return
+				}
 
-			if overrideVersions == "" && releaseVersion == "" {
-				Skip("Skipping upgrade test as no override or release version was provided")
-				return
+				if to == "" {
+					// If there's no target release 'to', we can't run an upgrade test.
+					// This is the expected case for PRs to this repo which don't have release context.
+					Skip("Skipping upgrade test as no release version was provided")
+					return
+				}
+
+				// Set the concrete, resolved versions back into the environment, so that they can be
+				// picked up by the cluster-standup-teardown library.
+				os.Setenv(env.ReleasePreUpgradeVersion, from)
+				os.Setenv(env.ReleaseVersion, to)
 			}
 		}
 
@@ -154,6 +171,46 @@ func Setup(isUpgrade bool, provider string, clusterBuilder cb.ClusterBuilder, cl
 
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
+}
+
+func getProviderFromBuilder(clusterBuilder cb.ClusterBuilder) (string, error) {
+	t := reflect.TypeOf(clusterBuilder)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	return getProviderFromBuilderLogic(t.PkgPath(), t.Name())
+}
+
+func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
+	// The full type name includes the package path, e.g., "github.com/giantswarm/cluster-test-suites/providers/capa.StandardBuilder"
+	// We want to extract the provider part, which is the directory name after "providers/".
+	parts := strings.Split(pkgPath, "/")
+	if len(parts) > 2 && parts[len(parts)-2] == "providers" {
+		provider := parts[len(parts)-1]
+
+		// The EKS test suite uses the CAPA provider builders, but is considered the "aws" provider.
+		// We can detect this by checking for the unique builder struct name and that it comes from the capa provider.
+		if structName == "ManagedClusterBuilder" && provider == "capa" {
+			return "aws", nil
+		}
+
+		// The CAPZ test suite has a different provider name.
+		if provider == "capz" {
+			return "azure", nil
+		}
+		// The CAPV test suite has a different provider name.
+		if provider == "capv" {
+			return "vsphere", nil
+		}
+		// The CAPVCD test suite has a different provider name.
+		if provider == "capvcd" {
+			return "cloud-director", nil
+		}
+		return provider, nil
+	}
+
+	return "", fmt.Errorf("could not determine provider from package path: %s", pkgPath)
 }
 
 func cleanupPVs(ctx context.Context) error {

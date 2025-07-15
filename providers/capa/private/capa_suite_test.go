@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPAPrivate(t *testing.T) {
-	suite.Setup(false, "capa", &capa.PrivateClusterBuilder{})
+	suite.Setup(false, &capa.PrivateClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Private Suite")
