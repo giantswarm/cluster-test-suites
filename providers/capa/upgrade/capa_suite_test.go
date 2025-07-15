@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPAUpgrade(t *testing.T) {
-	suite.Setup(true, "capa", &capa.ClusterBuilder{})
+	suite.Setup(true, &capa.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPA Upgrade Suite")

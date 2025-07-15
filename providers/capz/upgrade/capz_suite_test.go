@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPZUpgrade(t *testing.T) {
-	suite.Setup(true, "azure", &capz.ClusterBuilder{})
+	suite.Setup(true, &capz.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPZ Upgrade Suite")

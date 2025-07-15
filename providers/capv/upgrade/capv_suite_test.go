@@ -12,7 +12,7 @@ import (
 )
 
 func TestCAPVUpgrade(t *testing.T) {
-	suite.Setup(true, "vsphere", &capv.ClusterBuilder{})
+	suite.Setup(true, &capv.ClusterBuilder{})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPV Upgrade Suite")
