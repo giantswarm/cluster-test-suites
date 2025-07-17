@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update `capz-on-capa` to use the new `garm` management cluster.
+- Update `capv-on-capa` to use the new `garm` management cluster.
 
 ## [1.91.0] - 2025-07-10
 
