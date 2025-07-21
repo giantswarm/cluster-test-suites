@@ -1,6 +1,6 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
 global:
   connectivity:
-    baseDomain: gaws.gigantic.io
+    baseDomain: gawsprivate.gigantic.io
     proxy:
       enabled: false
