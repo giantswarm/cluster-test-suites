@@ -5,7 +5,12 @@
 ## ☑️ Requirements
 
 * A valid Kubeconfig, pointing at a `stable-testing` MC, with the required context defined. (See [cluster-standup-teardown](https://github.com/giantswarm/cluster-standup-teardown) for more details.)
-* Install [ginkgo](https://onsi.github.io/ginkgo/) on your machine: `go install github.com/onsi/ginkgo/v2/ginkgo`.
+* Install [ginkgo](https://onsi.github.io/ginkgo/) on your machine: `go install github.com/onsi/ginkgo/v2/ginkgo`.\
+  Run this command from inside the repository to get the correct version and do not just install `latest` instead. The following error is an indicator of not being in the correct directory:
+  ```
+  go: 'go install' requires a version when current directory is not in a module
+  	Try 'go install github.com/onsi/ginkgo/v2/ginkgo@latest' to install the latest version
+  ```
 * The `E2E_KUBECONFIG` environment variable set to point to the path of the above kubeconfig.
 
 Optional:
