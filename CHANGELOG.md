@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Enhanced upgrade test logic to automatically resolve release versions when `E2E_OVERRIDE_VERSIONS` is not set, including support for "previous_major" magic value resolution.
+
 ## [1.93.0] - 2025-08-13
 
 ### Changed
