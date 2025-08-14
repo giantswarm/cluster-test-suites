@@ -2,6 +2,10 @@ package suite
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"reflect"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -13,6 +17,7 @@ import (
 	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
 	"github.com/giantswarm/clustertest"
 	"github.com/giantswarm/clustertest/pkg/client"
+	"github.com/giantswarm/clustertest/pkg/env"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
@@ -29,9 +34,34 @@ import (
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
-		if isUpgrade && utils.ShouldSkipUpgrade() {
-			Skip("E2E_OVERRIDE_VERSIONS env var not set, skipping upgrade test")
-			return
+		if isUpgrade {
+			overrideVersions := strings.TrimSpace(os.Getenv(env.OverrideVersions))
+			if overrideVersions == "" {
+				// We're not using override versions, so we must be using release versions.
+				// We call GetUpgradeReleasesToTest to resolve the 'from' and 'to' versions.
+				// This function also handles the "previous_major" magic value.
+				provider, err := getProviderFromBuilder(clusterBuilder)
+				if err != nil {
+					Fail(fmt.Sprintf("failed to get provider from cluster builder: %s", err))
+				}
+				from, to, err := utils.GetUpgradeReleasesToTest(provider)
+				if err != nil {
+					Skip(fmt.Sprintf("failed to get upgrade releases to test: %s", err))
+					return
+				}
+
+				if to == "" {
+					// If there's no target release 'to', we can't run an upgrade test.
+					// This is the expected case for PRs to this repo which don't have release context.
+					Skip("Skipping upgrade test as no release version was provided")
+					return
+				}
+
+				// Set the concrete, resolved versions back into the environment, so that they can be
+				// picked up by the cluster-standup-teardown library.
+				os.Setenv(env.ReleasePreUpgradeVersion, from)
+				os.Setenv(env.ReleaseVersion, to)
+			}
 		}
 
 		logger.LogWriter = GinkgoWriter
@@ -141,6 +171,46 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
+}
+
+func getProviderFromBuilder(clusterBuilder cb.ClusterBuilder) (string, error) {
+	t := reflect.TypeOf(clusterBuilder)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	return getProviderFromBuilderLogic(t.PkgPath(), t.Name())
+}
+
+func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
+	// The full type name includes the package path, e.g., "github.com/giantswarm/cluster-test-suites/providers/capa.StandardBuilder"
+	// We want to extract the provider part, which is the directory name after "providers/".
+	parts := strings.Split(pkgPath, "/")
+	if len(parts) > 2 && parts[len(parts)-2] == "providers" {
+		provider := parts[len(parts)-1]
+
+		// The EKS test suite uses the CAPA provider builders, but is considered the "aws" provider.
+		// We can detect this by checking for the unique builder struct name and that it comes from the capa provider.
+		if structName == "ManagedClusterBuilder" && provider == "capa" {
+			return "aws", nil
+		}
+
+		// The CAPZ test suite has a different provider name.
+		if provider == "capz" {
+			return "azure", nil
+		}
+		// The CAPV test suite has a different provider name.
+		if provider == "capv" {
+			return "vsphere", nil
+		}
+		// The CAPVCD test suite has a different provider name.
+		if provider == "capvcd" {
+			return "cloud-director", nil
+		}
+		return provider, nil
+	}
+
+	return "", fmt.Errorf("could not determine provider from package path: %s", pkgPath)
 }
 
 func cleanupPVs(ctx context.Context) error {
