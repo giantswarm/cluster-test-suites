@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.95.0] - 2025-08-19
+
 ### Changed
 
 - Bump `clustertest` to [v1.39.0](https://github.com/giantswarm/clustertest/releases/tag/v1.39.0) to skip previous major upgrade testing when releasing the first version of a new major.
@@ -1108,7 +1110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.94.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.0...HEAD
+[1.95.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.94.0...v1.95.0
 [1.94.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.93.0...v1.94.0
 [1.93.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.92.1...v1.93.0
 [1.92.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.92.0...v1.92.1
