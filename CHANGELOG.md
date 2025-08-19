@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.95.3] - 2025-08-19
+
 ### Fixed
 
 - Refactored `AfterSuite` cleanup logic to rely on a single, universal check for uninitialized cluster objects.
@@ -1126,7 +1128,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.3...HEAD
+[1.95.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.2...v1.95.3
 [1.95.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.1...v1.95.2
 [1.95.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.0...v1.95.1
 [1.95.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.94.0...v1.95.0
