@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump `clustertest` to [v1.39.0](https://github.com/giantswarm/clustertest/releases/tag/v1.39.0) to skip previous major upgrade testing when releasing the first version of a new major.
+
 ## [1.94.0] - 2025-08-14
 
 ### Added
