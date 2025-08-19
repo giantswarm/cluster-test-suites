@@ -57,6 +57,13 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 					return
 				}
 
+				// Check if we were looking for a previous major release but got an empty 'from' version.
+				// This happens when we're drafting the first release of a new major version.
+				if from == "" && os.Getenv(env.ReleasePreUpgradeVersion) == "previous_major" {
+					Skip("Skipping upgrade test as this is the first release of a new major version")
+					return
+				}
+
 				// Set the concrete, resolved versions back into the environment, so that they can be
 				// picked up by the cluster-standup-teardown library.
 				os.Setenv(env.ReleasePreUpgradeVersion, from)
