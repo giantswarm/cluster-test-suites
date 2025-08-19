@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix AfterSuite panic when upgrade tests are skipped for first major releases by ensuring context is properly initialized before any skip logic.
+
 ## [1.95.1] - 2025-08-19
 
 ### Fixed

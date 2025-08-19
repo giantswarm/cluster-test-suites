@@ -34,6 +34,9 @@ import (
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
 	BeforeSuite(func() {
+		logger.LogWriter = GinkgoWriter
+		state.SetContext(context.Background())
+
 		if isUpgrade {
 			overrideVersions := strings.TrimSpace(os.Getenv(env.OverrideVersions))
 			if overrideVersions == "" {
@@ -70,10 +73,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 				os.Setenv(env.ReleaseVersion, to)
 			}
 		}
-
-		logger.LogWriter = GinkgoWriter
-
-		state.SetContext(context.Background())
 
 		framework, err := clustertest.New(clusterBuilder.KubeContext())
 		Expect(err).NotTo(HaveOccurred())
