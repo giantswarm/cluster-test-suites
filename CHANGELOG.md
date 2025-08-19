@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.95.2] - 2025-08-19
+
 ### Fixed
 
 - Fix AfterSuite panic when upgrade tests are skipped for first major releases by ensuring context is properly initialized before any skip logic.
@@ -1120,7 +1122,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.2...HEAD
+[1.95.2]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.1...v1.95.2
 [1.95.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.0...v1.95.1
 [1.95.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.94.0...v1.95.0
 [1.94.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.93.0...v1.94.0
