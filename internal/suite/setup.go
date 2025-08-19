@@ -19,7 +19,6 @@ import (
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/env"
 	"github.com/giantswarm/clustertest/pkg/logger"
-	"github.com/giantswarm/clustertest/pkg/utils"
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
@@ -27,6 +26,7 @@ import (
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/utils"
 )
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
@@ -161,7 +161,10 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	})
 
 	AfterSuite(func() {
-		if isUpgrade && utils.ShouldSkipUpgrade() {
+		// Only run cleanup if framework and cluster were actually initialized
+		// This prevents panics when BeforeSuite skips for any reason (PRs, first major releases, etc.)
+		if state.GetFramework() == nil || state.GetCluster() == nil {
+			logger.Log("Skipping cleanup as cluster/framework were not initialized")
 			return
 		}
 

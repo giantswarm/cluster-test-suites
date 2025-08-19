@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Refactored `AfterSuite` cleanup logic to rely on a single, universal check for uninitialized cluster objects.
+
 ## [1.95.2] - 2025-08-19
 
 ### Fixed
