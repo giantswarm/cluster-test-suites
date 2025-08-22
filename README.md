@@ -116,7 +116,7 @@ replace github.com/giantswarm/cluster-standup-teardown => /path/to/cluster-stand
 
 ### ⚙️ Running Tests in CI
 
-These tests are configures to run in our Tekton pipelines with our [cluster-test-suites pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/pipelines/cluster-test-suites.yaml). This pipeline can be triggered on appropriate repos by using the `/run cluster-test-suites` comment trigger.
+These tests are configures to run in our Tekton pipelines with our [cluster-test-suites pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/tekton-pipelines/pipelines/cluster-test-suites.yaml). This pipeline can be triggered on appropriate repos by using the `/run cluster-test-suites` comment trigger.
 
 Note: Test suites are configured to run in parallel using a [Matrix](https://tekton.dev/docs/pipelines/matrix/) in the Tekton Pipeline. Once all suites are complete the results of each will be collected and presented in a final Pipeline Task to show the results of all suites.
 
@@ -239,5 +239,5 @@ controlPlane:
 
 * [`clustertest` documentation](https://pkg.go.dev/github.com/giantswarm/clustertest)
 * [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs
-* [CI Tekton Pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/pipelines/cluster-test-suites.yaml)
+* [CI Tekton Pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/tekton-pipelines/pipelines/cluster-test-suites.yaml)
 * [Ginkgo docs](https://onsi.github.io/ginkgo/)
