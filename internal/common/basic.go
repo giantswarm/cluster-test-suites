@@ -6,8 +6,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -242,7 +241,7 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 // Running phase.
 func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
 	return func() error {
-		machinePools := &capiexp.MachinePoolList{}
+		machinePools := &capi.MachinePoolList{}
 		machinePoolListOptions := []cr.ListOption{
 			cr.InNamespace(clusterNamespace),
 			cr.MatchingLabels{
@@ -269,8 +268,8 @@ func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Clie
 			}
 			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsReady
 
-			currentMachinePoolPhase := capiexp.MachinePoolPhase(machinePool.Status.Phase)
-			machinePoolIsRunning := currentMachinePoolPhase == capiexp.MachinePoolPhaseRunning
+			currentMachinePoolPhase := capi.MachinePoolPhase(machinePool.Status.Phase)
+			machinePoolIsRunning := currentMachinePoolPhase == capi.MachinePoolPhaseRunning
 			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsRunning
 			logger.Log(
 				"MachinePool '%s/%s' expected to be in Running phase, found MachinePool is in '%s' phase.",
