@@ -5,8 +5,8 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	kubeadm "sigs.k8s.io/cluster-api/api/controlplane/kubeadm/v1beta1"
-	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	kubeadm "sigs.k8s.io/cluster-api/api/controlplane/kubeadm/v1beta2"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -222,16 +222,16 @@ func Run(cfg *TestConfig) {
 					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
-				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
-					capiconditions.GetReason(controlPlane, kubeadm.MachinesSpecUpToDateCondition) == kubeadm.RollingUpdateInProgressReason {
+				if capiconditions.IsFalse(controlPlane, string(kubeadm.MachinesSpecUpToDateV1Beta1Condition)) &&
+					capiconditions.GetReason(controlPlane, string(kubeadm.MachinesSpecUpToDateV1Beta1Condition)) == kubeadm.RollingUpdateInProgressV1Beta1Reason {
 					controlPlaneRollingUpdateStarted = true
 					break
 				} else {
-					machinesSpecUpToDateCondition := capiconditions.Get(controlPlane, kubeadm.MachinesSpecUpToDateCondition)
+					machinesSpecUpToDateCondition := capiconditions.Get(controlPlane, string(kubeadm.MachinesSpecUpToDateV1Beta1Condition))
 					if machinesSpecUpToDateCondition == nil {
-						logger.Log("KubeadmControlPlane condition %s is still not set on the KubeadmControlPlane resource, expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, kubeadm.RollingUpdateInProgressReason)
+						logger.Log("KubeadmControlPlane condition %s is still not set on the KubeadmControlPlane resource, expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateV1Beta1Condition, kubeadm.RollingUpdateInProgressV1Beta1Reason)
 					} else {
-						logger.Log("KubeadmControlPlane condition %s has Status='%s' and Reason='%s', expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, machinesSpecUpToDateCondition.Status, machinesSpecUpToDateCondition.Reason, kubeadm.RollingUpdateInProgressReason)
+						logger.Log("KubeadmControlPlane condition %s has Status='%s' and Reason='%s', expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateV1Beta1Condition, machinesSpecUpToDateCondition.Status, machinesSpecUpToDateCondition.Reason, kubeadm.RollingUpdateInProgressV1Beta1Reason)
 					}
 				}
 
@@ -244,7 +244,7 @@ func Run(cfg *TestConfig) {
 
 			mcClient := state.GetFramework().MC()
 			Eventually(
-				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
+				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateV1Beta1Condition, corev1.ConditionTrue, ""),
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())

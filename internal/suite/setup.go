@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
 
 	cb "github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder"
 	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
@@ -23,7 +22,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
-	capi "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
@@ -136,12 +135,10 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 						logger.Log("Failed to get Cluster CR: %v", err)
 					} else {
 						logger.Log(
-							"Cluster status: Phase='%s', InfrastructureReady='%t', ControlPlaneReady='%t', FailureReason='%s', FailureMessage='%s'",
+							"Cluster status: Phase='%s', InfrastructureProvisioned='%t', ControlPlaneInitialized='%t'",
 							cl.Status.Phase,
-							cl.Status.InfrastructureReady,
-							cl.Status.ControlPlaneReady,
-							ptr.Deref(cl.Status.FailureReason, ""),  //nolint:staticcheck // Ignore SA1019 this field is marked as deprecated.
-							ptr.Deref(cl.Status.FailureMessage, ""), //nolint:staticcheck // Ignore SA1019 this field is marked as deprecated.
+							cl.Status.Initialization.InfrastructureProvisioned,
+							cl.Status.Initialization.ControlPlaneInitialized,
 						)
 
 						for _, condition := range cl.Status.Conditions {
