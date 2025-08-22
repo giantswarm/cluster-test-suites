@@ -26,6 +26,37 @@ import (
 
 func RunApps() {
 	Context("default apps and helm releases", func() {
+		It("all HelmReleases are deployed without issues", func() {
+			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
+			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
+
+			// Get all HelmReleases in the cluster organization namespace
+			helmReleaseList := &helmv2beta2.HelmReleaseList{}
+			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
+			Expect(err).NotTo(HaveOccurred())
+
+			if len(helmReleaseList.Items) == 0 {
+				logger.Log("No HelmReleases found in namespace %s", state.GetCluster().Organization.GetNamespace())
+				return
+			}
+
+			helmReleaseNamespacedNames := []types.NamespacedName{}
+			for _, hr := range helmReleaseList.Items {
+				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.Name, Namespace: hr.Namespace})
+			}
+
+			Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
+				WithTimeout(timeout).
+				WithPolling(10*time.Second).
+				Should(
+					Succeed(),
+					failurehandler.Bundle(
+						helmReleaseIssues(),
+						reportHelmReleaseOwningTeams(),
+					),
+				)
+		})
+
 		It("all default apps are deployed without issues", func() {
 			skipDefaultAppsApp, err := state.GetCluster().UsesUnifiedClusterApp()
 			Expect(err).NotTo(HaveOccurred())
@@ -62,36 +93,6 @@ func RunApps() {
 					failurehandler.Bundle(
 						failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 						reportOwningTeams(),
-					),
-				)
-		})
-		It("all HelmReleases are deployed without issues", func() {
-			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
-			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
-
-			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helmv2beta2.HelmReleaseList{}
-			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
-			Expect(err).NotTo(HaveOccurred())
-
-			if len(helmReleaseList.Items) == 0 {
-				logger.Log("No HelmReleases found in namespace %s", state.GetCluster().Organization.GetNamespace())
-				return
-			}
-
-			helmReleaseNamespacedNames := []types.NamespacedName{}
-			for _, hr := range helmReleaseList.Items {
-				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.Name, Namespace: hr.Namespace})
-			}
-
-			Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
-				WithTimeout(timeout).
-				WithPolling(10*time.Second).
-				Should(
-					Succeed(),
-					failurehandler.Bundle(
-						helmReleaseIssues(),
-						reportHelmReleaseOwningTeams(),
 					),
 				)
 		})
