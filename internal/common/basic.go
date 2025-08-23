@@ -10,13 +10,14 @@ import (
 	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 	"github.com/giantswarm/clustertest/pkg/application"
 	"github.com/giantswarm/clustertest/pkg/client"
 	"github.com/giantswarm/clustertest/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/pkg/logger"
 	"github.com/giantswarm/clustertest/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
@@ -209,12 +210,21 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 	minNodes := 0
 	maxNodes := 0
 	for _, pool := range values.NodePools {
+		// MachineDeployment node pool
 		if pool.Replicas > 0 {
 			minNodes += pool.Replicas
 			maxNodes += pool.Replicas
 			continue
 		}
 
+		if pool.MinSize == 0 && pool.MaxSize == 0 {
+			// It's a Karpenter node pool, and we don't care about the number of workers.
+			// We set the min to 2 as we have some affinity rules that would require at least that.
+			minNodes += 2
+			maxNodes += 99
+		}
+
+		// MachinePool node pool
 		minNodes += pool.MinSize
 		maxNodes += pool.MaxSize
 	}
