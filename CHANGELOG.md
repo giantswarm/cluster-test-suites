@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.95.6] - 2025-08-28
+
+### Changed
+
+- Go: Update dependencies.
+
 ## [1.95.5] - 2025-08-23
 
 ### Changed
@@ -1140,7 +1146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.5...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.6...HEAD
+[1.95.6]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.5...v1.95.6
 [1.95.5]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.4...v1.95.5
 [1.95.4]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.3...v1.95.4
 [1.95.3]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.2...v1.95.3
