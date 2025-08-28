@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add automatic node roll detection to upgrade tests. Test reports will now include whether a release upgrade caused nodes to be rolled.
+
 ## [1.95.6] - 2025-08-28
 
 ### Changed

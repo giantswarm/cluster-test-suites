@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"os"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -16,6 +17,7 @@ import (
 	"github.com/giantswarm/clustertest/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
@@ -40,8 +42,10 @@ func Run(cfg *TestConfig) {
 		var cluster *application.Cluster
 		var wcClient *client.Client
 		var preUpgradeControlPlaneResourceGeneration int64
+		var initialNodes map[string]corev1.Node
 
 		BeforeAll(func() {
+			var err error
 			cluster = state.GetCluster()
 			preUpgradeControlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
@@ -49,6 +53,16 @@ func Run(cfg *TestConfig) {
 				preUpgradeControlPlaneResourceGeneration = 0
 			} else {
 				preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+			}
+			wcClient, err = state.GetFramework().WC(cluster.Name)
+			Expect(err).NotTo(HaveOccurred())
+
+			nodes := &corev1.NodeList{}
+			err = wcClient.List(state.GetContext(), nodes)
+			Expect(err).NotTo(HaveOccurred())
+			initialNodes = map[string]corev1.Node{}
+			for _, node := range nodes.Items {
+				initialNodes[node.Name] = node
 			}
 		})
 
@@ -248,6 +262,32 @@ func Run(cfg *TestConfig) {
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
+		})
+
+		It("detects if nodes were rolled", func() {
+			if os.Getenv("SKIP_NODE_ROLL_DETECTION") == "true" {
+				Skip("Node roll detection is disabled for this test suite.")
+			}
+			nodes := &corev1.NodeList{}
+			err := wcClient.List(state.GetContext(), nodes)
+			Expect(err).NotTo(HaveOccurred())
+
+			rolled := false
+			for nodeName := range initialNodes {
+				found := false
+				for _, newNode := range nodes.Items {
+					if nodeName == newNode.Name {
+						found = true
+						break
+					}
+				}
+				if !found {
+					rolled = true
+					break
+				}
+			}
+
+			helper.RecordNodeRolling(rolled)
 		})
 	})
 }
