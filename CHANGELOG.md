@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.96.1] - 2025-08-29
+
 ### Fixed
 
 - Skip standard upgrade test if no previous release is found in the same major version.
@@ -1156,7 +1158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.1...HEAD
+[1.96.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.0...v1.96.1
 [1.96.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.6...v1.96.0
 [1.95.6]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.5...v1.95.6
 [1.95.5]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.4...v1.95.5
