@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.97.0] - 2025-08-30
+
 ### Changed 
 
 - Added logging for automatic node roll detection.
@@ -1162,7 +1164,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.97.0...HEAD
+[1.97.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.1...v1.97.0
 [1.96.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.0...v1.96.1
 [1.96.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.6...v1.96.0
 [1.95.6]: https://github.com/giantswarm/cluster-test-suites/compare/v1.95.5...v1.95.6
