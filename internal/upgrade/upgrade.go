@@ -273,6 +273,19 @@ func Run(cfg *TestConfig) {
 			Expect(err).NotTo(HaveOccurred())
 
 			rolled := false
+			initialNodeNames := make([]string, 0, len(initialNodes))
+			for nodeName := range initialNodes {
+				initialNodeNames = append(initialNodeNames, nodeName)
+			}
+
+			currentNodeNames := make([]string, 0, len(nodes.Items))
+			for _, node := range nodes.Items {
+				currentNodeNames = append(currentNodeNames, node.Name)
+			}
+
+			logger.Log("Node roll detection - Initial nodes: %v", initialNodeNames)
+			logger.Log("Node roll detection - Current nodes: %v", currentNodeNames)
+
 			for nodeName := range initialNodes {
 				found := false
 				for _, newNode := range nodes.Items {
@@ -283,10 +296,12 @@ func Run(cfg *TestConfig) {
 				}
 				if !found {
 					rolled = true
+					logger.Log("Node %s was rolled (not found in current nodes)", nodeName)
 					break
 				}
 			}
 
+			logger.Log("Node roll detection result: rolled=%v", rolled)
 			helper.RecordNodeRolling(rolled)
 		})
 	})

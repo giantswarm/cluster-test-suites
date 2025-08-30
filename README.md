@@ -17,6 +17,7 @@ Optional:
 
 * When `E2E_WC_NAME` and `E2E_WC_NAMESPACE` environment variables are set, the tests will run against the specified WC on the targeted MC. If one or both of the variables isn't set, the tests will create their own WC.
 * When `TELEPORT_IDENTITY_FILE` environment variable is set to point to the path of a valid teleport credential, the test will check if E2E WC is registered in Teleport cluster (`teleport.giantswarm.io`). If it isn't set, the test will be skipped.
+* When `SKIP_NODE_ROLL_DETECTION` environment variable is set to `"true"`, the node rolling detection test will be skipped in upgrade suites.
 
 ## 🏃 Running Tests
 
@@ -166,6 +167,36 @@ There are a few things to be aware about these tests:
 * These test suites only run if a `E2E_OVERRIDE_VERSIONS` environment variable is set, indicating the versions to upgrade the Apps to. For example `E2E_OVERRIDE_VERSIONS="cluster-aws=0.38.0-5f4372ac697fce58d524830a985ede2082d7f461"`.
 * The initial workload cluster created uses whatever the latest released version on GitHub is, this is not currently configurable.
 * These test suites use [Ginkgo Ordered Containers](https://onsi.github.io/ginkgo/#ordered-containers) to ensure certain tests specs are run before and after the upgrade process as required.
+
+### 🔄 Node Rolling Detection
+
+The upgrade test suites include automatic node rolling detection to help identify when a release will cause nodes to be replaced during the upgrade process. This is particularly important for:
+
+- **Major releases**: Typically always roll nodes due to Kubernetes minor version upgrades or Flatcar OS updates
+- **Minor/patch releases**: May or may not roll nodes depending on the components being updated
+
+#### How it works
+
+1. The test captures the initial set of nodes before the upgrade
+2. After the upgrade completes, it compares the current nodes with the initial set
+3. If any nodes were replaced (different node names), it records this as a node roll
+4. The result is added to the Ginkgo test report as a `NODES_ROLLED` entry
+
+#### PR Comment Integration
+
+When test results are posted back to PRs via Tekton pipelines, the node rolling information is displayed:
+
+- **Summary section**: Shows an overall "Nodes will be rolled" status at the top of the comment
+- **Test details**: Individual test results show node rolling status in the notes column
+- **Visual indicators**: 
+  - ✅ No nodes rolled
+  - ⚠️ Nodes will be rolled
+
+This helps reviewers and users quickly understand the impact of a release on running clusters.
+
+#### Disabling Node Roll Detection
+
+If needed, you can skip the node roll detection test by setting the `SKIP_NODE_ROLL_DETECTION` environment variable to `"true"`.
 
 ## ➕ Adding Tests
 
