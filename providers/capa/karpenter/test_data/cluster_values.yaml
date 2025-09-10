@@ -1,0 +1,5 @@
+# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  providerSpecific:
+    awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e
+    nodeTerminationHandlerEnabled: false # https://github.com/giantswarm/giantswarm/issues/32656
