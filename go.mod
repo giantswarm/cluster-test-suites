@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.18.2
 	github.com/fluxcd/helm-controller/api v1.3.0
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown v1.35.3
+	github.com/giantswarm/cluster-standup-teardown v1.36.0
 	github.com/giantswarm/clustertest v1.40.0
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20250907140457-e82d7a5d4047
@@ -137,8 +137,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
-	github.com/spf13/cobra v1.9.1 // indirect
-	github.com/spf13/pflag v1.0.7 // indirect
+	github.com/spf13/cobra v1.10.1 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
