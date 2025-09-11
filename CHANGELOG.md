@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added CAPA karpenter tests.
 
+### Changed
+
+- Don't rely on workers having labels. Instead, filter by nodes not having the control plane label.
+
 ## [1.97.1] - 2025-08-30
 
 ### Fixed
