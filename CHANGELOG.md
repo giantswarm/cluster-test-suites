@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.98.0] - 2025-09-16
+
 ### Added
 
 - Added CAPA karpenter tests.
@@ -1178,7 +1180,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.97.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v1.98.0...HEAD
+[1.98.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.97.1...v1.98.0
 [1.97.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.97.0...v1.97.1
 [1.97.0]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.1...v1.97.0
 [1.96.1]: https://github.com/giantswarm/cluster-test-suites/compare/v1.96.0...v1.96.1
