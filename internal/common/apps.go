@@ -261,46 +261,50 @@ func helmReleaseIssues() failurehandler.FailureHandler {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 
-		logger.Log("Gathering HelmRelease status information for debugging")
+		ShowHelmReleaseDebugInfo(ctx)
+	})
+}
 
-		helmReleaseList := &helmv2beta2.HelmReleaseList{}
-		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
-		if err != nil {
-			logger.Log("Failed to get HelmReleases - %v", err)
-			return
+func ShowHelmReleaseDebugInfo(ctx context.Context) {
+	logger.Log("Gathering HelmRelease status information for debugging")
+
+	helmReleaseList := &helmv2beta2.HelmReleaseList{}
+	err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
+	if err != nil {
+		logger.Log("Failed to get HelmReleases - %v", err)
+		return
+	}
+
+	for _, hr := range helmReleaseList.Items {
+		ready := false
+		for _, condition := range hr.Status.Conditions {
+			if condition.Type == "Ready" && condition.Status == metav1.ConditionTrue {
+				ready = true
+				break
+			}
 		}
 
-		for _, hr := range helmReleaseList.Items {
-			ready := false
+		if !ready {
+			logger.Log("HelmRelease '%s/%s' is not ready:", hr.Namespace, hr.Name)
 			for _, condition := range hr.Status.Conditions {
-				if condition.Type == "Ready" && condition.Status == metav1.ConditionTrue {
-					ready = true
-					break
-				}
+				logger.Log("  Condition: Type=%s, Status=%s, Reason=%s, Message=%s",
+					condition.Type, condition.Status, condition.Reason, condition.Message)
 			}
 
-			if !ready {
-				logger.Log("HelmRelease '%s/%s' is not ready:", hr.Namespace, hr.Name)
-				for _, condition := range hr.Status.Conditions {
-					logger.Log("  Condition: Type=%s, Status=%s, Reason=%s, Message=%s",
-						condition.Type, condition.Status, condition.Reason, condition.Message)
-				}
-
-				// Log recent events for this HelmRelease
-				events := &corev1.EventList{}
-				err := state.GetFramework().MC().List(ctx, events, ctrl.InNamespace(hr.Namespace),
-					ctrl.MatchingFields{"involvedObject.name": hr.Name})
-				if err == nil {
-					logger.Log("  Recent events:")
-					for _, event := range events.Items {
-						if event.InvolvedObject.Kind == "HelmRelease" {
-							logger.Log("    %s: %s", event.Reason, event.Message)
-						}
+			// Log recent events for this HelmRelease
+			events := &corev1.EventList{}
+			err := state.GetFramework().MC().List(ctx, events, ctrl.InNamespace(hr.Namespace),
+				ctrl.MatchingFields{"involvedObject.name": hr.Name})
+			if err == nil {
+				logger.Log("  Recent events:")
+				for _, event := range events.Items {
+					if event.InvolvedObject.Kind == "HelmRelease" {
+						logger.Log("    %s: %s", event.Reason, event.Message)
 					}
 				}
 			}
 		}
-	})
+	}
 }
 
 // reportHelmReleaseOwningTeams reports the teams responsible for failing HelmReleases

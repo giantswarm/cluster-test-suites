@@ -26,6 +26,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -89,7 +90,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		setupComplete := false
 		defer (func() {
 			if !setupComplete {
-				// If we fail to standup the cluster, lets grab the status of the cluster App to see if there's an error
+				// If we fail to standup the cluster, let's grab the status of the cluster App to see if there's an error
 				ctx := context.Background()
 				ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 				defer cancel()
@@ -153,6 +154,8 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 						}
 					}
 				}
+
+				common.ShowHelmReleaseDebugInfo(ctx)
 			}
 		})()
 
