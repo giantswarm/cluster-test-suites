@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	helmv2beta2 "github.com/fluxcd/helm-controller/api/v2beta2"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -89,7 +90,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		setupComplete := false
 		defer (func() {
 			if !setupComplete {
-				// If we fail to standup the cluster, lets grab the status of the cluster App to see if there's an error
+				// If we fail to standup the cluster, let's grab the status of the cluster App to see if there's an error
 				ctx := context.Background()
 				ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 				defer cancel()
@@ -150,6 +151,46 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 						for _, condition := range cl.Status.Conditions {
 							logger.Log("Cluster condition with type '%s' and status '%s' - Message='%s', Reason='%s', Last Occurred='%v'", condition.Type, condition.Status, condition.Message, condition.Reason, condition.LastTransitionTime)
+						}
+					}
+				}
+
+				logger.Log("Gathering HelmRelease status information for debugging")
+
+				helmReleaseList := &helmv2beta2.HelmReleaseList{}
+				err = framework.MC().List(ctx, helmReleaseList, cr.InNamespace(cluster.Organization.GetNamespace()))
+				if err != nil {
+					logger.Log("Failed to get HelmReleases - %v", err)
+					return
+				}
+
+				for _, hr := range helmReleaseList.Items {
+					ready := false
+					for _, condition := range hr.Status.Conditions {
+						if condition.Type == "Ready" && condition.Status == v1.ConditionTrue {
+							ready = true
+							break
+						}
+					}
+
+					if !ready {
+						logger.Log("HelmRelease '%s/%s' is not ready:", hr.Namespace, hr.Name)
+						for _, condition := range hr.Status.Conditions {
+							logger.Log("  Condition: Type=%s, Status=%s, Reason=%s, Message=%s",
+								condition.Type, condition.Status, condition.Reason, condition.Message)
+						}
+
+						// Log recent events for this HelmRelease
+						events := &corev1.EventList{}
+						err := framework.MC().List(ctx, events, cr.InNamespace(hr.Namespace),
+							cr.MatchingFields{"involvedObject.name": hr.Name})
+						if err == nil {
+							logger.Log("  Recent events:")
+							for _, event := range events.Items {
+								if event.InvolvedObject.Kind == "HelmRelease" {
+									logger.Log("    %s: %s", event.Reason, event.Message)
+								}
+							}
 						}
 					}
 				}
