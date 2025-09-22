@@ -165,6 +165,8 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		// Make sure this comes last
 		setupComplete = true
+
+		common.ShowHelmReleaseDebugInfo(state.GetContext())
 	})
 
 	AfterSuite(func() {
