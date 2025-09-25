@@ -26,7 +26,6 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/internal/common"
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 )
 
@@ -154,8 +153,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 						}
 					}
 				}
-
-				common.ShowHelmReleaseDebugInfo(ctx)
 			}
 		})()
 
@@ -165,8 +162,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		// Make sure this comes last
 		setupComplete = true
-
-		common.ShowHelmReleaseDebugInfo(state.GetContext())
 	})
 
 	AfterSuite(func() {
