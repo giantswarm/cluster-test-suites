@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Show `HelmReleases` status when testing cluster fails to get ready during the setup.
+
 ## [1.98.0] - 2025-09-16
 
 ### Added

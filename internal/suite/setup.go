@@ -89,7 +89,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		setupComplete := false
 		defer (func() {
 			if !setupComplete {
-				// If we fail to standup the cluster, lets grab the status of the cluster App to see if there's an error
+				// If we fail to standup the cluster, let's grab the status of the cluster App to see if there's an error
 				ctx := context.Background()
 				ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
 				defer cancel()
