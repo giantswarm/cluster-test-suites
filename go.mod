@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/cert-manager/cert-manager v1.18.2
-	github.com/fluxcd/helm-controller/api v1.4.0
+	github.com/fluxcd/helm-controller/api v1.4.1
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown v1.36.0
 	github.com/giantswarm/clustertest v1.41.0
