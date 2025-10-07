@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	helmv2beta2 "github.com/fluxcd/helm-controller/api/v2beta2"
+	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -30,7 +30,7 @@ func RunApps() {
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helmv2beta2.HelmReleaseList{}
+			helmReleaseList := &helm.HelmReleaseList{}
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -211,7 +211,7 @@ func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleas
 	return func() error {
 		allReady := true
 		for _, hr := range helmReleases {
-			helmRelease := &helmv2beta2.HelmRelease{}
+			helmRelease := &helm.HelmRelease{}
 			err := client.Get(ctx, hr, helmRelease)
 			if err != nil {
 				logger.Log("HelmRelease status for '%s' failed to retrieve: %v", hr.Name, err)
@@ -263,7 +263,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := &helmv2beta2.HelmReleaseList{}
+		helmReleaseList := &helm.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
