@@ -7,7 +7,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/internal/timeout"
 
-	"github.com/giantswarm/clustertest"
+	"github.com/giantswarm/clustertest/v2"
 	"github.com/giantswarm/clustertest/v2/pkg/application"
 )
 

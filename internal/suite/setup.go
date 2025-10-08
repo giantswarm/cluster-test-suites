@@ -13,9 +13,9 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	cb "github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder"
-	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
-	"github.com/giantswarm/clustertest"
+	cb "github.com/giantswarm/cluster-standup-teardown/v2/pkg/clusterbuilder"
+	"github.com/giantswarm/cluster-standup-teardown/v2/pkg/standup"
+	"github.com/giantswarm/clustertest/v2"
 	"github.com/giantswarm/clustertest/v2/pkg/client"
 	"github.com/giantswarm/clustertest/v2/pkg/env"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
