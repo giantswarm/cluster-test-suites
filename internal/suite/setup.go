@@ -26,7 +26,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 )
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.

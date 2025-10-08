@@ -11,8 +11,8 @@ import (
 	clustertestclient "github.com/giantswarm/clustertest/v2/pkg/client"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/suite"
 )
 
 func TestEKSStandard(t *testing.T) {

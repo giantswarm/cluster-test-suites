@@ -1,4 +1,4 @@
-module github.com/giantswarm/cluster-test-suites
+module github.com/giantswarm/cluster-test-suites/v2
 
 go 1.25.1
 

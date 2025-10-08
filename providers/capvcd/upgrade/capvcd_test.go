@@ -5,10 +5,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/internal/common"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/internal/timeout"
-	"github.com/giantswarm/cluster-test-suites/internal/upgrade"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {

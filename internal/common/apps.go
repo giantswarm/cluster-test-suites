@@ -18,9 +18,9 @@ import (
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/timeout"
 )
 
 func RunApps() {

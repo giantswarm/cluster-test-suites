@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/cluster-standup-teardown/v2/pkg/clusterbuilder/providers/capvcd"
 
-	"github.com/giantswarm/cluster-test-suites/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/suite"
 )
 
 func TestCAPVCDStandard(t *testing.T) {
