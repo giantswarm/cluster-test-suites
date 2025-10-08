@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder/providers/capa"
-	clustertestclient "github.com/giantswarm/clustertest/pkg/client"
-	"github.com/giantswarm/clustertest/pkg/wait"
+	clustertestclient "github.com/giantswarm/clustertest/v2/pkg/client"
+	"github.com/giantswarm/clustertest/v2/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/internal/state"
 	"github.com/giantswarm/cluster-test-suites/internal/suite"
