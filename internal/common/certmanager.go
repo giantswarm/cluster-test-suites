@@ -6,8 +6,8 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/giantswarm/cluster-test-suites/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 	"github.com/giantswarm/clustertest/v2/pkg/client"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
