@@ -3,9 +3,9 @@ package standard
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/clustertest/pkg/application"
+	"github.com/giantswarm/clustertest/v2/pkg/application"
 
-	"github.com/giantswarm/cluster-test-suites/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
 )
 
 type ClusterValues struct {

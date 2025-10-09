@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/internal/state"
-	"github.com/giantswarm/cluster-test-suites/internal/teleport"
-	"github.com/giantswarm/clustertest/pkg/logger"
-	"github.com/giantswarm/clustertest/pkg/wait"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/teleport"
+	"github.com/giantswarm/clustertest/v2/pkg/logger"
+	"github.com/giantswarm/clustertest/v2/pkg/wait"
 
 	tc "github.com/gravitational/teleport/api/client"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck

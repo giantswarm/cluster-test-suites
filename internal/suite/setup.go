@@ -13,20 +13,20 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	cb "github.com/giantswarm/cluster-standup-teardown/pkg/clusterbuilder"
-	"github.com/giantswarm/cluster-standup-teardown/pkg/standup"
-	"github.com/giantswarm/clustertest"
-	"github.com/giantswarm/clustertest/pkg/client"
-	"github.com/giantswarm/clustertest/pkg/env"
-	"github.com/giantswarm/clustertest/pkg/logger"
-	"github.com/giantswarm/clustertest/pkg/utils"
-	"github.com/giantswarm/clustertest/pkg/wait"
+	cb "github.com/giantswarm/cluster-standup-teardown/v2/pkg/clusterbuilder"
+	"github.com/giantswarm/cluster-standup-teardown/v2/pkg/standup"
+	"github.com/giantswarm/clustertest/v2"
+	"github.com/giantswarm/clustertest/v2/pkg/client"
+	"github.com/giantswarm/clustertest/v2/pkg/env"
+	"github.com/giantswarm/clustertest/v2/pkg/logger"
+	"github.com/giantswarm/clustertest/v2/pkg/utils"
+	"github.com/giantswarm/clustertest/v2/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 )
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
