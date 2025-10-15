@@ -3,7 +3,7 @@ module github.com/giantswarm/cluster-test-suites/v2
 go 1.25.2
 
 require (
-	github.com/cert-manager/cert-manager v1.19.0
+	github.com/cert-manager/cert-manager v1.19.1
 	github.com/fluxcd/helm-controller/api v1.4.2
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v2 v2.0.3
