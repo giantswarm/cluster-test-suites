@@ -92,7 +92,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate deployments not ready"),
+					),
 				)
 		})
 
@@ -107,7 +110,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.StatefulSetsNotReady(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.StatefulSetsNotReady(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate statefulsets not ready"),
+					),
 				)
 		})
 
@@ -122,7 +128,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.DaemonSetsNotReady(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.DaemonSetsNotReady(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate daemonsets not ready"),
+					),
 				)
 		})
 
@@ -137,7 +146,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.JobsUnsuccessful(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.JobsUnsuccessful(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate kubernetes Jobs that have not finished successfully"),
+					),
 				)
 		})
 
@@ -152,7 +164,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate pods that are not in Running state"),
+					),
 				)
 		})
 
@@ -172,7 +187,10 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+					failurehandler.Bundle(
+						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate pods that are restarting"),
+					),
 				)
 		})
 
