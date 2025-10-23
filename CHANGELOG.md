@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated `cluster-standup-teardown` to `v2.2.2` with changes to karpenter CAPA cluster configuration.
+- Go: Update dependencies.
+
 ## [2.1.1] - 2025-10-16
 
 ### Fixed
