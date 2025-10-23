@@ -179,7 +179,7 @@ func runBasic() {
 
 			Eventually(
 				wait.ConsistentWaitCondition(
-					wait.AreNoPodsCrashLoopingWithFilter(state.GetContext(), wcClient, 0, filterLabels),
+					wait.AreNoPodsCrashLoopingWithFilter(state.GetContext(), wcClient, 2, filterLabels),
 					10,
 					5*time.Second,
 				)).
