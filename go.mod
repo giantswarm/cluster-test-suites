@@ -4,13 +4,13 @@ go 1.25.3
 
 require (
 	github.com/cert-manager/cert-manager v1.19.1
-	github.com/fluxcd/helm-controller/api v1.4.2
+	github.com/fluxcd/helm-controller/api v1.4.3
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v2 v2.2.2
 	github.com/giantswarm/clustertest/v2 v2.1.3-0.20251024100118-5af371f77d80
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20251022114952-e19963dfc1d2
-	github.com/onsi/ginkgo/v2 v2.27.1
+	github.com/gravitational/teleport/api v0.0.0-20251024210814-66d0c8e7becc
+	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	k8s.io/api v0.34.1
 	k8s.io/apiextensions-apiserver v0.34.1
@@ -159,7 +159,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
-	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
