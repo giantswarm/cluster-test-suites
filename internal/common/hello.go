@@ -10,6 +10,7 @@ import (
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/v2/pkg/application"
+	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	"github.com/giantswarm/clustertest/v2/pkg/net"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
@@ -226,9 +227,12 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return fmt.Errorf("certificate is not ready")
 			}).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), fmt.Sprintf("Investigate why Certificate %s/%s is not ready", certificateNamespace, certificateName)),
+				)
 		})
 
 		It("hello world app responds successfully", func() {
@@ -255,9 +259,12 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return string(bodyBytes), nil
 			}).
-				WithTimeout(15 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(ContainSubstring("Hello World"))
+				WithTimeout(15*time.Minute).
+				WithPolling(5*time.Second).
+				Should(
+					ContainSubstring("Hello World"),
+					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate why I don't get a successful response from the 'hello-world' application deployed in the 'giantswarm' namespace"),
+				)
 		})
 
 		It("uninstall apps", func() {
