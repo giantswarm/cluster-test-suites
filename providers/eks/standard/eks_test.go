@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
 )
 
-var _ = XDescribe("Common tests", func() {
+var _ = Describe("Common tests", func() {
 	common.Run(&common.TestConfig{
 		AutoScalingSupported: true,
 		BastionSupported:     false,

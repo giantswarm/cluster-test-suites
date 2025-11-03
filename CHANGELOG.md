@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add LLM failure handler to investigate failures in tests.
 
+## [2.3.0] - 2025-10-29
+
+### Changed
+
+- Re-enable EKS tests.
+
 ## [2.2.0] - 2025-10-23
 
 ### Changed
@@ -1227,7 +1233,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.0.2...v2.1.0
