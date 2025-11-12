@@ -165,10 +165,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		Expect(err).NotTo(HaveOccurred())
 		state.SetCluster(cluster)
 
-		err = copyOpenAIAPIKeyToNamespace(state.GetContext(), framework.MC(), cluster.GetNamespace())
-		Expect(err).NotTo(HaveOccurred())
-		logger.Log("Successfully copied openai-api-key secret to organization namespace '%s'", cluster.GetNamespace())
-
 		// Make sure this comes last
 		setupComplete = true
 	})
@@ -233,33 +229,6 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not determine provider from package path: %s", pkgPath)
-}
-
-func copyOpenAIAPIKeyToNamespace(ctx context.Context, mcClient *client.Client, targetNamespace string) error {
-	// Get the Open AI API key secret from the source namespace
-	sourceSecret := &corev1.Secret{}
-	err := mcClient.Get(ctx, cr.ObjectKey{Namespace: OpenAIAPIKeySecretNamespace, Name: OpenAIAPIKeySecretName}, sourceSecret)
-	if err != nil {
-		return fmt.Errorf("failed to get secret '%s/%s': %w", OpenAIAPIKeySecretNamespace, OpenAIAPIKeySecretName, err)
-	}
-
-	// Create a new secret in the target namespace
-	targetSecret := &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      OpenAIAPIKeySecretName,
-			Namespace: targetNamespace,
-			Labels:    sourceSecret.Labels,
-		},
-		Type: sourceSecret.Type,
-		Data: sourceSecret.Data,
-	}
-
-	err = mcClient.Create(ctx, targetSecret)
-	if err != nil {
-		return fmt.Errorf("failed to create secret in namespace '%s': %w", targetNamespace, err)
-	}
-
-	return nil
 }
 
 func cleanupPVs(ctx context.Context) error {
