@@ -53,6 +53,7 @@ func RunApps() {
 						failurehandler.HelmReleasesNotReady(state.GetFramework(), state.GetCluster()),
 						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
 						reportHelmReleaseOwningTeams(),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate HelmReleases not ready"),
 					),
 				)
 		})
@@ -92,6 +93,7 @@ func RunApps() {
 					BeTrue(),
 					failurehandler.Bundle(
 						failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
+						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Apps not ready"),
 						reportOwningTeams(),
 					),
 				)

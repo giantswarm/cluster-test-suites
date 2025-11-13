@@ -6,13 +6,15 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 	"github.com/giantswarm/clustertest/v2/pkg/client"
+	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	batchv1 "k8s.io/api/batch/v1"
+
+	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -40,9 +42,9 @@ func runCertManager() {
 		It("cert-manager default ClusterIssuers are present and ready", func() {
 			for _, clusterIssuerName := range clusterIssuers {
 				Eventually(checkClusterIssuer(state.GetContext(), wcClient, clusterIssuerName)).
-					WithTimeout(120 * time.Second).
-					WithPolling(1 * time.Second).
-					Should(Succeed())
+					WithTimeout(120*time.Second).
+					WithPolling(1*time.Second).
+					Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), fmt.Sprintf("Investigate cert-manager ClusterIssuer %s missing or not ready", clusterIssuerName)))
 			}
 		})
 	})

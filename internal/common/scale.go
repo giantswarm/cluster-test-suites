@@ -8,6 +8,7 @@ import (
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/v2/pkg/application"
 	"github.com/giantswarm/clustertest/v2/pkg/client"
+	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -146,7 +147,7 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return false, nil
-			}, "15m", "10s").Should(BeTrue())
+			}, "15m", "10s").Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' deployment has not scaled up properly"))
 		})
 
 		AfterEach(func() {

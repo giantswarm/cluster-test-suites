@@ -10,6 +10,7 @@ import (
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/clustertest/v2/pkg/application"
+	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	"github.com/giantswarm/clustertest/v2/pkg/net"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
@@ -51,12 +52,12 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue())
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'cert-manager' App not ready"))
 
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue())
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'external-dns' App not ready"))
 		})
 
 		It("should deploy ingress-nginx", func() {
@@ -85,7 +86,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), nginxApp.InstallName, nginxApp.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue())
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate ingress-nginx App not ready"))
 		})
 
 		It("cluster wildcard ingress DNS must be resolvable", func() {
@@ -159,9 +160,9 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.InstallName, helloApp.GetNamespace())()
 			}).
-				WithTimeout(6 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(BeTrue())
+				WithTimeout(6*time.Minute).
+				WithPolling(5*time.Second).
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' App is not ready"))
 		})
 
 		It("ingress resource has load balancer in status", func() {
@@ -186,9 +187,9 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return false, nil
 			}).
-				WithTimeout(6 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(BeTrue())
+				WithTimeout(6*time.Minute).
+				WithPolling(5*time.Second).
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Ingress 'hello-world' has no load balancer set in status"))
 		})
 
 		It("should have a ready Certificate generated", func() {
@@ -226,9 +227,12 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return fmt.Errorf("certificate is not ready")
 			}).
-				WithTimeout(15 * time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed())
+				Should(
+					Succeed(),
+					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), fmt.Sprintf("Investigate why Certificate %s/%s is not ready", certificateNamespace, certificateName)),
+				)
 		})
 
 		It("hello world app responds successfully", func() {
@@ -255,9 +259,12 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return string(bodyBytes), nil
 			}).
-				WithTimeout(15 * time.Minute).
-				WithPolling(5 * time.Second).
-				Should(ContainSubstring("Hello World"))
+				WithTimeout(15*time.Minute).
+				WithPolling(5*time.Second).
+				Should(
+					ContainSubstring("Hello World"),
+					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate why I don't get a successful response from the 'hello-world' application deployed in the 'giantswarm' namespace"),
+				)
 		})
 
 		It("uninstall apps", func() {
