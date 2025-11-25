@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  architect: giantswarm/architect@6.7.0
+  architect: giantswarm/architect@6.8.0
 
 workflows:
   test-and-push:
@@ -19,4 +19,3 @@ workflows:
                 - master
           registries-data: |-
             public gsoci.azurecr.io ACR_GSOCI_USERNAME ACR_GSOCI_PASSWORD true
-            public quay.io QUAY_USERNAME QUAY_PASSWORD true
