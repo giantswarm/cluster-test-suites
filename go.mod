@@ -6,8 +6,8 @@ require (
 	github.com/cert-manager/cert-manager v1.19.1
 	github.com/fluxcd/helm-controller/api v1.4.4
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown/v2 v2.2.2
-	github.com/giantswarm/clustertest/v2 v2.1.2
+	github.com/giantswarm/cluster-standup-teardown/v2 v2.3.0
+	github.com/giantswarm/clustertest/v2 v2.2.0
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20251123191104-5750241f5b9f
 	github.com/onsi/ginkgo/v2 v2.27.2
@@ -93,6 +93,7 @@ require (
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v76 v76.0.0 // indirect
+	github.com/google/go-github/v79 v79.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20251114195745-4902fdda35c8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
