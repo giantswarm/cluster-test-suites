@@ -203,7 +203,7 @@ func runBasic() {
 			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
 				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Cluster API Cluster CR not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Cluster API Cluster CR not ready"))
 		})
 
 		It("has all machine pools ready and running", func() {
