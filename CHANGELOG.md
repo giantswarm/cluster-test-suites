@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update `cluster-standup-teardown` to `v2.3.2` to remove container registries secret from App configuration.
+
 ## [2.4.1] - 2025-11-27
 
 ### Changed
