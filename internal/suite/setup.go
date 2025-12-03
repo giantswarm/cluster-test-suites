@@ -18,6 +18,7 @@ import (
 	"github.com/giantswarm/clustertest/v2"
 	"github.com/giantswarm/clustertest/v2/pkg/client"
 	"github.com/giantswarm/clustertest/v2/pkg/env"
+	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v2/pkg/logger"
 	"github.com/giantswarm/clustertest/v2/pkg/utils"
 	"github.com/giantswarm/clustertest/v2/pkg/wait"
@@ -156,7 +157,17 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 						for _, condition := range cl.Status.Conditions {
 							logger.Log("Cluster condition with type '%s' and status '%s' - Message='%s', Reason='%s', Last Occurred='%v'", condition.Type, condition.Status, condition.Message, condition.Reason, condition.LastTransitionTime)
 						}
+
 					}
+				}
+
+				// Trigger LLM investigation for cluster setup failure
+				logger.Log("Triggering LLM investigation for cluster setup failure")
+				handler := failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate cluster setup failure in BeforeSuite")
+				if handlerFunc, ok := handler.(func() string); ok {
+					logger.Log("LLM investigation failure message: %s", handlerFunc())
+				} else {
+					logger.Log("Failed to cast failure handler to expected type")
 				}
 			}
 		})()
