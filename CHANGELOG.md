@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Call LLM when `BeforeSuite` fails to provision a cluster to investigate what happened. 
+
 ## [2.4.2] - 2025-12-02
 
 ### Changed
