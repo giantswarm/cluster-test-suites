@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Excluding karpenter pods from test that make sure pods are not restarting too many times because karpenter is deployed using a HelmRelease, and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process. Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
+
 ## [2.4.2] - 2025-12-02
 
 ### Changed

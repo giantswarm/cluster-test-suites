@@ -175,6 +175,9 @@ func runBasic() {
 			filterLabels := []string{
 				// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
 				"app.kubernetes.io/name!=cluster-autoscaler-app",
+				// Excluding karpenter because it's deployed using a HelmRelease and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process.
+				// Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
+				"app.kubernetes.io/name!=karpenter",
 			}
 
 			Eventually(
