@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- In the test that asserts pods are not restarting, combine all filter labels into a single label selector string using Kubernetes set-based selector syntax with OR logic.
+
 ## [2.6.1] - 2025-12-15
 
 ### Changed
