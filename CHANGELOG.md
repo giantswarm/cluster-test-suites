@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.2] - 2025-12-15
+
 ### Fixed
 
 - In the test that asserts pods are not restarting, combine all filter labels into a single label selector string using Kubernetes set-based selector syntax with OR logic.
@@ -1269,7 +1271,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.2...HEAD
+[2.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.0...v2.6.1
 [2.6.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.4.2...v2.5.0
