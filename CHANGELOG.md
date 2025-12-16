@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Go: Update `cluster-standup-teardown` to v2.3.4. ([#879](https://github.com/giantswarm/cluster-test-suites/pull/879))
+
 ## [2.6.2] - 2025-12-15
 
 ### Fixed
