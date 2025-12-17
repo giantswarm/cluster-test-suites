@@ -264,41 +264,64 @@ func Run(cfg *TestConfig) {
 			).Should(BeTrue())
 		})
 
-		It("detects if nodes were rolled", func() {
+		AfterAll(func() {
+			// Run node roll detection at the very end of the upgrade context, right before cluster deletion.
+			// This ensures that old nodes have been fully removed before we check if nodes were rolled.
+			// On providers with single CP nodes (like CAPV), old nodes might still be around when
+			// KubeadmControlPlane reports as up-to-date, so we need to wait until the very end.
 			if os.Getenv("SKIP_NODE_ROLL_DETECTION") == "true" {
-				Skip("Node roll detection is disabled for this test suite.")
+				logger.Log("Node roll detection is disabled for this test suite.")
+				return
 			}
-			nodes := &corev1.NodeList{}
-			err := wcClient.List(state.GetContext(), nodes)
-			Expect(err).NotTo(HaveOccurred())
 
-			rolled := false
+			var err error
+			wcClient, err = state.GetFramework().WC(cluster.Name)
+			if err != nil {
+				logger.Log("Failed to get WC client for node roll detection: %v", err)
+				return
+			}
+
 			initialNodeNames := make([]string, 0, len(initialNodes))
 			for nodeName := range initialNodes {
 				initialNodeNames = append(initialNodeNames, nodeName)
 			}
-
-			currentNodeNames := make([]string, 0, len(nodes.Items))
-			for _, node := range nodes.Items {
-				currentNodeNames = append(currentNodeNames, node.Name)
-			}
-
 			logger.Log("Node roll detection - Initial nodes: %v", initialNodeNames)
-			logger.Log("Node roll detection - Current nodes: %v", currentNodeNames)
 
-			for nodeName := range initialNodes {
-				found := false
-				for _, newNode := range nodes.Items {
-					if nodeName == newNode.Name {
-						found = true
-						break
+			rolled := false
+			timeout := 5 * time.Minute
+			startTime := time.Now()
+
+			// Poll for node rolling without failing the test if it doesn't happen (e.g. scale-up)
+			for {
+				nodes := &corev1.NodeList{}
+				if err := wcClient.List(state.GetContext(), nodes); err != nil {
+					logger.Log("Failed to list nodes for roll detection: %v", err)
+				} else {
+					currentNodeNames := make([]string, 0, len(nodes.Items))
+					for _, node := range nodes.Items {
+						currentNodeNames = append(currentNodeNames, node.Name)
+					}
+
+					for nodeName := range initialNodes {
+						found := false
+						for _, newNode := range nodes.Items {
+							if nodeName == newNode.Name {
+								found = true
+								break
+							}
+						}
+						if !found {
+							rolled = true
+							logger.Log("Node %s was rolled (not found in current nodes: %v)", nodeName, currentNodeNames)
+							break
+						}
 					}
 				}
-				if !found {
-					rolled = true
-					logger.Log("Node %s was rolled (not found in current nodes)", nodeName)
+
+				if rolled || time.Since(startTime) >= timeout {
 					break
 				}
+				time.Sleep(10 * time.Second)
 			}
 
 			logger.Log("Node roll detection result: rolled=%v", rolled)
