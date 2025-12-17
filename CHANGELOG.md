@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2025-12-17
+
 ### Changed
 
 - Polling for node roll detection to fix race condition on single control plane node providers.
@@ -1281,7 +1283,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.3...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.3...v2.7.0
 [2.6.3]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.2...v2.6.3
 [2.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.1...v2.6.2
 [2.6.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.0...v2.6.1
