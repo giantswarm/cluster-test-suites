@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix node roll detection race condition on single control plane node providers by adding a polling loop.
+
 ## [2.7.0] - 2025-12-17
 
 ### Changed

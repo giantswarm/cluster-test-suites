@@ -264,21 +264,13 @@ func Run(cfg *TestConfig) {
 			).Should(BeTrue())
 		})
 
-		AfterAll(func() {
+		It("detects if nodes were rolled", func() {
 			// Run node roll detection at the very end of the upgrade context, right before cluster deletion.
 			// This ensures that old nodes have been fully removed before we check if nodes were rolled.
 			// On providers with single CP nodes (like CAPV), old nodes might still be around when
 			// KubeadmControlPlane reports as up-to-date, so we need to wait until the very end.
 			if os.Getenv("SKIP_NODE_ROLL_DETECTION") == "true" {
-				logger.Log("Node roll detection is disabled for this test suite.")
-				return
-			}
-
-			var err error
-			wcClient, err = state.GetFramework().WC(cluster.Name)
-			if err != nil {
-				logger.Log("Failed to get WC client for node roll detection: %v", err)
-				return
+				Skip("Node roll detection is disabled for this test suite.")
 			}
 
 			initialNodeNames := make([]string, 0, len(initialNodes))
