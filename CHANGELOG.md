@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1] - 2025-12-18
+
 ### Fixed
 
 - Fix node roll detection race condition on single control plane node providers by adding a polling loop.
@@ -1287,7 +1289,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.3...v2.7.0
 [2.6.3]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.2...v2.6.3
 [2.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.1...v2.6.2
