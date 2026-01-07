@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Simplified default apps checks in tests - all providers now use unified cluster apps that deploy default apps directly.
+- Removed `UsesUnifiedClusterApp()` conditional checks from `apps.go` and `upgrade.go`.
+- Simplified `getDefaultAppsSelector()` to always use unified app labels.
+
+### Dependencies
+
+- Update `clustertest` to v3.0.0 (pending release) with breaking changes removing default-apps support.
+
 ## [2.7.1] - 2025-12-18
 
 ### Fixed

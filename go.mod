@@ -21,6 +21,9 @@ require (
 	sigs.k8s.io/controller-runtime v0.22.4
 )
 
+// TODO: Remove this replace directive once clustertest v3.0.0 is released
+replace github.com/giantswarm/clustertest/v2 => github.com/giantswarm/clustertest/v2 v2.2.3-0.20260107153935-437df9c1ae22
+
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
@@ -186,12 +189,12 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.19.4 // indirect
 	k8s.io/apiserver v0.35.0 // indirect
-	k8s.io/cli-runtime v0.34.3 // indirect
+	k8s.io/cli-runtime v0.35.0 // indirect
 	k8s.io/cluster-bootstrap v0.34.3 // indirect
 	k8s.io/component-base v0.35.0 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e // indirect
-	k8s.io/kubectl v0.34.3 // indirect
+	k8s.io/kubectl v0.35.0 // indirect
 	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/e2e-framework v0.6.0 // indirect
 	sigs.k8s.io/gateway-api v1.4.1 // indirect

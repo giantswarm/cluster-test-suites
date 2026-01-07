@@ -191,21 +191,6 @@ func Run(cfg *TestConfig) {
 			_, err := state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
 			Expect(err).NotTo(HaveOccurred())
 
-			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
-			Expect(err).NotTo(HaveOccurred())
-
-			if !skipDefaultAppsApp {
-				Eventually(
-					wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace, builtCluster.DefaultApps.App.Spec.Version),
-					10*time.Minute, 5*time.Second,
-				).Should(BeTrue())
-
-				Eventually(
-					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace),
-					10*time.Minute, 5*time.Second,
-				).Should(BeTrue())
-			}
-
 			Eventually(
 				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.Cluster.App.Name, builtCluster.Cluster.App.Namespace, builtCluster.Cluster.App.Spec.Version),
 				10*time.Minute, 5*time.Second,
