@@ -5,7 +5,7 @@ import (
 
 	"github.com/giantswarm/clustertest/v3/pkg/application"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/common"
 )
 
 type ClusterValues struct {

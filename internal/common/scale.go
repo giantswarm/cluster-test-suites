@@ -18,8 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
 )
 
 func runScale(autoScalingSupported bool) {

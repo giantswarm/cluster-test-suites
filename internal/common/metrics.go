@@ -16,8 +16,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client2 "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
 )
 
 const mimirUrl = "mimir-gateway.mimir.svc:80/prometheus"
