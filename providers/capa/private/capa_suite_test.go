@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v2/internal/suite"
 
-	"github.com/giantswarm/cluster-standup-teardown/v2/pkg/clusterbuilder/providers/capa"
+	"github.com/giantswarm/cluster-standup-teardown/v3/pkg/clusterbuilder/providers/capa"
 )
 
 func TestCAPAPrivate(t *testing.T) {

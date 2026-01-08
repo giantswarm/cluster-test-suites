@@ -9,8 +9,8 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 	"github.com/giantswarm/cluster-test-suites/v2/internal/teleport"
-	"github.com/giantswarm/clustertest/v2/pkg/logger"
-	"github.com/giantswarm/clustertest/v2/pkg/wait"
+	"github.com/giantswarm/clustertest/v3/pkg/logger"
+	"github.com/giantswarm/clustertest/v3/pkg/wait"
 
 	tc "github.com/gravitational/teleport/api/client"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
