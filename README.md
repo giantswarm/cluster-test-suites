@@ -126,7 +126,7 @@ When the pipeline runs against PRs to the `cluster-test-suites` repo the followi
 * The `upgrade` tests won't run as there's no information as to what versions to upgrade from/to.
 * All providers will be tested. These test suites will run in parallel and the pipeline will wait for all of them to complete before finishing.
 
-When the pipeline runs against one of the provider-specific repos (e.g. cluster or default-apps repos) the following is of note:
+When the pipeline runs against one of the provider-specific repos (e.g. cluster repos) the following is of note:
 * The pipeline will use the latest tagged release of the cluster-test-suites container image.
 * Only the tests associated with that provider will be run, including the `upgrade` tests.
 
@@ -160,7 +160,7 @@ E.g.
 
 ## ⬆️ Upgrade Tests
 
-Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of both the cluster App and the default-apps App. It then upgrades that cluster to whatever currently needs testing.
+Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of the cluster App. It then upgrades that cluster to whatever currently needs testing.
 
 There are a few things to be aware about these tests:
 
@@ -244,7 +244,7 @@ A new test suite is added by creating a new module under the provider directory 
 
 The `suite_test.go` should mostly be the same across test suites so it will likely be enough to copy the function over from the `standard` test suite and update the names used to represent the test suite being created. This file mostly relies on the [`suite`](./internal/suite/) module to handle the test suite setup and clean up logic.
 
-The `test_data` directory should contain at least the values files for the cluster app and the default-apps app. These values are what indicate the variant used for this test suite. See [Creating values files](#Creating-values-files) below for more details.
+The `test_data` directory should contain the values files for the cluster app. These values are what indicate the variant used for this test suite. See [Creating values files](#Creating-values-files) below for more details.
 
 ### Creating values files
 

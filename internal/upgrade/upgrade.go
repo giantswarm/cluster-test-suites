@@ -11,10 +11,10 @@ import (
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v2/pkg/application"
-	"github.com/giantswarm/clustertest/v2/pkg/client"
-	"github.com/giantswarm/clustertest/v2/pkg/logger"
-	"github.com/giantswarm/clustertest/v2/pkg/wait"
+	"github.com/giantswarm/clustertest/v3/pkg/application"
+	"github.com/giantswarm/clustertest/v3/pkg/client"
+	"github.com/giantswarm/clustertest/v3/pkg/logger"
+	"github.com/giantswarm/clustertest/v3/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
 	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
@@ -180,7 +180,7 @@ func Run(cfg *TestConfig) {
 		It("should apply new version successfully", func() {
 			cluster = cluster.
 				// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
-				WithAppVersions("", "").
+				WithAppVersions("").
 				// Set release versions to `""` so that it makes use of the overrides set in the `E2E_RELEASE_VERSION` environment var
 				WithRelease(application.ReleasePair{Version: "", Commit: ""})
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
@@ -190,21 +190,6 @@ func Run(cfg *TestConfig) {
 
 			_, err := state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
 			Expect(err).NotTo(HaveOccurred())
-
-			skipDefaultAppsApp, err := cluster.UsesUnifiedClusterApp()
-			Expect(err).NotTo(HaveOccurred())
-
-			if !skipDefaultAppsApp {
-				Eventually(
-					wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace, builtCluster.DefaultApps.App.Spec.Version),
-					10*time.Minute, 5*time.Second,
-				).Should(BeTrue())
-
-				Eventually(
-					wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), builtCluster.DefaultApps.App.Name, builtCluster.DefaultApps.App.Namespace),
-					10*time.Minute, 5*time.Second,
-				).Should(BeTrue())
-			}
 
 			Eventually(
 				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.Cluster.App.Name, builtCluster.Cluster.App.Namespace, builtCluster.Cluster.App.Spec.Version),

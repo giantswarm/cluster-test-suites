@@ -10,11 +10,11 @@ import (
 	capiexp "sigs.k8s.io/cluster-api/exp/api/v1beta1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v2/pkg/application"
-	"github.com/giantswarm/clustertest/v2/pkg/client"
-	"github.com/giantswarm/clustertest/v2/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v2/pkg/logger"
-	"github.com/giantswarm/clustertest/v2/pkg/wait"
+	"github.com/giantswarm/clustertest/v3/pkg/application"
+	"github.com/giantswarm/clustertest/v3/pkg/client"
+	"github.com/giantswarm/clustertest/v3/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v3/pkg/logger"
+	"github.com/giantswarm/clustertest/v3/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
 	"github.com/giantswarm/cluster-test-suites/v2/internal/timeout"
