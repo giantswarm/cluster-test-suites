@@ -21,6 +21,9 @@ require (
 	sigs.k8s.io/controller-runtime v0.22.4
 )
 
+// TODO: Remove this replace directive once cluster-standup-teardown v3.1.0 is released
+replace github.com/giantswarm/cluster-standup-teardown/v3 => github.com/giantswarm/cluster-standup-teardown/v3 v3.0.1-0.20260108135023-f5b69af5ef7a
+
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
