@@ -11,8 +11,8 @@ import (
 	clustertestclient "github.com/giantswarm/clustertest/v3/pkg/client"
 	"github.com/giantswarm/clustertest/v3/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/suite"
 )
 
 func TestEKSUpgrade(t *testing.T) {

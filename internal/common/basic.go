@@ -16,8 +16,8 @@ import (
 	"github.com/giantswarm/clustertest/v3/pkg/logger"
 	"github.com/giantswarm/clustertest/v3/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck

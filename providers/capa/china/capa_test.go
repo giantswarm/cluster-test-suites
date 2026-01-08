@@ -5,9 +5,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/timeout"
 )
 
 var _ = Describe("Common tests", func() {

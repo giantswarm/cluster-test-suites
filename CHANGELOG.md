@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-01-08
+
 ### Changed
 
 - Simplified default apps checks in tests - all providers now use unified cluster apps that deploy default apps directly.
@@ -1297,7 +1299,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.1...v3.0.0
 [2.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.3...v2.7.0
 [2.6.3]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.2...v2.6.3

@@ -3,9 +3,9 @@ package upgrade
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/ecr"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/upgrade"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/ecr"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {

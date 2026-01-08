@@ -13,8 +13,8 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	batchv1 "k8s.io/api/batch/v1"
 
-	"github.com/giantswarm/cluster-test-suites/v2/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v2/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
