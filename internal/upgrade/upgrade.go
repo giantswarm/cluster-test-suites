@@ -180,7 +180,7 @@ func Run(cfg *TestConfig) {
 		It("should apply new version successfully", func() {
 			cluster = cluster.
 				// Set app versions to `""` so that it makes use of the overrides set in the `E2E_OVERRIDE_VERSIONS` environment var
-				WithAppVersions("", "").
+				WithAppVersions("").
 				// Set release versions to `""` so that it makes use of the overrides set in the `E2E_RELEASE_VERSION` environment var
 				WithRelease(application.ReleasePair{Version: "", Commit: ""})
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)

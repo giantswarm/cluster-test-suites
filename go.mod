@@ -21,8 +21,10 @@ require (
 	sigs.k8s.io/controller-runtime v0.22.4
 )
 
-// TODO: Remove this replace directive once cluster-standup-teardown v3.1.0 is released
-replace github.com/giantswarm/cluster-standup-teardown/v3 => github.com/giantswarm/cluster-standup-teardown/v3 v3.0.1-0.20260108135023-f5b69af5ef7a
+// TODO: Remove these replace directives once clustertest v3.1.0 and cluster-standup-teardown v3.1.0 are released
+replace github.com/giantswarm/clustertest/v3 => github.com/giantswarm/clustertest/v3 v3.0.1-0.20260108140949-bf00cff52b13
+
+replace github.com/giantswarm/cluster-standup-teardown/v3 => github.com/giantswarm/cluster-standup-teardown/v3 v3.0.1-0.20260108141123-f03d69086456
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
