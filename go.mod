@@ -6,8 +6,8 @@ require (
 	github.com/cert-manager/cert-manager v1.19.2
 	github.com/fluxcd/helm-controller/api v1.4.5
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown/v3 v3.0.0
-	github.com/giantswarm/clustertest/v3 v3.0.0
+	github.com/giantswarm/cluster-standup-teardown/v4 v4.0.0
+	github.com/giantswarm/clustertest/v3 v3.1.0
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20260103010210-62e1efbf1147
 	github.com/onsi/ginkgo/v2 v2.27.3
@@ -20,11 +20,6 @@ require (
 	sigs.k8s.io/cluster-api v1.10.8
 	sigs.k8s.io/controller-runtime v0.22.4
 )
-
-// TODO: Remove these replace directives once clustertest v3.1.0 and cluster-standup-teardown v3.1.0 are released
-replace github.com/giantswarm/clustertest/v3 => github.com/giantswarm/clustertest/v3 v3.0.1-0.20260108140949-bf00cff52b13
-
-replace github.com/giantswarm/cluster-standup-teardown/v3 => github.com/giantswarm/cluster-standup-teardown/v3 v3.0.1-0.20260108141123-f03d69086456
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
