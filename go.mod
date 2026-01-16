@@ -7,7 +7,7 @@ require (
 	github.com/fluxcd/helm-controller/api v1.4.5
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v4 v4.0.0
-	github.com/giantswarm/clustertest/v3 v3.1.0
+	github.com/giantswarm/clustertest/v3 v3.1.1
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20260113113505-56ac9fdb6c50
 	github.com/onsi/ginkgo/v2 v2.27.5
@@ -172,7 +172,7 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
