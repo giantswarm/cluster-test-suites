@@ -1,6 +1,6 @@
 module github.com/giantswarm/cluster-test-suites/v3
 
-go 1.25.5
+go 1.25.6
 
 require (
 	github.com/cert-manager/cert-manager v1.19.2
@@ -9,7 +9,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown/v4 v4.0.0
 	github.com/giantswarm/clustertest/v3 v3.1.0
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20260113113505-56ac9fdb6c50
+	github.com/gravitational/teleport/api v0.0.0-20260116220117-f1ad945490e4
 	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	k8s.io/api v0.35.0
