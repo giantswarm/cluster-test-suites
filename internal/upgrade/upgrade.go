@@ -3,9 +3,11 @@ package upgrade
 import (
 	"context"
 	"os"
+	"sort"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	capi "sigs.k8s.io/cluster-api/api/v1beta1"
 	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
@@ -25,6 +27,13 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 )
 
+// nodeInfo tracks node identity for reliable roll detection
+type nodeInfo struct {
+	Name      string
+	UID       types.UID
+	CreatedAt time.Time
+}
+
 type TestConfig struct {
 	ControlPlaneNodesTimeout time.Duration
 	WorkerNodesTimeout       time.Duration
@@ -42,7 +51,8 @@ func Run(cfg *TestConfig) {
 		var cluster *application.Cluster
 		var wcClient *client.Client
 		var preUpgradeControlPlaneResourceGeneration int64
-		var initialNodes map[string]corev1.Node
+		var initialNodes map[string]nodeInfo
+		var initialNodeCount int
 
 		BeforeAll(func() {
 			var err error
@@ -60,10 +70,16 @@ func Run(cfg *TestConfig) {
 			nodes := &corev1.NodeList{}
 			err = wcClient.List(state.GetContext(), nodes)
 			Expect(err).NotTo(HaveOccurred())
-			initialNodes = map[string]corev1.Node{}
+			initialNodes = make(map[string]nodeInfo, len(nodes.Items))
 			for _, node := range nodes.Items {
-				initialNodes[node.Name] = node
+				initialNodes[node.Name] = nodeInfo{
+					Name:      node.Name,
+					UID:       node.UID,
+					CreatedAt: node.CreationTimestamp.Time,
+				}
 			}
+			initialNodeCount = len(nodes.Items)
+			logger.Log("Node roll detection - Captured %d initial nodes before upgrade", initialNodeCount)
 		})
 
 		BeforeEach(func() {
@@ -258,13 +274,21 @@ func Run(cfg *TestConfig) {
 				Skip("Node roll detection is disabled for this test suite.")
 			}
 
+			// Log initial nodes with UIDs for debugging
 			initialNodeNames := make([]string, 0, len(initialNodes))
 			for nodeName := range initialNodes {
 				initialNodeNames = append(initialNodeNames, nodeName)
 			}
-			logger.Log("Node roll detection - Initial nodes: %v", initialNodeNames)
+			sort.Strings(initialNodeNames)
+			logger.Log("Node roll detection - Initial nodes (%d): %v", len(initialNodes), initialNodeNames)
+			for _, name := range initialNodeNames {
+				info := initialNodes[name]
+				logger.Log("  - %s (UID: %s, Created: %s)", name, info.UID, info.CreatedAt.Format(time.RFC3339))
+			}
 
 			rolled := false
+			var rolledNodes []string
+			var replacedNodes []string
 			timeout := 5 * time.Minute
 			startTime := time.Now()
 
@@ -274,24 +298,43 @@ func Run(cfg *TestConfig) {
 				if err := wcClient.List(state.GetContext(), nodes); err != nil {
 					logger.Log("Failed to list nodes for roll detection: %v", err)
 				} else {
+					// Build current node map with UIDs
+					currentNodes := make(map[string]nodeInfo, len(nodes.Items))
 					currentNodeNames := make([]string, 0, len(nodes.Items))
 					for _, node := range nodes.Items {
+						currentNodes[node.Name] = nodeInfo{
+							Name:      node.Name,
+							UID:       node.UID,
+							CreatedAt: node.CreationTimestamp.Time,
+						}
 						currentNodeNames = append(currentNodeNames, node.Name)
 					}
 
-					for nodeName := range initialNodes {
-						found := false
-						for _, newNode := range nodes.Items {
-							if nodeName == newNode.Name {
-								found = true
-								break
+					rolledNodes = nil
+					replacedNodes = nil
+
+					// Check each initial node
+					for nodeName, initialInfo := range initialNodes {
+						if currentInfo, exists := currentNodes[nodeName]; exists {
+							// Node with same name exists - check if it was replaced (different UID)
+							if currentInfo.UID != initialInfo.UID {
+								replacedNodes = append(replacedNodes, nodeName)
+								rolled = true
+								logger.Log("Node %s was replaced (UID changed: %s -> %s)", nodeName, initialInfo.UID, currentInfo.UID)
 							}
-						}
-						if !found {
+						} else {
+							// Node no longer exists - it was rolled away
+							rolledNodes = append(rolledNodes, nodeName)
 							rolled = true
 							logger.Log("Node %s was rolled (not found in current nodes: %v)", nodeName, currentNodeNames)
-							break
 						}
+					}
+
+					// Also check for new nodes that appeared (could indicate scale-up vs roll)
+					// If node count increased and no nodes were removed, it's likely a scale-up, not a roll
+					if len(nodes.Items) > initialNodeCount && len(rolledNodes) == 0 && len(replacedNodes) == 0 {
+						logger.Log("Node count increased from %d to %d without removing existing nodes - likely a scale-up, not a roll",
+							initialNodeCount, len(nodes.Items))
 					}
 				}
 
@@ -301,7 +344,12 @@ func Run(cfg *TestConfig) {
 				time.Sleep(10 * time.Second)
 			}
 
-			logger.Log("Node roll detection result: rolled=%v", rolled)
+			// Final summary
+			if rolled {
+				logger.Log("Node roll detection result: rolled=true (removed: %v, replaced: %v)", rolledNodes, replacedNodes)
+			} else {
+				logger.Log("Node roll detection result: rolled=false - all %d initial nodes still present with same UIDs", len(initialNodes))
+			}
 			helper.RecordNodeRolling(rolled)
 		})
 	})
