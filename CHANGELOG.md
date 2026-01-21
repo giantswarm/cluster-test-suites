@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve node roll detection reliability by tracking node UIDs and creation timestamps to detect node replacements and distinguish scale-up events from actual rolls.
+
 ## [3.0.0] - 2026-01-08
 
 ### Changed
