@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use the `giantswarm-garm-wc-e2e` garm for WC e2e testing on `garm`
 
+## [3.1.0] - 2026-01-22
+
+### Changed
+
+- Improve node roll detection reliability by tracking node UIDs and creation timestamps to detect node replacements and distinguish scale-up events from actual rolls.
+
 ## [3.0.0] - 2026-01-08
 
 ### Changed
@@ -1303,7 +1309,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.1...v3.0.0
 [2.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.6.3...v2.7.0
