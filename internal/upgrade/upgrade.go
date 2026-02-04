@@ -37,12 +37,14 @@ type nodeInfo struct {
 type TestConfig struct {
 	ControlPlaneNodesTimeout time.Duration
 	WorkerNodesTimeout       time.Duration
+	MinimalCluster           bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
 	return &TestConfig{
 		ControlPlaneNodesTimeout: 15 * time.Minute,
 		WorkerNodesTimeout:       15 * time.Minute,
+		MinimalCluster:           false,
 	}
 }
 
@@ -143,7 +145,7 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
-		common.RunApps()
+		common.RunApps(cfg.MinimalCluster)
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
 			Eventually(

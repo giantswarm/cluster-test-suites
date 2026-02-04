@@ -16,11 +16,5 @@ var _ = Describe("Common tests", func() {
 		state.SetTestTimeout(timeout.DeployApps, time.Minute*30)
 	})
 
-	common.Run(&common.TestConfig{
-		AutoScalingSupported:         true,
-		BastionSupported:             false,
-		TeleportSupported:            true,
-		ExternalDnsSupported:         true,
-		ControlPlaneMetricsSupported: true,
-	})
+	common.Run(common.NewTestConfigWithDefaults())
 })

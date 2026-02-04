@@ -6,10 +6,22 @@ type TestConfig struct {
 	TeleportSupported            bool
 	ExternalDnsSupported         bool
 	ControlPlaneMetricsSupported bool
+	MinimalCluster               bool
+}
+
+func NewTestConfigWithDefaults() *TestConfig {
+	return &TestConfig{
+		AutoScalingSupported:         true,
+		BastionSupported:             false,
+		TeleportSupported:            true,
+		ExternalDnsSupported:         true,
+		ControlPlaneMetricsSupported: true,
+		MinimalCluster:               false,
+	}
 }
 
 func Run(cfg *TestConfig) {
-	RunApps()
+	RunApps(cfg.MinimalCluster)
 	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)

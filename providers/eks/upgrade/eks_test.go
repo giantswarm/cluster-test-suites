@@ -8,14 +8,18 @@ import (
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
-	upgrade.Run(upgrade.NewTestConfigWithDefaults())
+	cfg := upgrade.NewTestConfigWithDefaults()
+	// EKS doesn't have any of the Giant Swarm apps deployed
+	cfg.MinimalCluster = true
+	upgrade.Run(cfg)
 
 	// Finally run the common tests after upgrade is completed
-	common.Run(&common.TestConfig{
-		AutoScalingSupported: true,
-		BastionSupported:     false,
-		ExternalDnsSupported: true,
-		// EKS does not have metrics for k8s control plane components.
-		ControlPlaneMetricsSupported: false,
-	})
+	ccfg := common.NewTestConfigWithDefaults()
+	// EKS does not have metrics for k8s control plane components.
+	ccfg.ControlPlaneMetricsSupported = false
+	// EKS doesn't have any of the Giant Swarm apps deployed
+	ccfg.MinimalCluster = true
+	ccfg.ExternalDnsSupported = false
+	ccfg.AutoScalingSupported = false
+	common.Run(ccfg)
 })
