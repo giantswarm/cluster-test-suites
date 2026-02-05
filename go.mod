@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.19.3
 	github.com/fluxcd/helm-controller/api v1.4.5
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown/v4 v4.0.0
+	github.com/giantswarm/cluster-standup-teardown/v4 v4.1.0
 	github.com/giantswarm/clustertest/v3 v3.1.2
 	github.com/giantswarm/k8smetadata v0.25.0
 	github.com/gravitational/teleport/api v0.0.0-20260131023006-26a4287ba2e2
