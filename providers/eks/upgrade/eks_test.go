@@ -23,5 +23,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	ccfg.SecurityBundleInstalled = false
 	ccfg.ExternalDnsSupported = false
 	ccfg.AutoScalingSupported = false
+	ccfg.CertManagerSupported = false
 	common.Run(ccfg)
 })
