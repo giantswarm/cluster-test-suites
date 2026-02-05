@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `ObservabilityBundleInstalled` and `SecurityBundleInstalled` configuration options to control bundle app testing and introduce `NewTestConfigWithDefaults()` constructor for simplified test configuration.
+- Add `CertManagerSupported`, `ObservabilityBundleInstalled` and `SecurityBundleInstalled` configuration options to control bundle app testing and introduce `NewTestConfigWithDefaults()` constructor for simplified test configuration.
 
 ### Changed
 
