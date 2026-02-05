@@ -6,7 +6,8 @@ type TestConfig struct {
 	TeleportSupported            bool
 	ExternalDnsSupported         bool
 	ControlPlaneMetricsSupported bool
-	MinimalCluster               bool
+	ObservabilityBundleInstalled bool
+	SecurityBundleInstalled      bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -16,12 +17,13 @@ func NewTestConfigWithDefaults() *TestConfig {
 		TeleportSupported:            true,
 		ExternalDnsSupported:         true,
 		ControlPlaneMetricsSupported: true,
-		MinimalCluster:               false,
+		ObservabilityBundleInstalled: true,
+		SecurityBundleInstalled:      true,
 	}
 }
 
 func Run(cfg *TestConfig) {
-	RunApps(cfg.MinimalCluster)
+	RunApps(cfg)
 	runBasic()
 	runCertManager()
 	runDNS(cfg.BastionSupported)

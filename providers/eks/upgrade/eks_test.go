@@ -10,7 +10,8 @@ import (
 var _ = Describe("Basic upgrade test", Ordered, func() {
 	cfg := upgrade.NewTestConfigWithDefaults()
 	// EKS doesn't have any of the Giant Swarm apps deployed
-	cfg.MinimalCluster = true
+	cfg.ObservabilityBundleInstalled = false
+	cfg.SecurityBundleInstalled = false
 	upgrade.Run(cfg)
 
 	// Finally run the common tests after upgrade is completed
@@ -18,7 +19,8 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// EKS does not have metrics for k8s control plane components.
 	ccfg.ControlPlaneMetricsSupported = false
 	// EKS doesn't have any of the Giant Swarm apps deployed
-	ccfg.MinimalCluster = true
+	ccfg.ObservabilityBundleInstalled = false
+	ccfg.SecurityBundleInstalled = false
 	ccfg.ExternalDnsSupported = false
 	ccfg.AutoScalingSupported = false
 	common.Run(ccfg)

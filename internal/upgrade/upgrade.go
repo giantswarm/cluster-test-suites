@@ -35,16 +35,18 @@ type nodeInfo struct {
 }
 
 type TestConfig struct {
-	ControlPlaneNodesTimeout time.Duration
-	WorkerNodesTimeout       time.Duration
-	MinimalCluster           bool
+	ControlPlaneNodesTimeout     time.Duration
+	WorkerNodesTimeout           time.Duration
+	ObservabilityBundleInstalled bool
+	SecurityBundleInstalled      bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
 	return &TestConfig{
-		ControlPlaneNodesTimeout: 15 * time.Minute,
-		WorkerNodesTimeout:       15 * time.Minute,
-		MinimalCluster:           false,
+		ControlPlaneNodesTimeout:     15 * time.Minute,
+		WorkerNodesTimeout:           15 * time.Minute,
+		ObservabilityBundleInstalled: true,
+		SecurityBundleInstalled:      true,
 	}
 }
 
@@ -145,7 +147,10 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
-		common.RunApps(cfg.MinimalCluster)
+		common.RunApps(&common.TestConfig{
+			ObservabilityBundleInstalled: cfg.ObservabilityBundleInstalled,
+			SecurityBundleInstalled:      cfg.SecurityBundleInstalled,
+		})
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
 			Eventually(

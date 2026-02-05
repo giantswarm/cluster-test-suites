@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `MinimalCluster` configuration option to skip bundle app tests and introduce `NewTestConfigWithDefaults()` constructor for simplified test configuration.
+- Add `ObservabilityBundleInstalled` and `SecurityBundleInstalled` configuration options to control bundle app testing and introduce `NewTestConfigWithDefaults()` constructor for simplified test configuration.
+
+### Changed
+
+- Refactored `common.RunApps` to accept the full `TestConfig` struct instead of individual boolean parameters for better extensibility.
 
 ## [3.1.0] - 2026-01-22
 
