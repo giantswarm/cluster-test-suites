@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-02-10
+
 ### Added
 
 - Add `CertManagerSupported`, `ObservabilityBundleInstalled` and `SecurityBundleInstalled` configuration options to control bundle app testing and introduce `NewTestConfigWithDefaults()` constructor for simplified test configuration.
@@ -1314,7 +1316,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.1...v3.0.0
 [2.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v2.7.0...v2.7.1

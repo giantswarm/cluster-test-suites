@@ -3,7 +3,7 @@ package china
 import (
 	"testing"
 
-	"github.com/giantswarm/cluster-test-suites/v3/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/suite"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 

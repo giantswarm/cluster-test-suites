@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/cluster-standup-teardown/v4/pkg/clusterbuilder/providers/capv"
 
-	"github.com/giantswarm/cluster-test-suites/v3/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/suite"
 )
 
 func TestCAPVOnCAPZ(t *testing.T) {
