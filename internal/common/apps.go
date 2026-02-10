@@ -23,7 +23,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v3/internal/timeout"
 )
 
-func RunApps() {
+func RunApps(cfg *TestConfig) {
 	Context("default apps and helm releases", func() {
 		It("all HelmReleases are deployed without issues", func() {
 			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
@@ -88,6 +88,10 @@ func RunApps() {
 	})
 	Context("observability-bundle apps", func() {
 		It("all observability-bundle apps are deployed without issues", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("observability-bundle is not installed")
+			}
+
 			helper.SetResponsibleTeam(helper.TeamAtlas)
 
 			// We need to wait for the observability-bundle app to be deployed before we can check the apps it deploys.
@@ -119,6 +123,10 @@ func RunApps() {
 	})
 	Context("security-bundle apps", func() {
 		It("all security-bundle apps are deployed without issues", func() {
+			if !cfg.SecurityBundleInstalled {
+				Skip("security-bundle is not installed")
+			}
+
 			helper.SetResponsibleTeam(helper.TeamShield)
 
 			// We need to wait for the security-bundle app to be deployed before we can check the apps it deploys.

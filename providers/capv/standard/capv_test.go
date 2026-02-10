@@ -7,13 +7,10 @@ import (
 )
 
 var _ = Describe("Common tests", func() {
-	common.Run(&common.TestConfig{
-		// No autoscaling on-prem
-		AutoScalingSupported: false,
-		BastionSupported:     false,
-		TeleportSupported:    true,
-		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
-		ExternalDnsSupported:         false,
-		ControlPlaneMetricsSupported: true,
-	})
+	cfg := common.NewTestConfigWithDefaults()
+	// No autoscaling on-prem
+	cfg.AutoScalingSupported = false
+	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
+	cfg.ExternalDnsSupported = false
+	common.Run(cfg)
 })
