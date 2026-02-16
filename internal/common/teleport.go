@@ -55,5 +55,12 @@ func runTeleport(teleportSupported bool) {
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
 		})
+
+		It("should be able to connect to the workload cluster using Teleport", func() {
+			Eventually(wait.IsTeleportReady(state.GetContext(), state.GetFramework().MC(), state.GetCluster().Name, "giantswarm")).
+				WithTimeout(5 * time.Minute).
+				WithPolling(wait.DefaultInterval).
+				Should(BeTrue())
+		})
 	})
 }
