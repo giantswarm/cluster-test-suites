@@ -217,10 +217,10 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 	if len(parts) > 2 && parts[len(parts)-2] == "providers" {
 		provider := parts[len(parts)-1]
 
-		// The EKS test suite uses the CAPA provider builders, but is considered the "aws" provider.
+		// The EKS test suite uses the CAPA provider builders, but is considered the "eks" provider.
 		// We can detect this by checking for the unique builder struct name and that it comes from the capa provider.
 		if structName == "ManagedClusterBuilder" && provider == "capa" {
-			return "aws", nil
+			return "eks", nil
 		}
 
 		// The CAPZ test suite has a different provider name.
