@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Adjust `eks` provider detection logic to fix the upgrade test suites.
+
 ## [4.0.1] - 2026-02-17
 
 ### Changed
