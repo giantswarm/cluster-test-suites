@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-02-18
+
 ### Fixed
 
 - Adjust `eks` provider detection logic to fix the upgrade test suites.
@@ -1327,7 +1329,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.2...HEAD
+[4.0.2]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v3.0.0...v3.1.0
