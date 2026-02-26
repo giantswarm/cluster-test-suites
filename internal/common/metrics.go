@@ -16,13 +16,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client2 "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v3/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/state"
 )
 
 const mimirUrl = "mimir-gateway.mimir.svc:80/prometheus"
 
-func runMetrics(controlPlaneMetricsSupported bool) {
+func runMetrics(cfg *TestConfig) {
 	Context("metrics", func() {
 		var mcClient *client.Client
 		var metrics []string
@@ -30,6 +30,10 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		var testPodNamespace string
 
 		BeforeEach(func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("Observability bundle is not installed in this cluster configuration")
+			}
+
 			helper.SetResponsibleTeam(helper.TeamAtlas)
 
 			mcClient = state.GetFramework().MC()
@@ -52,7 +56,7 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 				"cilium_version",
 			}
 
-			if controlPlaneMetricsSupported {
+			if cfg.ControlPlaneMetricsSupported {
 				metrics = append(metrics, []string{
 					// API server metrics in prometheus-rules
 					"apiserver_flowcontrol_dispatched_requests_total",
@@ -80,6 +84,10 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		})
 
 		It("creates test pod", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("Observability bundle is not installed in this cluster configuration")
+			}
+
 			// Run a pod with alpine in the default namespace of the MC.
 			testPodName = fmt.Sprintf("%s-metrics-test", state.GetCluster().Name)
 			testPodNamespace = "default"
@@ -91,6 +99,10 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		})
 
 		It("ensure key metrics are available on mimir", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("Observability bundle is not installed in this cluster configuration")
+			}
+
 			for _, metric := range metrics {
 				Eventually(checkMetricPresent(mcClient, metric, mimirUrl, testPodName, testPodNamespace)).
 					WithTimeout(10 * time.Minute).
@@ -100,6 +112,10 @@ func runMetrics(controlPlaneMetricsSupported bool) {
 		})
 
 		It("clean up test pod", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("Observability bundle is not installed in this cluster configuration")
+			}
+
 			err := cleanupTestPod(mcClient, testPodName, testPodNamespace)
 			Expect(err).NotTo(HaveOccurred())
 		})

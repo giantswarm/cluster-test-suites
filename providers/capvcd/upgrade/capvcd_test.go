@@ -5,10 +5,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v3/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v3/internal/timeout"
-	"github.com/giantswarm/cluster-test-suites/v3/internal/upgrade"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
@@ -25,13 +25,10 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	upgrade.Run(cfg)
 
 	// Finally run the common tests after upgrade is completed
-	common.Run(&common.TestConfig{
-		// No autoscaling on-prem
-		AutoScalingSupported: false,
-		BastionSupported:     false,
-		TeleportSupported:    true,
-		// Disabled until https://github.com/giantswarm/roadmap/issues/1037
-		ExternalDnsSupported:         false,
-		ControlPlaneMetricsSupported: true,
-	})
+	ccfg := common.NewTestConfigWithDefaults()
+	// No autoscaling on-prem
+	ccfg.AutoScalingSupported = false
+	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
+	ccfg.ExternalDnsSupported = false
+	common.Run(ccfg)
 })

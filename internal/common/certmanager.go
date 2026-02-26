@@ -13,8 +13,8 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	batchv1 "k8s.io/api/batch/v1"
 
-	"github.com/giantswarm/cluster-test-suites/v3/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v3/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v4/internal/state"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -24,11 +24,15 @@ import (
 
 var clusterIssuers = []string{"selfsigned-giantswarm", "letsencrypt-giantswarm"}
 
-func runCertManager() {
+func runCertManager(certManagerSupported bool) {
 	Context("cert-manager ClusterIssuers", func() {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
+			if !certManagerSupported {
+				Skip("cert-manager is not supported in this cluster configuration")
+			}
+
 			helper.SetResponsibleTeam(helper.TeamShield)
 
 			var err error
@@ -40,6 +44,10 @@ func runCertManager() {
 		})
 
 		It("cert-manager default ClusterIssuers are present and ready", func() {
+			if !certManagerSupported {
+				Skip("cert-manager is not supported in this cluster configuration")
+			}
+
 			for _, clusterIssuerName := range clusterIssuers {
 				Eventually(checkClusterIssuer(state.GetContext(), wcClient, clusterIssuerName)).
 					WithTimeout(120*time.Second).
