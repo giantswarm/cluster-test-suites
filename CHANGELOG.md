@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Handle `first_previous_major` in upgrade skip logic alongside `previous_major`.
+
 ## [4.0.3] - 2026-02-25
 
 ### Changed
