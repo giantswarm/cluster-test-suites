@@ -9,6 +9,7 @@ import (
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
 	cfg := upgrade.NewTestConfigWithDefaults()
+	cfg.ControlPlaneType = upgrade.ControlPlaneTypeAWSManaged
 	// EKS doesn't have any of the Giant Swarm apps deployed
 	cfg.ObservabilityBundleInstalled = false
 	cfg.SecurityBundleInstalled = false

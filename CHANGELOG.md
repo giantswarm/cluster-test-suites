@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for EKS provider upgrade tests. It will now detect if the control plane has been updated.
+
 ## [4.0.3] - 2026-02-25
 
 ### Changed

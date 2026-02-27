@@ -34,11 +34,19 @@ type nodeInfo struct {
 	CreatedAt time.Time
 }
 
+const (
+	ControlPlaneTypeKubeadm    = "kubeadm"
+	ControlPlaneTypeAWSManaged = "aws-managed"
+
+	eksControlPlaneUpdatingCondition = "EKSControlPlaneUpdating"
+)
+
 type TestConfig struct {
 	ControlPlaneNodesTimeout     time.Duration
 	WorkerNodesTimeout           time.Duration
 	ObservabilityBundleInstalled bool
 	SecurityBundleInstalled      bool
+	ControlPlaneType             string
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -47,6 +55,7 @@ func NewTestConfigWithDefaults() *TestConfig {
 		WorkerNodesTimeout:           15 * time.Minute,
 		ObservabilityBundleInstalled: true,
 		SecurityBundleInstalled:      true,
+		ControlPlaneType:             ControlPlaneTypeKubeadm,
 	}
 }
 
@@ -58,16 +67,26 @@ func Run(cfg *TestConfig) {
 		var initialNodes map[string]nodeInfo
 		var initialNodeCount int
 
+		preUpgradeControlPlaneResourceGeneration = 0
+
 		BeforeAll(func() {
 			var err error
 			cluster = state.GetCluster()
-			preUpgradeControlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
-			Expect(err).NotTo(HaveOccurred())
-			if preUpgradeControlPlane == nil {
-				preUpgradeControlPlaneResourceGeneration = 0
-			} else {
-				preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+
+			if cfg.ControlPlaneType == ControlPlaneTypeKubeadm {
+				preUpgradeControlPlane, kcpErr := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+				Expect(kcpErr).NotTo(HaveOccurred())
+				if preUpgradeControlPlane != nil {
+					preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+				}
+			} else if cfg.ControlPlaneType == ControlPlaneTypeAWSManaged {
+				preUpgradeControlPlane, kcpErr := state.GetFramework().GetAWSManagedControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+				Expect(kcpErr).NotTo(HaveOccurred())
+				if preUpgradeControlPlane != nil {
+					preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
+				}
 			}
+
 			wcClient, err = state.GetFramework().WC(cluster.Name)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -225,7 +244,11 @@ func Run(cfg *TestConfig) {
 			).Should(BeTrue())
 		})
 
-		It("successfully finishes control plane nodes rolling update if it is needed", func() {
+		It("successfully finishes the kubeadm control plane nodes rolling update if it is needed", func() {
+			if cfg.ControlPlaneType != ControlPlaneTypeKubeadm {
+				Skip("This test is only for kubeadm control plane clusters")
+			}
+
 			// Check MachinesSpecUpToDate condition on KubeadmControlPlane. Repeat the check 5 times, with some waiting time,
 			// so Cluster API controllers have time to react to upgrade (it is usually instantaneous).
 			numberOfChecks := 18
@@ -237,7 +260,7 @@ func Run(cfg *TestConfig) {
 				Expect(err).NotTo(HaveOccurred())
 
 				if controlPlane == nil {
-					Skip("Control plane resource not found (assuming this is a managed cluster)")
+					Skip("Control plane resource not found")
 				}
 
 				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
@@ -267,6 +290,55 @@ func Run(cfg *TestConfig) {
 			mcClient := state.GetFramework().MC()
 			Eventually(
 				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
+				30*time.Minute,
+				30*time.Second,
+			).Should(BeTrue())
+		})
+
+		It("successfully finishes the EKS control plane nodes rolling update if it is needed", func() {
+			if cfg.ControlPlaneType != ControlPlaneTypeAWSManaged {
+				Skip("This test is only for AWS managed (EKS) control plane clusters")
+			}
+
+			// Check EKSControlPlaneUpdatingCondition on AWSManagedControlPlane. Repeat the check with some waiting time,
+			// so CAPA controllers have time to react to the upgrade.
+			numberOfChecks := 18
+			waitBetweenChecks := 10 * time.Second
+			controlPlaneUpdateStarted := false
+
+			mcClient := state.GetFramework().MC()
+
+			for i := 0; i < numberOfChecks; i++ {
+				controlPlane, err := state.GetFramework().GetAWSManagedControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+				Expect(err).NotTo(HaveOccurred())
+
+				if controlPlane == nil {
+					Skip("Control plane resource not found")
+				}
+
+				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
+					Skip("AWSManagedControlPlane resource generation did not change, skipping update test")
+				}
+
+				updating := capiconditions.Get(capiconditions.UnstructuredGetter(controlPlane), eksControlPlaneUpdatingCondition)
+				if updating == nil {
+					logger.Log("AWSManagedControlPlane condition %s is not set, expected Status='True'", eksControlPlaneUpdatingCondition)
+				} else if updating.Status == corev1.ConditionTrue {
+					controlPlaneUpdateStarted = true
+					break
+				} else {
+					logger.Log("AWSManagedControlPlane condition %s has Status='%s', expected Status='True'", eksControlPlaneUpdatingCondition, updating.Status)
+				}
+
+				time.Sleep(waitBetweenChecks)
+			}
+
+			if !controlPlaneUpdateStarted {
+				Skip("EKS control plane update is not happening")
+			}
+
+			Eventually(
+				wait.IsAWSManagedControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), eksControlPlaneUpdatingCondition, corev1.ConditionFalse, ""),
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
