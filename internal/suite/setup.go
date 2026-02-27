@@ -69,7 +69,8 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 				// Check if we were looking for a previous major release but got an empty 'from' version.
 				// This happens when we're drafting the first release of a new major version.
 				if from == "" {
-					if os.Getenv(env.ReleasePreUpgradeVersion) == "previous_major" {
+					preUpgrade := os.Getenv(env.ReleasePreUpgradeVersion)
+					if preUpgrade == "previous_major" || preUpgrade == "first_previous_major" {
 						Skip("Skipping upgrade test as this is the first release of a new major version")
 					} else {
 						Skip("Skipping standard upgrade test as no previous release was found in this major version")
