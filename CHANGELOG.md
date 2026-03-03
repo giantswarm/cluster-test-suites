@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-03-03
+
 ### Changed
 
 - Handle `first_previous_major` in upgrade skip logic alongside `previous_major`.
@@ -1339,7 +1341,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.0...v4.0.1
