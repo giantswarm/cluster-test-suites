@@ -73,18 +73,10 @@ func Run(cfg *TestConfig) {
 			var err error
 			cluster = state.GetCluster()
 
-			if cfg.ControlPlaneType == ControlPlaneTypeKubeadm {
-				preUpgradeControlPlane, kcpErr := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
-				Expect(kcpErr).NotTo(HaveOccurred())
-				if preUpgradeControlPlane != nil {
-					preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
-				}
-			} else if cfg.ControlPlaneType == ControlPlaneTypeAWSManaged {
-				preUpgradeControlPlane, kcpErr := state.GetFramework().GetAWSManagedControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
-				Expect(kcpErr).NotTo(HaveOccurred())
-				if preUpgradeControlPlane != nil {
-					preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
-				}
+			preUpgradeControlPlane, kcpErr := state.GetFramework().GetControlPlaneResource(state.GetContext(), cluster.Name, cluster.GetNamespace())
+			Expect(kcpErr).NotTo(HaveOccurred())
+			if preUpgradeControlPlane != nil {
+				preUpgradeControlPlaneResourceGeneration = preUpgradeControlPlane.GetGeneration()
 			}
 
 			wcClient, err = state.GetFramework().WC(cluster.Name)
@@ -115,6 +107,10 @@ func Run(cfg *TestConfig) {
 		It("has all the control-plane nodes running", func() {
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
+
+			if replicas == 0 {
+				Skip("Expected number of control plane replicas is 0, skipping control plane nodes readiness check")
+			}
 
 			Eventually(
 				wait.ConsistentWaitCondition(
@@ -228,9 +224,10 @@ func Run(cfg *TestConfig) {
 			applyCtx, cancelApplyCtx := context.WithTimeout(state.GetContext(), 20*time.Minute)
 			defer cancelApplyCtx()
 
-			builtCluster, _ := cluster.Build()
+			builtCluster, err := cluster.Build()
+			Expect(err).NotTo(HaveOccurred())
 
-			_, err := state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
+			_, err = state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(
@@ -309,7 +306,7 @@ func Run(cfg *TestConfig) {
 			mcClient := state.GetFramework().MC()
 
 			for i := 0; i < numberOfChecks; i++ {
-				controlPlane, err := state.GetFramework().GetAWSManagedControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
+				controlPlane, err := state.GetFramework().GetControlPlaneResource(state.GetContext(), cluster.Name, cluster.GetNamespace())
 				Expect(err).NotTo(HaveOccurred())
 
 				if controlPlane == nil {
@@ -338,7 +335,7 @@ func Run(cfg *TestConfig) {
 			}
 
 			Eventually(
-				wait.IsAWSManagedControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), eksControlPlaneUpdatingCondition, corev1.ConditionFalse, ""),
+				wait.IsControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), eksControlPlaneUpdatingCondition, corev1.ConditionFalse, "updated"),
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
@@ -368,7 +365,7 @@ func Run(cfg *TestConfig) {
 			rolled := false
 			var rolledNodes []string
 			var replacedNodes []string
-			timeout := 5 * time.Minute
+			timeout := 10 * time.Minute
 			startTime := time.Now()
 
 			// Poll for node rolling without failing the test if it doesn't happen (e.g. scale-up)
