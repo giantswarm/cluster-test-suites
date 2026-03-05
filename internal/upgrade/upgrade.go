@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sort"
 	"time"
@@ -56,6 +57,42 @@ func NewTestConfigWithDefaults() *TestConfig {
 		ObservabilityBundleInstalled: true,
 		SecurityBundleInstalled:      true,
 		ControlPlaneType:             ControlPlaneTypeKubeadm,
+	}
+}
+
+// controlPlaneUpdateSpec describes which conditions signal an in-progress and a
+// completed control plane rolling update for a given provider.
+type controlPlaneUpdateSpec struct {
+	inProgressCondition capi.ConditionType
+	inProgressStatus    corev1.ConditionStatus
+	inProgressReason    string // empty = match any reason
+	completeCondition   capi.ConditionType
+	completeStatus      corev1.ConditionStatus
+	completeReason      string // empty = match any reason
+}
+
+func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool) {
+	switch cpType {
+	case ControlPlaneTypeKubeadm:
+		return controlPlaneUpdateSpec{
+			inProgressCondition: kubeadm.MachinesSpecUpToDateCondition,
+			inProgressStatus:    corev1.ConditionFalse,
+			inProgressReason:    kubeadm.RollingUpdateInProgressReason,
+			completeCondition:   kubeadm.MachinesSpecUpToDateCondition,
+			completeStatus:      corev1.ConditionTrue,
+			completeReason:      "",
+		}, true
+	case ControlPlaneTypeAWSManaged:
+		return controlPlaneUpdateSpec{
+			inProgressCondition: eksControlPlaneUpdatingCondition,
+			inProgressStatus:    corev1.ConditionTrue,
+			inProgressReason:    "",
+			completeCondition:   eksControlPlaneUpdatingCondition,
+			completeStatus:      corev1.ConditionFalse,
+			completeReason:      "updated",
+		}, true
+	default:
+		return controlPlaneUpdateSpec{}, false
 	}
 }
 
@@ -241,69 +278,17 @@ func Run(cfg *TestConfig) {
 			).Should(BeTrue())
 		})
 
-		It("successfully finishes the kubeadm control plane nodes rolling update if it is needed", func() {
-			if cfg.ControlPlaneType != ControlPlaneTypeKubeadm {
-				Skip("This test is only for kubeadm control plane clusters")
+		It("successfully finishes the control plane nodes rolling update if it is needed", func() {
+			spec, ok := controlPlaneUpdateSpecForType(cfg.ControlPlaneType)
+			if !ok {
+				Skip(fmt.Sprintf("No control plane update check defined for control plane type %q", cfg.ControlPlaneType))
 			}
 
-			// Check MachinesSpecUpToDate condition on KubeadmControlPlane. Repeat the check 5 times, with some waiting time,
-			// so Cluster API controllers have time to react to upgrade (it is usually instantaneous).
-			numberOfChecks := 18
-			waitBetweenChecks := 10 * time.Second
-			controlPlaneRollingUpdateStarted := false
-
-			for i := 0; i < numberOfChecks; i++ {
-				controlPlane, err := state.GetFramework().GetKubeadmControlPlane(state.GetContext(), cluster.Name, cluster.GetNamespace())
-				Expect(err).NotTo(HaveOccurred())
-
-				if controlPlane == nil {
-					Skip("Control plane resource not found")
-				}
-
-				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
-					Skip("Control plane resource generation did not change, skipping rolling update test")
-				}
-
-				if capiconditions.IsFalse(controlPlane, kubeadm.MachinesSpecUpToDateCondition) &&
-					capiconditions.GetReason(controlPlane, kubeadm.MachinesSpecUpToDateCondition) == kubeadm.RollingUpdateInProgressReason {
-					controlPlaneRollingUpdateStarted = true
-					break
-				} else {
-					machinesSpecUpToDateCondition := capiconditions.Get(controlPlane, kubeadm.MachinesSpecUpToDateCondition)
-					if machinesSpecUpToDateCondition == nil {
-						logger.Log("KubeadmControlPlane condition %s is still not set on the KubeadmControlPlane resource, expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, kubeadm.RollingUpdateInProgressReason)
-					} else {
-						logger.Log("KubeadmControlPlane condition %s has Status='%s' and Reason='%s', expected condition with Status='False' and Reason='%s'", kubeadm.MachinesSpecUpToDateCondition, machinesSpecUpToDateCondition.Status, machinesSpecUpToDateCondition.Reason, kubeadm.RollingUpdateInProgressReason)
-					}
-				}
-
-				time.Sleep(waitBetweenChecks)
-			}
-
-			if !controlPlaneRollingUpdateStarted {
-				Skip("Control plane nodes rolling update is not happening")
-			}
-
-			mcClient := state.GetFramework().MC()
-			Eventually(
-				wait.IsKubeadmControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), kubeadm.MachinesSpecUpToDateCondition, corev1.ConditionTrue, ""),
-				30*time.Minute,
-				30*time.Second,
-			).Should(BeTrue())
-		})
-
-		It("successfully finishes the EKS control plane nodes rolling update if it is needed", func() {
-			if cfg.ControlPlaneType != ControlPlaneTypeAWSManaged {
-				Skip("This test is only for AWS managed (EKS) control plane clusters")
-			}
-
-			// Check EKSControlPlaneUpdatingCondition on AWSManagedControlPlane. Repeat the check with some waiting time,
-			// so CAPA controllers have time to react to the upgrade.
+			// Check the in-progress condition on the control plane resource. Repeat the check with some waiting time,
+			// so controllers have time to react to the upgrade.
 			numberOfChecks := 18
 			waitBetweenChecks := 10 * time.Second
 			controlPlaneUpdateStarted := false
-
-			mcClient := state.GetFramework().MC()
 
 			for i := 0; i < numberOfChecks; i++ {
 				controlPlane, err := state.GetFramework().GetControlPlaneResource(state.GetContext(), cluster.Name, cluster.GetNamespace())
@@ -314,28 +299,29 @@ func Run(cfg *TestConfig) {
 				}
 
 				if controlPlane.GetGeneration() == preUpgradeControlPlaneResourceGeneration {
-					Skip("AWSManagedControlPlane resource generation did not change, skipping update test")
+					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
-				updating := capiconditions.Get(capiconditions.UnstructuredGetter(controlPlane), eksControlPlaneUpdatingCondition)
-				if updating == nil {
-					logger.Log("AWSManagedControlPlane condition %s is not set, expected Status='True'", eksControlPlaneUpdatingCondition)
-				} else if updating.Status == corev1.ConditionTrue {
+				cond := capiconditions.Get(capiconditions.UnstructuredGetter(controlPlane), spec.inProgressCondition)
+				if cond == nil {
+					logger.Log("Control plane condition %s is not set, expected Status='%s'", spec.inProgressCondition, spec.inProgressStatus)
+				} else if cond.Status == spec.inProgressStatus && (spec.inProgressReason == "" || cond.Reason == spec.inProgressReason) {
 					controlPlaneUpdateStarted = true
 					break
 				} else {
-					logger.Log("AWSManagedControlPlane condition %s has Status='%s', expected Status='True'", eksControlPlaneUpdatingCondition, updating.Status)
+					logger.Log("Control plane condition %s has Status='%s' Reason='%s', expected Status='%s' Reason='%s'", spec.inProgressCondition, cond.Status, cond.Reason, spec.inProgressStatus, spec.inProgressReason)
 				}
 
 				time.Sleep(waitBetweenChecks)
 			}
 
 			if !controlPlaneUpdateStarted {
-				Skip("EKS control plane update is not happening")
+				Skip("Control plane update is not happening")
 			}
 
+			mcClient := state.GetFramework().MC()
 			Eventually(
-				wait.IsControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), eksControlPlaneUpdatingCondition, corev1.ConditionFalse, "updated"),
+				wait.IsControlPlaneConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), spec.completeCondition, spec.completeStatus, spec.completeReason),
 				30*time.Minute,
 				30*time.Second,
 			).Should(BeTrue())
