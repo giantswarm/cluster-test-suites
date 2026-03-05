@@ -365,7 +365,7 @@ func Run(cfg *TestConfig) {
 			rolled := false
 			var rolledNodes []string
 			var replacedNodes []string
-			timeout := 10 * time.Minute
+			timeout := 15 * time.Minute // node rolls can take a long time in some providers
 			startTime := time.Now()
 
 			// Poll for node rolling without failing the test if it doesn't happen (e.g. scale-up)
