@@ -9,11 +9,11 @@ require (
 	github.com/giantswarm/cluster-standup-teardown/v4 v4.1.2
 	github.com/giantswarm/clustertest/v3 v3.3.0
 	github.com/giantswarm/k8smetadata v0.25.0
-	github.com/gravitational/teleport/api v0.0.0-20260217120222-8f9465947591
+	github.com/gravitational/teleport/api v0.0.0-20260302084756-36120b30cc98
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	k8s.io/api v0.35.2
-	k8s.io/apiextensions-apiserver v0.35.1
+	k8s.io/apiextensions-apiserver v0.35.2
 	k8s.io/apimachinery v0.35.2
 	k8s.io/client-go v0.35.2
 	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2
@@ -184,7 +184,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.20.0 // indirect
-	k8s.io/apiserver v0.35.1 // indirect
+	k8s.io/apiserver v0.35.2 // indirect
 	k8s.io/cli-runtime v0.35.2 // indirect
 	k8s.io/cluster-bootstrap v0.35.1 // indirect
 	k8s.io/component-base v0.35.2 // indirect
