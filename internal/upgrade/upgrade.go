@@ -38,8 +38,6 @@ type nodeInfo struct {
 const (
 	ControlPlaneTypeKubeadm    = "kubeadm"
 	ControlPlaneTypeAWSManaged = "aws-managed"
-
-	eksControlPlaneUpdatingCondition = "EKSControlPlaneUpdating"
 )
 
 type TestConfig struct {
@@ -84,10 +82,10 @@ func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool)
 		}, true
 	case ControlPlaneTypeAWSManaged:
 		return controlPlaneUpdateSpec{
-			inProgressCondition: eksControlPlaneUpdatingCondition,
+			inProgressCondition: "EKSControlPlaneUpdating",
 			inProgressStatus:    corev1.ConditionTrue,
 			inProgressReason:    "",
-			completeCondition:   eksControlPlaneUpdatingCondition,
+			completeCondition:   "EKSControlPlaneUpdating",
 			completeStatus:      corev1.ConditionFalse,
 			completeReason:      "updated",
 		}, true
