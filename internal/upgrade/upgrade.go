@@ -105,12 +105,12 @@ func Run(cfg *TestConfig) {
 		})
 
 		It("has all the control-plane nodes running", func() {
+			if cfg.ControlPlaneType == ControlPlaneTypeAWSManaged {
+				Skip("Skipping control plane nodes readiness check for EKS clusters")
+			}
+
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
 			Expect(err).NotTo(HaveOccurred())
-
-			if replicas == 0 {
-				Skip("Expected number of control plane replicas is 0, skipping control plane nodes readiness check")
-			}
 
 			Eventually(
 				wait.ConsistentWaitCondition(
