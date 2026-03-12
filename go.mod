@@ -4,7 +4,7 @@ go 1.25.8
 
 require (
 	github.com/cert-manager/cert-manager v1.20.0
-	github.com/fluxcd/helm-controller/api v1.5.1
+	github.com/fluxcd/helm-controller/api v1.5.2
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v4 v4.1.2
 	github.com/giantswarm/clustertest/v3 v3.3.0
@@ -52,8 +52,8 @@ require (
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v1.15.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.25.0 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v1.15.1 // indirect
+	github.com/fluxcd/pkg/apis/meta v1.25.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/giantswarm/kubectl-gs/v2 v2.57.0 // indirect
