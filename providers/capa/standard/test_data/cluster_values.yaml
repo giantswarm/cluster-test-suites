@@ -12,7 +12,7 @@ global:
   nodePools:
     nodepool-0:
       minSize: 1
-      maxSize: 3
+      maxSize: 1
     np-karpntr:
       type: karpenter
       rootVolumeSizeGB: 15
