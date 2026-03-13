@@ -61,17 +61,17 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'external-dns' App not ready"))
 		})
 
-		It("should deploy aws-load-balancer-controller-bundle", func() {
-			const awsLBValuesFile = "./test_data/aws-load-balancer-controller-bundle_values.yaml"
+		It("should deploy aws-lb-controller-bundle", func() {
+			const awsLBValuesFile = "./test_data/aws-lb-controller-bundle_values.yaml"
 
 			if !helper.FileExists(awsLBValuesFile) {
-				Skip("aws-load-balancer-controller-bundle values file not found, skipping")
+				Skip("aws-lb-controller-bundle values file not found, skipping")
 			}
 
 			org := state.GetCluster().Organization
-			bundleAppName := fmt.Sprintf("%s-aws-load-balancer-controller-bundle", state.GetCluster().Name)
+			bundleAppName := fmt.Sprintf("%s-aws-lb-controller-bundle", state.GetCluster().Name)
 
-			awsLBControllerApp = application.New(bundleAppName, "aws-load-balancer-controller-bundle").
+			awsLBControllerApp = application.New(bundleAppName, "aws-lb-controller-bundle").
 				WithCatalog("giantswarm").
 				WithOrganization(*org).
 				WithVersion("latest").
@@ -88,7 +88,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), awsLBControllerApp.InstallName, awsLBControllerApp.GetNamespace())).
 				WithTimeout(5*time.Minute).
 				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-load-balancer-controller-bundle App not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-lb-controller-bundle App not ready"))
 
 			// Wait for child apps
 			appList := &v1alpha1.AppList{}
@@ -103,7 +103,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
 				WithTimeout(10*time.Minute).
 				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-load-balancer-controller-bundle child Apps not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-lb-controller-bundle child Apps not ready"))
 
 			awsLBDeployed = true
 		})
