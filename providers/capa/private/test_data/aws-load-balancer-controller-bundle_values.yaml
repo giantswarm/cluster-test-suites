@@ -1,0 +1,7 @@
+clusterName: {{ .ClusterName }}
+clusterID: {{ .ClusterName }}
+provider: capa
+global:
+  podSecurityStandards:
+    enforced: true
+enableServiceMutatorWebhook: false
