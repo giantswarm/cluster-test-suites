@@ -238,10 +238,11 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 		}
 
 		if pool.MinSize == 0 && pool.MaxSize == 0 {
-			// It's a Karpenter node pool, and we don't care about the number of workers.
-			// We set the min to 2 as we have some affinity rules that would require at least that.
-			minNodes += 2
+			// It's a Karpenter node pool — nodes are provisioned on-demand when pods are pending.
+			// We expect at least 1 node to come up from workloads being scheduled.
+			minNodes += 1
 			maxNodes += 99
+			continue
 		}
 
 		// MachinePool node pool

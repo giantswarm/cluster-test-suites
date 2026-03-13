@@ -10,6 +10,9 @@ global:
   # run in production (mixed ASG + Karpenter pools).
   # See: https://github.com/giantswarm/roadmap/issues/4249
   nodePools:
+    nodepool-0:
+      minSize: 1
+      maxSize: 3
     np-karpntr:
       type: karpenter
       rootVolumeSizeGB: 15
