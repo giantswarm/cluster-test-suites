@@ -9,6 +9,7 @@ type TestConfig struct {
 	ControlPlaneMetricsSupported bool
 	ObservabilityBundleInstalled bool
 	SecurityBundleInstalled      bool
+	GatewayAPISupported          bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -21,6 +22,7 @@ func NewTestConfigWithDefaults() *TestConfig {
 		ControlPlaneMetricsSupported: true,
 		ObservabilityBundleInstalled: true,
 		SecurityBundleInstalled:      true,
+		GatewayAPISupported:          true,
 	}
 }
 
@@ -32,6 +34,7 @@ func Run(cfg *TestConfig) {
 	runMetrics(cfg)
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorld(cfg.ExternalDnsSupported)
+	runHelloWorldGateway(cfg.GatewayAPISupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
 }

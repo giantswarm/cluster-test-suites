@@ -16,5 +16,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	cfg.AutoScalingSupported = false
 	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
 	cfg.ExternalDnsSupported = false
+	cfg.GatewayAPISupported = false
 	common.Run(cfg)
 })
