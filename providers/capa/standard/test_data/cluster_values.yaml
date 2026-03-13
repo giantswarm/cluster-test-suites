@@ -4,8 +4,11 @@ global:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e
     nodeTerminationHandlerEnabled: false # https://github.com/giantswarm/giantswarm/issues/32656
 
-  # Mixed node pools: 1 ASG-based + 1 Karpenter-based
-  # This reflects production usage where customers run both pool types
+  # Add a Karpenter node pool alongside the ASG-based nodepool-0 from the base values.
+  # This merges what was previously the separate capa/karpenter test suite into capa/standard,
+  # testing both node provisioning models in a single run — which also reflects how customers
+  # run in production (mixed ASG + Karpenter pools).
+  # See: https://github.com/giantswarm/roadmap/issues/4249
   nodePools:
     np-karpntr:
       type: karpenter
