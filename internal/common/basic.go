@@ -239,8 +239,9 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 
 		if pool.MinSize == 0 && pool.MaxSize == 0 {
 			// It's a Karpenter node pool — nodes are provisioned on-demand when pods are pending.
-			// We expect at least 1 node to come up from workloads being scheduled.
-			minNodes += 1
+			// We don't require Karpenter nodes in this basic check since they only appear when
+			// workloads overflow the ASG pool. Karpenter is validated later by the scale test
+			// which deploys enough replicas to force Karpenter to provision nodes.
 			maxNodes += 99
 			continue
 		}
