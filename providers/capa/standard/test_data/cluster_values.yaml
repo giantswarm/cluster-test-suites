@@ -3,3 +3,49 @@ global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e
     nodeTerminationHandlerEnabled: false # https://github.com/giantswarm/giantswarm/issues/32656
+
+  # Add a Karpenter node pool alongside the ASG-based nodepool-0 from the base values.
+  # This merges what was previously the separate capa/karpenter test suite into capa/standard,
+  # testing both node provisioning models in a single run — which also reflects how customers
+  # run in production (mixed ASG + Karpenter pools).
+  # See: https://github.com/giantswarm/roadmap/issues/4249
+  nodePools:
+    nodepool-0:
+      minSize: 1
+      maxSize: 1
+    np-karpntr:
+      type: karpenter
+      rootVolumeSizeGB: 15
+      libVolumeSizeGB: 30
+      logVolumeSizeGB: 10
+      requirements:
+        - key: karpenter.k8s.aws/instance-family
+          operator: NotIn
+          values:
+            - t3
+            - t3a
+            - t2
+        - key: karpenter.k8s.aws/instance-cpu
+          operator: In
+          values:
+            - "4"
+            - "8"
+            - "16"
+            - "32"
+        - key: karpenter.k8s.aws/instance-hypervisor
+          operator: In
+          values:
+            - nitro
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+            - amd64
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values:
+            - spot
+            - on-demand
+        - key: kubernetes.io/os
+          operator: In
+          values:
+            - linux

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Merge CAPA standard and karpenter test suites into a single standard suite with mixed node pools (1 ASG + 1 Karpenter). This better reflects production usage and eliminates a separate test suite.
+
+### Removed
+
+- Remove `capa/karpenter` test suite (merged into `capa/standard`).
+
 ### Added
 
 - Add support for EKS provider upgrade tests. It will now detect if the control plane has been updated.
