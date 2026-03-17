@@ -4,12 +4,12 @@ go 1.25.8
 
 require (
 	github.com/cert-manager/cert-manager v1.20.0
-	github.com/fluxcd/helm-controller/api v1.5.2
+	github.com/fluxcd/helm-controller/api v1.5.3
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v4 v4.1.2
 	github.com/giantswarm/clustertest/v3 v3.3.0
 	github.com/giantswarm/k8smetadata v0.26.0
-	github.com/gravitational/teleport/api v0.0.0-20260308150033-d1e5f67123a5
+	github.com/gravitational/teleport/api v0.0.0-20260315193602-c3632c94569b
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	k8s.io/api v0.35.2
