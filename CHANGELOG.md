@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-03-17
+
 ### Changed
 
 - Merge CAPA standard and karpenter test suites into a single standard suite with mixed node pools (1 ASG + 1 Karpenter). This better reflects production usage and eliminates a separate test suite.
@@ -1353,7 +1355,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...v5.0.0
 [4.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.1...v4.0.2
