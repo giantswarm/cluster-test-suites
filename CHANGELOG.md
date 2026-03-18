@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate from CAPI v1beta1 to v1beta2 (`sigs.k8s.io/cluster-api` v1.12.3) and bump `clustertest/v3` to match.
+
 ## [5.0.0] - 2026-03-17
 
 ### Changed
