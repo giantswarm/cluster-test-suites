@@ -74,10 +74,10 @@ func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool)
 	switch cpType {
 	case ControlPlaneTypeKubeadm:
 		return controlPlaneUpdateSpec{
-			inProgressCondition: string(kubeadm.MachinesSpecUpToDateV1Beta1Condition),
+			inProgressCondition: kubeadm.KubeadmControlPlaneMachinesUpToDateCondition,
 			inProgressStatus:    metav1.ConditionFalse,
-			inProgressReason:    kubeadm.RollingUpdateInProgressV1Beta1Reason,
-			completeCondition:   string(kubeadm.MachinesSpecUpToDateV1Beta1Condition),
+			inProgressReason:    capi.NotUpToDateReason,
+			completeCondition:   kubeadm.KubeadmControlPlaneMachinesUpToDateCondition,
 			completeStatus:      metav1.ConditionTrue,
 			completeReason:      "",
 		}, true
