@@ -15,10 +15,10 @@ import (
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v3/pkg/application"
-	"github.com/giantswarm/clustertest/v3/pkg/client"
-	"github.com/giantswarm/clustertest/v3/pkg/logger"
-	"github.com/giantswarm/clustertest/v3/pkg/wait"
+	"github.com/giantswarm/clustertest/v4/pkg/application"
+	"github.com/giantswarm/clustertest/v4/pkg/client"
+	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v5/internal/common"
 	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"

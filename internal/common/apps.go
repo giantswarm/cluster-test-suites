@@ -14,9 +14,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v3/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v3/pkg/logger"
-	"github.com/giantswarm/clustertest/v3/pkg/wait"
+	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v5/internal/state"

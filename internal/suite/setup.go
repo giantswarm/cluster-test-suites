@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/clustertest/v3/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,12 +16,12 @@ import (
 
 	cb "github.com/giantswarm/cluster-standup-teardown/v4/pkg/clusterbuilder"
 	"github.com/giantswarm/cluster-standup-teardown/v4/pkg/standup"
-	"github.com/giantswarm/clustertest/v3"
-	"github.com/giantswarm/clustertest/v3/pkg/client"
-	"github.com/giantswarm/clustertest/v3/pkg/env"
-	"github.com/giantswarm/clustertest/v3/pkg/logger"
-	"github.com/giantswarm/clustertest/v3/pkg/utils"
-	"github.com/giantswarm/clustertest/v3/pkg/wait"
+	"github.com/giantswarm/clustertest/v4"
+	"github.com/giantswarm/clustertest/v4/pkg/client"
+	"github.com/giantswarm/clustertest/v4/pkg/env"
+	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/utils"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
