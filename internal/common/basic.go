@@ -269,8 +269,7 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 	}
 }
 
-// CheckMachinePoolsReadyAndRunning checks if all MachinePool resources have Ready condition with Status True and are in
-// Running phase.
+// CheckMachinePoolsReadyAndRunning checks if all MachinePool resources are in Running phase with all replicas available.
 func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
 	return func() error {
 		machinePools := &capi.MachinePoolList{}
@@ -290,27 +289,30 @@ func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Clie
 			return nil
 		}
 
-		allMachinePoolsAreReadyAndRunning := true
+		allReady := true
 		for _, mp := range machinePools.Items {
-			machinePool := mp
-			var machinePoolIsReady bool
-			machinePoolIsReady, err = wait.IsClusterAPIObjectConditionSet(&mp, capi.AvailableCondition, metav1.ConditionTrue, "")
-			if err != nil {
-				return err
-			}
-			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsReady
+			phase := capi.MachinePoolPhase(mp.Status.Phase)
+			isRunning := phase == capi.MachinePoolPhaseRunning
 
-			currentMachinePoolPhase := capi.MachinePoolPhase(machinePool.Status.Phase)
-			machinePoolIsRunning := currentMachinePoolPhase == capi.MachinePoolPhaseRunning
-			allMachinePoolsAreReadyAndRunning = allMachinePoolsAreReadyAndRunning && machinePoolIsRunning
+			var desired, available int32
+			if mp.Spec.Replicas != nil {
+				desired = *mp.Spec.Replicas
+			}
+			if mp.Status.AvailableReplicas != nil {
+				available = *mp.Status.AvailableReplicas
+			}
+			replicasReady := available >= desired && desired > 0
+
 			logger.Log(
-				"MachinePool '%s/%s' expected to be in Running phase, found MachinePool is in '%s' phase.",
-				machinePool.Namespace,
-				machinePool.Name,
-				machinePool.Status.Phase)
+				"MachinePool '%s/%s': phase=%s, replicas=%d/%d available",
+				mp.Namespace, mp.Name, mp.Status.Phase, available, desired)
+
+			if !isRunning || !replicasReady {
+				allReady = false
+			}
 		}
 
-		if !allMachinePoolsAreReadyAndRunning {
+		if !allReady {
 			return fmt.Errorf("not all MachinePools are ready and running")
 		}
 
