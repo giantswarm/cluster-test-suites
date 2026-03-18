@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-standup-teardown/v4/pkg/clusterbuilder/providers/capa"
+	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder/providers/capa"
 	clustertestclient "github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
