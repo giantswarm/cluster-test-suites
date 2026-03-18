@@ -195,13 +195,13 @@ func runBasic() {
 				)
 		})
 
-		It("has Cluster Ready condition with Status='True'", func() {
+		It("has Cluster Available condition with Status='True'", func() {
 			// Overriding the default timeout, when ClusterReadyTimeout is set
 			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
 
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
-			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, metav1.ConditionTrue, "")).
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.AvailableCondition, metav1.ConditionTrue, "")).
 				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Cluster API Cluster CR not ready"))
@@ -294,7 +294,7 @@ func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Clie
 		for _, mp := range machinePools.Items {
 			machinePool := mp
 			var machinePoolIsReady bool
-			machinePoolIsReady, err = wait.IsClusterApiObjectConditionSet(&mp, capi.ReadyCondition, metav1.ConditionTrue, "")
+			machinePoolIsReady, err = wait.IsClusterAPIObjectConditionSet(&mp, capi.AvailableCondition, metav1.ConditionTrue, "")
 			if err != nil {
 				return err
 			}

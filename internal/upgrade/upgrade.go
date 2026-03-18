@@ -170,13 +170,13 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
-		It("has Cluster Ready condition with Status='True'", func() {
+		It("has Cluster Available condition with Status='True'", func() {
 			// Overriding the default timeout, when clusterReadyTimeout is set
 			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
 
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
-			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, metav1.ConditionTrue, "")).
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.AvailableCondition, metav1.ConditionTrue, "")).
 				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
