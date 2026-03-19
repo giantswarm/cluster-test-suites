@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-03-19
+
 ### Changed
 
 - Migrate from CAPI v1beta1 to v1beta2 (`sigs.k8s.io/cluster-api` v1.12.3) and bump `clustertest` from v3 to v4.0.0.
@@ -1360,7 +1362,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...v5.0.0
 [4.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/giantswarm/cluster-test-suites/compare/v4.0.2...v4.0.3

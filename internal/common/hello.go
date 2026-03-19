@@ -21,8 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 )
 
 func runHelloWorld(externalDnsSupported bool) {

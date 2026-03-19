@@ -27,7 +27,7 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 )
 
 const (

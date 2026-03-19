@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/v5/assets/storage"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/assets/storage"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"

@@ -9,9 +9,9 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/ecr"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/ecr"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 )
 
 var _ = Describe("Cilium ENI mode tests", func() {
