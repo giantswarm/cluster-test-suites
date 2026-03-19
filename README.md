@@ -234,7 +234,7 @@ Available timeout keys and their defaults:
 |-----|---------|------|
 | `timeout.DeployApps` | 15m | HelmReleases and default apps deployed |
 | `timeout.ClusterReadyTimeout` | 15m | Cluster Ready condition |
-| `timeout.MimirMetrics` | 20m | Key metrics available on Mimir |
+| `timeout.MimirMetrics` | 10m | Key metrics available on Mimir |
 | `timeout.PVCBinding` | 5m | PVC binds to a volume |
 | `timeout.CertManager` | 5m | ClusterIssuers present and ready |
 | `timeout.BundleApps` | 90s | Observability/security bundle app detection |

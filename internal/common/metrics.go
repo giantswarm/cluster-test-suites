@@ -104,7 +104,7 @@ func runMetrics(cfg *TestConfig) {
 				Skip("Observability bundle is not installed in this cluster configuration")
 			}
 
-			metricsTimeout := state.GetTestTimeout(timeout.MimirMetrics, 20*time.Minute)
+			metricsTimeout := state.GetTestTimeout(timeout.MimirMetrics, 10*time.Minute)
 			for _, metric := range metrics {
 				Eventually(checkMetricPresent(mcClient, metric, mimirUrl, testPodName, testPodNamespace)).
 					WithTimeout(metricsTimeout).

@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Increase mimir metrics test timeout from 10m to 20m to reduce flakiness (top failing test across all providers).
-- Increase PVC binding timeout from 1m to 5m to fix frequent CAPV/CAPVCD failures.
+- Increase PVC binding timeout from 1m to 5m.
 - Increase cert-manager ClusterIssuer timeout from 2m to 5m and polling from 1s to 5s.
 - Increase observability-bundle and security-bundle app detection timeout from 30s to 90s and polling from 50ms to 5s.
 - Make mimir metrics, PVC binding, cert-manager, and bundle app timeouts configurable via the timeout package.
