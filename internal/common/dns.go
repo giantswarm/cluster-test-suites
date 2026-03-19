@@ -6,10 +6,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/giantswarm/clustertest/v3/pkg/application"
-	"github.com/giantswarm/clustertest/v3/pkg/logger"
-	clustertestnet "github.com/giantswarm/clustertest/v3/pkg/net"
-	"github.com/giantswarm/clustertest/v3/pkg/wait"
+	"github.com/giantswarm/clustertest/v4/pkg/application"
+	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	clustertestnet "github.com/giantswarm/clustertest/v4/pkg/net"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 

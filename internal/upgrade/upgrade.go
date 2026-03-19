@@ -8,16 +8,17 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	capi "sigs.k8s.io/cluster-api/api/v1beta1"
-	kubeadm "sigs.k8s.io/cluster-api/controlplane/kubeadm/api/v1beta1"
+	kubeadm "sigs.k8s.io/cluster-api/api/controlplane/kubeadm/v1beta2"
+	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v3/pkg/application"
-	"github.com/giantswarm/clustertest/v3/pkg/client"
-	"github.com/giantswarm/clustertest/v3/pkg/logger"
-	"github.com/giantswarm/clustertest/v3/pkg/wait"
+	"github.com/giantswarm/clustertest/v4/pkg/application"
+	"github.com/giantswarm/clustertest/v4/pkg/client"
+	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v5/internal/common"
 	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"
@@ -61,11 +62,11 @@ func NewTestConfigWithDefaults() *TestConfig {
 // controlPlaneUpdateSpec describes which conditions signal an in-progress and a
 // completed control plane rolling update for a given provider.
 type controlPlaneUpdateSpec struct {
-	inProgressCondition capi.ConditionType
-	inProgressStatus    corev1.ConditionStatus
+	inProgressCondition string
+	inProgressStatus    metav1.ConditionStatus
 	inProgressReason    string // empty = match any reason
-	completeCondition   capi.ConditionType
-	completeStatus      corev1.ConditionStatus
+	completeCondition   string
+	completeStatus      metav1.ConditionStatus
 	completeReason      string // empty = match any reason
 }
 
@@ -73,20 +74,20 @@ func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool)
 	switch cpType {
 	case ControlPlaneTypeKubeadm:
 		return controlPlaneUpdateSpec{
-			inProgressCondition: kubeadm.MachinesSpecUpToDateCondition,
-			inProgressStatus:    corev1.ConditionFalse,
-			inProgressReason:    kubeadm.RollingUpdateInProgressReason,
-			completeCondition:   kubeadm.MachinesSpecUpToDateCondition,
-			completeStatus:      corev1.ConditionTrue,
+			inProgressCondition: kubeadm.KubeadmControlPlaneMachinesUpToDateCondition,
+			inProgressStatus:    metav1.ConditionFalse,
+			inProgressReason:    capi.NotUpToDateReason,
+			completeCondition:   kubeadm.KubeadmControlPlaneMachinesUpToDateCondition,
+			completeStatus:      metav1.ConditionTrue,
 			completeReason:      "",
 		}, true
 	case ControlPlaneTypeAWSManaged:
 		return controlPlaneUpdateSpec{
 			inProgressCondition: "EKSControlPlaneUpdating",
-			inProgressStatus:    corev1.ConditionTrue,
+			inProgressStatus:    metav1.ConditionTrue,
 			inProgressReason:    "",
 			completeCondition:   "EKSControlPlaneUpdating",
-			completeStatus:      corev1.ConditionFalse,
+			completeStatus:      metav1.ConditionFalse,
 			completeReason:      "updated",
 		}, true
 	default:
@@ -169,13 +170,13 @@ func Run(cfg *TestConfig) {
 				Should(Succeed())
 		})
 
-		It("has Cluster Ready condition with Status='True'", func() {
+		It("has Cluster Available condition with Status='True'", func() {
 			// Overriding the default timeout, when clusterReadyTimeout is set
 			timeout := state.GetTestTimeout(timeout.ClusterReadyTimeout, 15*time.Minute)
 
 			mcClient := state.GetFramework().MC()
 			cluster := state.GetCluster()
-			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.ReadyCondition, corev1.ConditionTrue, "")).
+			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.AvailableCondition, metav1.ConditionTrue, "")).
 				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
 				Should(BeTrue())
@@ -300,8 +301,8 @@ func Run(cfg *TestConfig) {
 					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
-				cond := capiconditions.Get(capiconditions.UnstructuredGetter(controlPlane), spec.inProgressCondition)
-				if cond == nil {
+				cond, condErr := capiconditions.UnstructuredGet(controlPlane, spec.inProgressCondition)
+				if condErr != nil || cond == nil {
 					logger.Log("Control plane condition %s is not set, expected Status='%s'", spec.inProgressCondition, spec.inProgressStatus)
 				} else if cond.Status == spec.inProgressStatus && (spec.inProgressReason == "" || cond.Reason == spec.inProgressReason) {
 					controlPlaneUpdateStarted = true

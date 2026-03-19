@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v5/internal/suite"
 
-	"github.com/giantswarm/cluster-standup-teardown/v4/pkg/clusterbuilder/providers/capa"
+	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder/providers/capa"
 )
 
 func TestCAPAUpgrade(t *testing.T) {

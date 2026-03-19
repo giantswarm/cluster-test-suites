@@ -3,7 +3,7 @@ package standard
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/clustertest/v3/pkg/application"
+	"github.com/giantswarm/clustertest/v4/pkg/application"
 
 	"github.com/giantswarm/cluster-test-suites/v5/internal/common"
 )
