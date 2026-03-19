@@ -20,10 +20,10 @@ import (
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v5/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck

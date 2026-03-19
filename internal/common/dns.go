@@ -13,7 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 )
 
 func runDNS(bastionSuppoted bool) {

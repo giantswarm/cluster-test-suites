@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/v5/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 
 	"github.com/giantswarm/clustertest/v4"
 	"github.com/giantswarm/clustertest/v4/pkg/application"
