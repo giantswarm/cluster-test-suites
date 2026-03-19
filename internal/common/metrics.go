@@ -18,6 +18,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 )
 
 const mimirUrl = "mimir-gateway.mimir.svc:80/prometheus"
@@ -103,9 +104,10 @@ func runMetrics(cfg *TestConfig) {
 				Skip("Observability bundle is not installed in this cluster configuration")
 			}
 
+			metricsTimeout := state.GetTestTimeout(timeout.MimirMetrics, 10*time.Minute)
 			for _, metric := range metrics {
 				Eventually(checkMetricPresent(mcClient, metric, mimirUrl, testPodName, testPodNamespace)).
-					WithTimeout(10 * time.Minute).
+					WithTimeout(metricsTimeout).
 					WithPolling(10 * time.Second).
 					Should(Succeed())
 			}

@@ -224,6 +224,45 @@ It("should test something", func() {
 
 To add a new grouping of common tests you can create a new file with a function similar to `runMyNewGrouping()` and then add a call to this from the [`./internal/common/common.go`](./internal/common/common.go) `Run()` function.
 
+### Configurable Test Timeouts
+
+Several test timeouts can be overridden per test suite using the `timeout` package. This is useful for providers or configurations where certain operations take longer (e.g. slower infrastructure, network latency).
+
+Available timeout keys and their defaults:
+
+| Key | Default | Test |
+|-----|---------|------|
+| `timeout.DeployApps` | 15m | HelmReleases and default apps deployed |
+| `timeout.ClusterReadyTimeout` | 15m | Cluster Ready condition |
+| `timeout.MimirMetrics` | 10m | Key metrics available on Mimir |
+| `timeout.PVCBinding` | 5m | PVC binds to a volume |
+| `timeout.CertManager` | 5m | ClusterIssuers present and ready |
+| `timeout.BundleApps` | 90s | Observability/security bundle app detection |
+
+To override a timeout in a specific test suite, call `state.SetTestTimeout` in a `BeforeEach` block:
+
+```go
+import (
+    "time"
+
+    "github.com/giantswarm/cluster-test-suites/v6/internal/state"
+    "github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+)
+
+var _ = Describe("Tests", func() {
+    BeforeEach(func() {
+        // Karpenter workers take longer to provision
+        state.SetTestTimeout(timeout.DeployApps, time.Minute*30)
+        // Slower storage provisioning on this provider
+        state.SetTestTimeout(timeout.PVCBinding, 10*time.Minute)
+    })
+
+    common.Run(common.NewTestConfigWithDefaults())
+})
+```
+
+If no override is set, the default value is used automatically.
+
 ### Adding provider-specific tests
 
 Each CAPI provider has its own subdirectory under [`./providers/`](./providers/) that specific tests can be added to.

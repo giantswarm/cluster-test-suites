@@ -7,6 +7,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v6/assets/storage"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
@@ -126,6 +127,7 @@ func runStorage() {
 			})
 
 			It("binds the PVC", func() {
+				pvcTimeout := state.GetTestTimeout(timeout.PVCBinding, 5*time.Minute)
 				Eventually(
 					func() error {
 						err := wcClient.Get(state.GetContext(), cr.ObjectKeyFromObject(pvc), pvc)
@@ -148,7 +150,7 @@ func runStorage() {
 
 						return nil
 					}).
-					WithTimeout(1 * time.Minute).
+					WithTimeout(pvcTimeout).
 					WithPolling(wait.DefaultInterval).
 					Should(Succeed())
 			})

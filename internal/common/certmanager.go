@@ -15,6 +15,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -48,10 +49,11 @@ func runCertManager(certManagerSupported bool) {
 				Skip("cert-manager is not supported in this cluster configuration")
 			}
 
+			certManagerTimeout := state.GetTestTimeout(timeout.CertManager, 5*time.Minute)
 			for _, clusterIssuerName := range clusterIssuers {
 				Eventually(checkClusterIssuer(state.GetContext(), wcClient, clusterIssuerName)).
-					WithTimeout(120*time.Second).
-					WithPolling(1*time.Second).
+					WithTimeout(certManagerTimeout).
+					WithPolling(5*time.Second).
 					Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), fmt.Sprintf("Investigate cert-manager ClusterIssuer %s missing or not ready", clusterIssuerName)))
 			}
 		})

@@ -97,9 +97,10 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the observability-bundle app to be deployed before we can check the apps it deploys.
 			observabilityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
 
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), observabilityAppsAppName, state.GetCluster().GetNamespace())).
-				WithTimeout(30 * time.Second).
-				WithPolling(50 * time.Millisecond).
+				WithTimeout(bundleTimeout).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 
 			// Wait for all observability-bundle apps to be deployed
@@ -132,9 +133,10 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the security-bundle app to be deployed before we can check the apps it deploys.
 			securityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
 
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), securityAppsAppName, state.GetCluster().GetNamespace())).
-				WithTimeout(30 * time.Second).
-				WithPolling(50 * time.Millisecond).
+				WithTimeout(bundleTimeout).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 
 			// Wait for all security-bundle apps to be deployed
