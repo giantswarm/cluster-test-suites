@@ -5,6 +5,8 @@ global:
 cluster:
   providerIntegration:
     apps:
+      coreDns:
+        enable: true
       observabilityBundle:
         enable: true
       securityBundle:
