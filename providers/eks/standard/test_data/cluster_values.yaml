@@ -5,41 +5,21 @@ global:
 cluster:
   providerIntegration:
     apps:
-      certExporter:
-        enable: true
-      certManager:
-        enable: true
-      chartOperatorExtensions:
-        enable: true
+      # Dependencies needed for Team Tenet apps
       cilium:
-        enable: true
-      ciliumServiceMonitors:
-        enable: true
-      clusterAutoscaler:
         enable: true
       coreDns:
         enable: true
-      coreDnsExtensions:
-        enable: true
-      externalDns:
-        enable: true
-      k8sDnsNodeCache:
-        enable: true
-      metricsServer:
-        enable: true
-      netExporter:
-        enable: true
-      networkPolicies:
-        enable: true
-      nodeExporter:
-        enable: true
       observabilityBundle:
         enable: true
-      observabilityPolicies:
-        enable: true
-      rbacBootstrap:
-        enable: true
       securityBundle:
+        enable: true
+      # Team Tenet apps
+      certExporter:
+        enable: true
+      clusterAutoscaler:
+        enable: true
+      nodeExporter:
         enable: true
       verticalPodAutoscaler:
         enable: true

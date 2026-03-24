@@ -13,8 +13,8 @@ var _ = Describe("Common tests", func() {
 	// EKS doesn't have any of the Giant Swarm apps deployed
 	cfg.ObservabilityBundleInstalled = true
 	cfg.SecurityBundleInstalled = true
-	cfg.ExternalDnsSupported = true
+	cfg.ExternalDnsSupported = false
 	cfg.AutoScalingSupported = true
-	cfg.CertManagerSupported = true
+	cfg.CertManagerSupported = false
 	common.Run(cfg)
 })
