@@ -14,7 +14,7 @@ var _ = Describe("Common tests", func() {
 	cfg.ObservabilityBundleInstalled = false
 	cfg.SecurityBundleInstalled = false
 	cfg.ExternalDnsSupported = false
-	cfg.AutoScalingSupported = false
+	cfg.AutoScalingSupported = true
 	cfg.CertManagerSupported = false
 	common.Run(cfg)
 })
