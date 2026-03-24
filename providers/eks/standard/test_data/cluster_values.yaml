@@ -2,14 +2,16 @@
 global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e-eks
-  apps:
-    certExporter:
-      enable: true
-    clusterAutoscaler:
-      enable: true
-    nodeExporter:
-      enable: true
-    verticalPodAutoscaler:
-      enable: true
-    verticalPodAutoscalerCrd:
-      enable: true
+cluster:
+  providerIntegration:
+    apps:
+      certExporter:
+        enable: true
+      clusterAutoscaler:
+        enable: true
+      nodeExporter:
+        enable: true
+      verticalPodAutoscaler:
+        enable: true
+      verticalPodAutoscalerCrd:
+        enable: true
