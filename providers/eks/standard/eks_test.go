@@ -11,8 +11,8 @@ var _ = Describe("Common tests", func() {
 	// EKS does not have metrics for k8s control plane components.
 	cfg.ControlPlaneMetricsSupported = false
 	// EKS doesn't have any of the Giant Swarm apps deployed
-	cfg.ObservabilityBundleInstalled = false
-	cfg.SecurityBundleInstalled = false
+	cfg.ObservabilityBundleInstalled = true
+	cfg.SecurityBundleInstalled = true
 	cfg.ExternalDnsSupported = false
 	cfg.AutoScalingSupported = true
 	cfg.CertManagerSupported = false

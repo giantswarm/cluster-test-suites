@@ -5,6 +5,8 @@ global:
 cluster:
   providerIntegration:
     apps:
+      observabilityBundle:
+        enable: true
       securityBundle:
         enable: true
       certExporter:
