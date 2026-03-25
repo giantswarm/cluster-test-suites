@@ -15,8 +15,6 @@ type ClusterValues struct {
 
 var _ = Describe("Common tests", func() {
 	cfg := common.NewTestConfigWithDefaults()
-	// Disabled until https://github.com/giantswarm/roadmap/issues/2693
-	cfg.AutoScalingSupported = false
 	// Disabled until wildcard ingress support is added
 	cfg.ExternalDnsSupported = false
 	common.Run(cfg)
