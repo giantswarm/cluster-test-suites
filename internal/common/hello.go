@@ -8,7 +8,7 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
+	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v4/pkg/application"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
@@ -29,7 +29,7 @@ func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", Ordered, func() {
 		var (
 			nginxApp              *application.Application
-			helloApp              *application.Application
+			helloHelmRelease      *helm.HelmRelease
 			helloWorldIngressHost string
 			helloWorldIngressUrl  string
 		)
@@ -113,56 +113,62 @@ func runHelloWorld(externalDnsSupported bool) {
 
 		It("should deploy the hello-world app", func() {
 			org := state.GetCluster().Organization
+			clusterName := state.GetCluster().Name
+			namespace := org.GetNamespace()
 
 			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
-			helloAppValues := map[string]string{"IngressUrl": helloWorldIngressHost}
 
-			helloApp = application.New(fmt.Sprintf("%s-hello-world", state.GetCluster().Name), "hello-world").
-				WithCatalog("giantswarm").
-				WithOrganization(*org).
-				WithVersion("latest").
-				WithClusterName(state.GetCluster().Name).
-				WithInCluster(false).
-				WithInstallNamespace("giantswarm").
-				MustWithValuesFile("./test_data/helloworld_values.yaml", &application.TemplateValues{
-					ClusterName:  state.GetCluster().Name,
-					Organization: state.GetCluster().Organization.Name,
-					ExtraValues:  helloAppValues,
-				})
-
-			err := state.GetFramework().MC().DeployApp(state.GetContext(), *helloApp)
+			err := ensureTestHelmRepository(state.GetContext(), state.GetFramework().MC(), namespace)
 			Expect(err).To(BeNil())
 
-			Eventually(func() (bool, error) {
-				// The hello-world app creates `Ingress` resources, and the `ingress-nginx` app installed above has created some admission webhooks for `Ingress`. While `nginx` webhooks are booting, requests to them will fail to respond successfully,
-				// and `Ingress` resources won't be able to be created until the webhooks are up and running. The first time we try to install the `hello-world` app, it will fail because of this.
-				// `chart-operator` reconciles `charts` every 5 minutes, which means that the `hello-world` app won't be retried again until the next chart-operator reconciliation loop 5 minutes later.
-				// To speed things up, we keep patching the hello-world `App` CR by adding a label. That way, we trigger reconciliation loops in chart-operator.
-				managementClusterKubeClient := state.GetFramework().MC()
+			values := map[string]interface{}{
+				"ingress": map[string]interface{}{
+					"annotations": map[string]interface{}{
+						"kubernetes.io/tls-acme":         "true",
+						"cert-manager.io/cluster-issuer": "letsencrypt-giantswarm",
+					},
+					"hosts": []interface{}{
+						map[string]interface{}{
+							"host": helloWorldIngressHost,
+							"paths": []interface{}{
+								map[string]interface{}{
+									"path":     "/",
+									"pathType": "ImplementationSpecific",
+								},
+							},
+						},
+					},
+					"tls": []interface{}{
+						map[string]interface{}{
+							"secretName": "hello-world-tls",
+							"hosts":      []interface{}{helloWorldIngressHost},
+						},
+					},
+				},
+			}
 
-				helloApplication := &v1alpha1.App{}
-				err := managementClusterKubeClient.Get(state.GetContext(), types.NamespacedName{Name: helloApp.InstallName, Namespace: helloApp.GetNamespace()}, helloApplication)
-				if err != nil {
-					return false, err
-				}
+			helloHelmRelease, err = newTestHelmRelease(
+				fmt.Sprintf("%s-hello-world", clusterName),
+				namespace,
+				"hello-world",
+				"hello-world",
+				"giantswarm",
+				clusterName,
+				values,
+			)
+			Expect(err).To(BeNil())
 
-				now := time.Now()
-				patchedApp := helloApplication.DeepCopy()
-				labels := patchedApp.GetLabels()
-				labels["update"] = fmt.Sprintf("%d", now.Unix())
-				patchedApp.SetLabels(labels)
+			err = state.GetFramework().MC().Create(state.GetContext(), helloHelmRelease)
+			Expect(err).To(BeNil())
 
-				err = managementClusterKubeClient.Patch(state.GetContext(), patchedApp, ctrl.MergeFrom(helloApplication))
-				if err != nil {
-					return false, err
-				}
-
-				return wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.InstallName, helloApp.GetNamespace())()
-			}).
+			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
+				Name:      helloHelmRelease.Name,
+				Namespace: helloHelmRelease.Namespace,
+			})).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' App is not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' HelmRelease is not ready"))
 		})
 
 		It("ingress resource has load balancer in status", func() {
@@ -270,7 +276,11 @@ func runHelloWorld(externalDnsSupported bool) {
 		It("uninstall apps", func() {
 			err := state.GetFramework().MC().DeleteApp(state.GetContext(), *nginxApp)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = state.GetFramework().MC().DeleteApp(state.GetContext(), *helloApp)
+
+			err = state.GetFramework().MC().Delete(state.GetContext(), helloHelmRelease)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			err = deleteTestHelmRepository(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.Namespace)
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
