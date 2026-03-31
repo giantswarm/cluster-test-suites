@@ -54,30 +54,13 @@ func runScale(autoScalingSupported bool) {
 
 			replicaCount = len(nodes.Items) + 1
 
-			values := map[string]interface{}{
-				"autoscaling": map[string]interface{}{
-					"enabled": false,
+			values, err := parseValuesFile("./test_data/scale_helloworld_values.yaml", &HelmReleaseTemplateValues{
+				ClusterName: clusterName,
+				ExtraValues: map[string]string{
+					"ReplicaCount": fmt.Sprintf("%d", replicaCount),
 				},
-				"replicaCount": replicaCount,
-				"affinity": map[string]interface{}{
-					"podAntiAffinity": map[string]interface{}{
-						"requiredDuringSchedulingIgnoredDuringExecution": []interface{}{
-							map[string]interface{}{
-								"labelSelector": map[string]interface{}{
-									"matchExpressions": []interface{}{
-										map[string]interface{}{
-											"key":      "app.kubernetes.io/instance",
-											"operator": "In",
-											"values":   []interface{}{"scale-hello-world"},
-										},
-									},
-								},
-								"topologyKey": "kubernetes.io/hostname",
-							},
-						},
-					},
-				},
-			}
+			})
+			Expect(err).To(BeNil())
 
 			err = ensureTestHelmRepository(ctx, state.GetFramework().MC(), namespace)
 			Expect(err).To(BeNil())

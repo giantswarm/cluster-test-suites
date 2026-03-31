@@ -1,14 +1,18 @@
 package common
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"text/template"
 	"time"
 
 	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/fluxcd/pkg/apis/meta"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"gopkg.in/yaml.v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,6 +107,38 @@ func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace
 			Values: &apiextensionsv1.JSON{Raw: valuesJSON},
 		},
 	}, nil
+}
+
+// HelmReleaseTemplateValues holds the template variables for HelmRelease values files.
+type HelmReleaseTemplateValues struct {
+	ClusterName string
+	ExtraValues map[string]string
+}
+
+// parseValuesFile reads a YAML template file, executes Go template substitution,
+// and returns the result as a map suitable for HelmRelease values.
+func parseValuesFile(path string, templateValues *HelmReleaseTemplateValues) (map[string]interface{}, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading values file %s: %w", path, err)
+	}
+
+	tmpl, err := template.New("values").Parse(string(data))
+	if err != nil {
+		return nil, fmt.Errorf("parsing values template %s: %w", path, err)
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, templateValues); err != nil {
+		return nil, fmt.Errorf("executing values template %s: %w", path, err)
+	}
+
+	var values map[string]interface{}
+	if err := yaml.Unmarshal(buf.Bytes(), &values); err != nil {
+		return nil, fmt.Errorf("unmarshalling values from %s: %w", path, err)
+	}
+
+	return values, nil
 }
 
 func isHelmReleaseReady(ctx context.Context, c cr.Client, name types.NamespacedName) func() (bool, error) {

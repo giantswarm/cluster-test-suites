@@ -122,31 +122,13 @@ func runHelloWorld(externalDnsSupported bool) {
 			err := ensureTestHelmRepository(state.GetContext(), state.GetFramework().MC(), namespace)
 			Expect(err).To(BeNil())
 
-			values := map[string]interface{}{
-				"ingress": map[string]interface{}{
-					"annotations": map[string]interface{}{
-						"kubernetes.io/tls-acme":         "true",
-						"cert-manager.io/cluster-issuer": "letsencrypt-giantswarm",
-					},
-					"hosts": []interface{}{
-						map[string]interface{}{
-							"host": helloWorldIngressHost,
-							"paths": []interface{}{
-								map[string]interface{}{
-									"path":     "/",
-									"pathType": "ImplementationSpecific",
-								},
-							},
-						},
-					},
-					"tls": []interface{}{
-						map[string]interface{}{
-							"secretName": "hello-world-tls",
-							"hosts":      []interface{}{helloWorldIngressHost},
-						},
-					},
+			values, err := parseValuesFile("./test_data/helloworld_values.yaml", &HelmReleaseTemplateValues{
+				ClusterName: clusterName,
+				ExtraValues: map[string]string{
+					"IngressUrl": helloWorldIngressHost,
 				},
-			}
+			})
+			Expect(err).To(BeNil())
 
 			helloHelmRelease, err = newTestHelmRelease(
 				fmt.Sprintf("%s-hello-world", clusterName),
