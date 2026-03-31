@@ -80,8 +80,9 @@ func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace
 		},
 		Spec: helm.HelmReleaseSpec{
 			Interval:        metav1.Duration{Duration: 1 * time.Minute},
-			ReleaseName:     releaseName,
-			TargetNamespace: targetNamespace,
+			ReleaseName:      releaseName,
+			TargetNamespace:  targetNamespace,
+			StorageNamespace: targetNamespace,
 			Chart: &helm.HelmChartTemplate{
 				Spec: helm.HelmChartTemplateSpec{
 					Chart:   chartName,
