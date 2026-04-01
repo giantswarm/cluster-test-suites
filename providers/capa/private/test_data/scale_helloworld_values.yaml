@@ -1,5 +1,3 @@
-clusterName: {{ .ClusterName }}
-organization: {{ .Organization }}
 autoscaling:
   enabled: false
 replicaCount: {{ index .ExtraValues "ReplicaCount" }}
