@@ -24,6 +24,7 @@ func runScale(autoScalingSupported bool) {
 	Context("scale", func() {
 		var (
 			helmRelease  *unstructured.Unstructured
+			ociRepoName  string
 			wcClient     *client.Client
 			replicaCount int
 		)
@@ -62,16 +63,17 @@ func runScale(autoScalingSupported bool) {
 			})
 			Expect(err).To(BeNil())
 
-			err = ensureTestHelmRepository(ctx, state.GetFramework().MC(), namespace)
+			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
+			err = ensureTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
 			Expect(err).To(BeNil())
 
 			helmRelease = newTestHelmRelease(
 				fmt.Sprintf("%s-scale-hello-world", clusterName),
 				namespace,
-				"hello-world",
 				"scale-hello-world",
 				"giantswarm",
 				clusterName,
+				ociRepoName,
 				values,
 			)
 
@@ -158,7 +160,7 @@ func runScale(autoScalingSupported bool) {
 			err := state.GetFramework().MC().Delete(ctx, helmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestHelmRepository(ctx, state.GetFramework().MC(), helmRelease.GetNamespace())
+			err = deleteTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, helmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})

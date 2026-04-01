@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	testHelmRepoName = "giantswarm-catalog-test"
-	testHelmRepoURL  = "https://giantswarm.github.io/giantswarm-catalog/"
+	testOCIRegistryURL = "oci://giantswarmpublic.azurecr.io/giantswarm-catalog"
 )
 
 var helmReleaseGVK = schema.GroupVersionKind{
@@ -39,36 +38,39 @@ func newUnstructuredHelmReleaseList() *unstructured.UnstructuredList {
 	return list
 }
 
-func ensureTestHelmRepository(ctx context.Context, c cr.Client, namespace string) error {
+func ensureTestOCIRepository(ctx context.Context, c cr.Client, name, namespace, chartName string) error {
 	repo := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "source.toolkit.fluxcd.io/v1",
-			"kind":       "HelmRepository",
+			"apiVersion": "source.toolkit.fluxcd.io/v1beta2",
+			"kind":       "OCIRepository",
 			"metadata": map[string]interface{}{
-				"name":      testHelmRepoName,
+				"name":      name,
 				"namespace": namespace,
 			},
 			"spec": map[string]interface{}{
-				"url":      testHelmRepoURL,
-				"interval": "10m",
+				"url":      fmt.Sprintf("%s/%s", testOCIRegistryURL, chartName),
+				"interval": "1m",
+				"ref": map[string]interface{}{
+					"semver": "*",
+				},
 			},
 		},
 	}
 
 	err := c.Create(ctx, repo)
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		return fmt.Errorf("creating test HelmRepository: %w", err)
+		return fmt.Errorf("creating test OCIRepository: %w", err)
 	}
 	return nil
 }
 
-func deleteTestHelmRepository(ctx context.Context, c cr.Client, namespace string) error {
+func deleteTestOCIRepository(ctx context.Context, c cr.Client, name, namespace string) error {
 	repo := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "source.toolkit.fluxcd.io/v1",
-			"kind":       "HelmRepository",
+			"apiVersion": "source.toolkit.fluxcd.io/v1beta2",
+			"kind":       "OCIRepository",
 			"metadata": map[string]interface{}{
-				"name":      testHelmRepoName,
+				"name":      name,
 				"namespace": namespace,
 			},
 		},
@@ -80,7 +82,7 @@ func deleteTestHelmRepository(ctx context.Context, c cr.Client, namespace string
 	return err
 }
 
-func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace, clusterName string, values map[string]interface{}) *unstructured.Unstructured {
+func newTestHelmRelease(name, namespace, releaseName, targetNamespace, clusterName, ociRepoName string, values map[string]interface{}) *unstructured.Unstructured {
 	hr := &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "helm.toolkit.fluxcd.io/v2",
@@ -94,15 +96,9 @@ func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace
 				"releaseName":      releaseName,
 				"targetNamespace":  targetNamespace,
 				"storageNamespace": targetNamespace,
-				"chart": map[string]interface{}{
-					"spec": map[string]interface{}{
-						"chart":   chartName,
-						"version": "*",
-						"sourceRef": map[string]interface{}{
-							"kind": "HelmRepository",
-							"name": testHelmRepoName,
-						},
-					},
+				"chartRef": map[string]interface{}{
+					"kind": "OCIRepository",
+					"name": ociRepoName,
 				},
 				"kubeConfig": map[string]interface{}{
 					"secretRef": map[string]interface{}{

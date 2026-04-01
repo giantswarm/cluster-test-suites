@@ -30,6 +30,7 @@ func runHelloWorld(externalDnsSupported bool) {
 		var (
 			nginxApp              *application.Application
 			helloHelmRelease      *unstructured.Unstructured
+			ociRepoName           string
 			helloWorldIngressHost string
 			helloWorldIngressUrl  string
 		)
@@ -119,7 +120,8 @@ func runHelloWorld(externalDnsSupported bool) {
 			helloWorldIngressHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 
-			err := ensureTestHelmRepository(state.GetContext(), state.GetFramework().MC(), namespace)
+			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
+			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
 			Expect(err).To(BeNil())
 
 			values, err := parseValuesFile("./test_data/helloworld_values.yaml", &HelmReleaseTemplateValues{
@@ -134,9 +136,9 @@ func runHelloWorld(externalDnsSupported bool) {
 				fmt.Sprintf("%s-hello-world", clusterName),
 				namespace,
 				"hello-world",
-				"hello-world",
 				"giantswarm",
 				clusterName,
+				ociRepoName,
 				values,
 			)
 
@@ -261,7 +263,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			err = state.GetFramework().MC().Delete(state.GetContext(), helloHelmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestHelmRepository(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetNamespace())
+			err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, helloHelmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
