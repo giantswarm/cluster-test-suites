@@ -9,7 +9,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown/v5 v5.0.0
 	github.com/giantswarm/clustertest/v4 v4.0.0
 	github.com/giantswarm/k8smetadata v0.26.0
-	github.com/gravitational/teleport/api v0.0.0-20260323132344-639ae930d33e
+	github.com/gravitational/teleport/api v0.0.0-20260401060553-8f7cb166ba67
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	k8s.io/api v0.35.3
@@ -138,8 +138,8 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/rubenv/sql-migrate v1.8.1 // indirect
-	github.com/russellhaering/gosaml2 v0.10.0 // indirect
-	github.com/russellhaering/goxmldsig v1.5.0 // indirect
+	github.com/russellhaering/gosaml2 v0.11.0 // indirect
+	github.com/russellhaering/goxmldsig v1.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect

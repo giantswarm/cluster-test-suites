@@ -229,8 +229,8 @@ github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 h1:JeSE6pjso5T
 github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674/go.mod h1:r4w70xmWCQKmi1ONH4KIaBptdivuRPyosB9RmPlGEwA=
 github.com/gosuri/uitable v0.0.4 h1:IG2xLKRvErL3uhY6e1BylFzG+aJiwQviDDTfOKeKTpY=
 github.com/gosuri/uitable v0.0.4/go.mod h1:tKR86bXuXPZazfOTG1FIzvjIdXzd0mo4Vtn16vt0PJo=
-github.com/gravitational/teleport/api v0.0.0-20260323132344-639ae930d33e h1:yISGEoq8Fuy7jk68aCpJVOC5zIBlaDfaf6OezjzLMTg=
-github.com/gravitational/teleport/api v0.0.0-20260323132344-639ae930d33e/go.mod h1:L+VhRkZeYQHGZ6zbouAv1yB9uyI5hwZRlMlCGQZJWWI=
+github.com/gravitational/teleport/api v0.0.0-20260401060553-8f7cb166ba67 h1:k/izdEu5xGmr3P0uE4a7F6eHFc+6xpS+LtcHtR1ygAk=
+github.com/gravitational/teleport/api v0.0.0-20260401060553-8f7cb166ba67/go.mod h1:cGfClFgxI9SD6u7ag9GU0LCxAcQKZqPTlTJTjjd05VI=
 github.com/gravitational/trace v1.5.1 h1:CdSymAjkE1VOef+lsC5x29jX9WbgI0fBtnRqeT4Fh+c=
 github.com/gravitational/trace v1.5.1/go.mod h1:sJKfJHIQ7IkG8kvYpFPEr6mj3WDEdZ0YAc7xAD8w7lw=
 github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=
@@ -356,10 +356,10 @@ github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0t
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/rubenv/sql-migrate v1.8.1 h1:EPNwCvjAowHI3TnZ+4fQu3a915OpnQoPAjTXCGOy2U0=
 github.com/rubenv/sql-migrate v1.8.1/go.mod h1:BTIKBORjzyxZDS6dzoiw6eAFYJ1iNlGAtjn4LGeVjS8=
-github.com/russellhaering/gosaml2 v0.10.0 h1:z7JTpKmC4JVG94tvSQz4lszUdKLt+uy5c6lEkhdEz3Y=
-github.com/russellhaering/gosaml2 v0.10.0/go.mod h1:XLwI/5aWV4E2X9p+qj6LgRwiYGv2nh4YS6pQBGlQ0Cc=
-github.com/russellhaering/goxmldsig v1.5.0 h1:AU2UkkYIUOTyZRbe08XMThaOCelArgvNfYapcmSjBNw=
-github.com/russellhaering/goxmldsig v1.5.0/go.mod h1:x98CjQNFJcWfMxeOrMnMKg70lvDP6tE0nTaeUnjXDmk=
+github.com/russellhaering/gosaml2 v0.11.0 h1:wlWm7dWMrpJBzh0xEOZof70nVen4f/2BEF8ZXaidJ9o=
+github.com/russellhaering/gosaml2 v0.11.0/go.mod h1:GmL5LeCP7PBYzSkkFxtmHuRzC2eUZ/6JSLYQd5fzKK4=
+github.com/russellhaering/goxmldsig v1.6.0 h1:8fdWXEPh2k/NZNQBPFNoVfS3JmzS4ZprY/sAOpKQLks=
+github.com/russellhaering/goxmldsig v1.6.0/go.mod h1:TrnaquDcYxWXfJrOjeMBTX4mLBeYAqaHEyUeWPxZlBM=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 h1:KRzFb2m7YtdldCEkzs6KqmJw4nqEVZGK7IN2kJkjTuQ=
