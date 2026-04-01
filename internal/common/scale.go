@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
@@ -13,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -23,7 +23,7 @@ import (
 func runScale(autoScalingSupported bool) {
 	Context("scale", func() {
 		var (
-			helmRelease  *helm.HelmRelease
+			helmRelease  *unstructured.Unstructured
 			wcClient     *client.Client
 			replicaCount int
 		)
@@ -65,7 +65,7 @@ func runScale(autoScalingSupported bool) {
 			err = ensureTestHelmRepository(ctx, state.GetFramework().MC(), namespace)
 			Expect(err).To(BeNil())
 
-			helmRelease, err = newTestHelmRelease(
+			helmRelease = newTestHelmRelease(
 				fmt.Sprintf("%s-scale-hello-world", clusterName),
 				namespace,
 				"hello-world",
@@ -74,14 +74,13 @@ func runScale(autoScalingSupported bool) {
 				clusterName,
 				values,
 			)
-			Expect(err).To(BeNil())
 
 			err = state.GetFramework().MC().Create(ctx, helmRelease)
 			Expect(err).To(BeNil())
 
 			Eventually(isHelmReleaseReady(ctx, state.GetFramework().MC(), types.NamespacedName{
-				Name:      helmRelease.Name,
-				Namespace: helmRelease.Namespace,
+				Name:      helmRelease.GetName(),
+				Namespace: helmRelease.GetNamespace(),
 			})).
 				WithTimeout(5 * time.Minute).
 				WithPolling(5 * time.Second).
@@ -159,7 +158,7 @@ func runScale(autoScalingSupported bool) {
 			err := state.GetFramework().MC().Delete(ctx, helmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestHelmRepository(ctx, state.GetFramework().MC(), helmRelease.Namespace)
+			err = deleteTestHelmRepository(ctx, state.GetFramework().MC(), helmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})

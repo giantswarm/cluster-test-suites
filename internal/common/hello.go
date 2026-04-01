@@ -8,7 +8,6 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v4/pkg/application"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
@@ -18,6 +17,7 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	networkingv1 "k8s.io/api/networking/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -29,7 +29,7 @@ func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", Ordered, func() {
 		var (
 			nginxApp              *application.Application
-			helloHelmRelease      *helm.HelmRelease
+			helloHelmRelease      *unstructured.Unstructured
 			helloWorldIngressHost string
 			helloWorldIngressUrl  string
 		)
@@ -130,7 +130,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			})
 			Expect(err).To(BeNil())
 
-			helloHelmRelease, err = newTestHelmRelease(
+			helloHelmRelease = newTestHelmRelease(
 				fmt.Sprintf("%s-hello-world", clusterName),
 				namespace,
 				"hello-world",
@@ -139,14 +139,13 @@ func runHelloWorld(externalDnsSupported bool) {
 				clusterName,
 				values,
 			)
-			Expect(err).To(BeNil())
 
 			err = state.GetFramework().MC().Create(state.GetContext(), helloHelmRelease)
 			Expect(err).To(BeNil())
 
 			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
-				Name:      helloHelmRelease.Name,
-				Namespace: helloHelmRelease.Namespace,
+				Name:      helloHelmRelease.GetName(),
+				Namespace: helloHelmRelease.GetNamespace(),
 			})).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
@@ -262,7 +261,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			err = state.GetFramework().MC().Delete(state.GetContext(), helloHelmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestHelmRepository(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.Namespace)
+			err = deleteTestHelmRepository(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})

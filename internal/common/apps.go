@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	helm "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -30,7 +28,7 @@ func RunApps(cfg *TestConfig) {
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helm.HelmReleaseList{}
+			helmReleaseList := newUnstructuredHelmReleaseList()
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -41,7 +39,7 @@ func RunApps(cfg *TestConfig) {
 
 			helmReleaseNamespacedNames := []types.NamespacedName{}
 			for _, hr := range helmReleaseList.Items {
-				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.Name, Namespace: hr.Namespace})
+				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
 			}
 
 			Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
@@ -199,7 +197,7 @@ func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleas
 	return func() error {
 		allReady := true
 		for _, hr := range helmReleases {
-			helmRelease := &helm.HelmRelease{}
+			helmRelease := newUnstructuredHelmRelease()
 			err := client.Get(ctx, hr, helmRelease)
 			if err != nil {
 				logger.Log("HelmRelease status for '%s' failed to retrieve: %v", hr.Name, err)
@@ -207,31 +205,14 @@ func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleas
 				continue
 			}
 
-			ready := false
-			readyCondition := ""
-			readyReason := ""
-			readyMessage := ""
-
-			for _, condition := range helmRelease.Status.Conditions {
-				if condition.Type == "Ready" {
-					if condition.Status == metav1.ConditionTrue {
-						ready = true
-					}
-					readyCondition = string(condition.Status)
-					readyReason = condition.Reason
-					readyMessage = condition.Message
-					break
-				}
-			}
-
+			ready, reason, message := getHelmReleaseReadyCondition(helmRelease)
 			if ready {
 				logger.Log("HelmRelease status for '%s' is as expected: expectedStatus='Ready' actualStatus='Ready'", hr.Name)
+			} else if reason != "" {
+				logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='%s' (reason: '%s')", hr.Name, reason, message)
+				allReady = false
 			} else {
-				if readyCondition == "" {
-					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='Unknown' (reason: 'No Ready condition found')", hr.Name)
-				} else {
-					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='%s' (reason: '%s - %s')", hr.Name, readyCondition, readyReason, readyMessage)
-				}
+				logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='Unknown' (reason: 'No Ready condition found')", hr.Name)
 				allReady = false
 			}
 		}
@@ -251,7 +232,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := &helm.HelmReleaseList{}
+		helmReleaseList := newUnstructuredHelmReleaseList()
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -259,16 +240,8 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 		}
 
 		for _, hr := range helmReleaseList.Items {
-			ready := false
-			for _, condition := range hr.Status.Conditions {
-				if condition.Type == "Ready" && condition.Status == metav1.ConditionTrue {
-					ready = true
-					break
-				}
-			}
-
+			ready, _, _ := getHelmReleaseReadyCondition(&hr)
 			if !ready {
-				// Get team label from labels
 				labels := hr.GetLabels()
 				if labels != nil {
 					if teamLabel, ok := labels["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {

@@ -3,20 +3,15 @@ package common
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"text/template"
-	"time"
 
-	helm "github.com/fluxcd/helm-controller/api/v2"
-	"github.com/fluxcd/pkg/apis/meta"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"gopkg.in/yaml.v3"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -25,6 +20,24 @@ const (
 	testHelmRepoName = "giantswarm-catalog-test"
 	testHelmRepoURL  = "https://giantswarm.github.io/giantswarm-catalog/"
 )
+
+var helmReleaseGVK = schema.GroupVersionKind{
+	Group:   "helm.toolkit.fluxcd.io",
+	Version: "v2",
+	Kind:    "HelmRelease",
+}
+
+func newUnstructuredHelmRelease() *unstructured.Unstructured {
+	hr := &unstructured.Unstructured{}
+	hr.SetGroupVersionKind(helmReleaseGVK)
+	return hr
+}
+
+func newUnstructuredHelmReleaseList() *unstructured.UnstructuredList {
+	list := &unstructured.UnstructuredList{}
+	list.SetGroupVersionKind(helmReleaseGVK.GroupVersion().WithKind("HelmReleaseList"))
+	return list
+}
 
 func ensureTestHelmRepository(ctx context.Context, c cr.Client, namespace string) error {
 	repo := &unstructured.Unstructured{
@@ -67,47 +80,47 @@ func deleteTestHelmRepository(ctx context.Context, c cr.Client, namespace string
 	return err
 }
 
-func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace, clusterName string, values map[string]interface{}) (*helm.HelmRelease, error) {
-	valuesJSON, err := json.Marshal(values)
-	if err != nil {
-		return nil, fmt.Errorf("marshalling helm values: %w", err)
-	}
-
-	return &helm.HelmRelease{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: helm.HelmReleaseSpec{
-			Interval:        metav1.Duration{Duration: 1 * time.Minute},
-			ReleaseName:      releaseName,
-			TargetNamespace:  targetNamespace,
-			StorageNamespace: targetNamespace,
-			Chart: &helm.HelmChartTemplate{
-				Spec: helm.HelmChartTemplateSpec{
-					Chart:   chartName,
-					Version: "*",
-					SourceRef: helm.CrossNamespaceObjectReference{
-						Kind: "HelmRepository",
-						Name: testHelmRepoName,
+func newTestHelmRelease(name, namespace, chartName, releaseName, targetNamespace, clusterName string, values map[string]interface{}) *unstructured.Unstructured {
+	hr := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "helm.toolkit.fluxcd.io/v2",
+			"kind":       "HelmRelease",
+			"metadata": map[string]interface{}{
+				"name":      name,
+				"namespace": namespace,
+			},
+			"spec": map[string]interface{}{
+				"interval":         "1m",
+				"releaseName":      releaseName,
+				"targetNamespace":  targetNamespace,
+				"storageNamespace": targetNamespace,
+				"chart": map[string]interface{}{
+					"spec": map[string]interface{}{
+						"chart":   chartName,
+						"version": "*",
+						"sourceRef": map[string]interface{}{
+							"kind": "HelmRepository",
+							"name": testHelmRepoName,
+						},
 					},
 				},
-			},
-			KubeConfig: &meta.KubeConfigReference{
-				SecretRef: &meta.SecretKeyReference{
-					Name: fmt.Sprintf("%s-kubeconfig", clusterName),
-					Key:  "value",
+				"kubeConfig": map[string]interface{}{
+					"secretRef": map[string]interface{}{
+						"name": fmt.Sprintf("%s-kubeconfig", clusterName),
+						"key":  "value",
+					},
 				},
-			},
-			Install: &helm.Install{
-				CreateNamespace: true,
-				Remediation: &helm.InstallRemediation{
-					Retries: 5,
+				"install": map[string]interface{}{
+					"createNamespace": true,
+					"remediation": map[string]interface{}{
+						"retries": int64(5),
+					},
 				},
+				"values": values,
 			},
-			Values: &apiextensionsv1.JSON{Raw: valuesJSON},
 		},
-	}, nil
+	}
+	return hr
 }
 
 // HelmReleaseTemplateValues holds the template variables for HelmRelease values files.
@@ -142,26 +155,49 @@ func parseValuesFile(path string, templateValues *HelmReleaseTemplateValues) (ma
 	return values, nil
 }
 
+// isHelmReleaseReady returns a function that checks if a HelmRelease has a Ready=True condition.
 func isHelmReleaseReady(ctx context.Context, c cr.Client, name types.NamespacedName) func() (bool, error) {
 	return func() (bool, error) {
-		hr := &helm.HelmRelease{}
+		hr := newUnstructuredHelmRelease()
 		err := c.Get(ctx, name, hr)
 		if err != nil {
 			return false, err
 		}
 
-		for _, condition := range hr.Status.Conditions {
-			if condition.Type == "Ready" {
-				if condition.Status == metav1.ConditionTrue {
-					logger.Log("HelmRelease '%s' is Ready", name.Name)
-					return true, nil
-				}
-				logger.Log("HelmRelease '%s' not yet ready: %s - %s", name.Name, condition.Reason, condition.Message)
-				return false, nil
-			}
+		ready, reason, message := getHelmReleaseReadyCondition(hr)
+		switch {
+		case ready:
+			logger.Log("HelmRelease '%s' is Ready", name.Name)
+			return true, nil
+		case reason != "":
+			logger.Log("HelmRelease '%s' not yet ready: %s - %s", name.Name, reason, message)
+		default:
+			logger.Log("HelmRelease '%s' has no Ready condition yet", name.Name)
 		}
-
-		logger.Log("HelmRelease '%s' has no Ready condition yet", name.Name)
 		return false, nil
 	}
+}
+
+// getHelmReleaseReadyCondition extracts the Ready condition from an unstructured HelmRelease.
+func getHelmReleaseReadyCondition(hr *unstructured.Unstructured) (ready bool, reason, message string) {
+	conditions, found, err := unstructured.NestedSlice(hr.Object, "status", "conditions")
+	if err != nil || !found {
+		return false, "", ""
+	}
+
+	for _, c := range conditions {
+		condition, ok := c.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		condType, _ := condition["type"].(string)
+		if condType != "Ready" {
+			continue
+		}
+		status, _ := condition["status"].(string)
+		reason, _ = condition["reason"].(string)
+		message, _ = condition["message"].(string)
+		return status == "True", reason, message
+	}
+	return false, "", ""
 }
