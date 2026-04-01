@@ -121,7 +121,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 
 			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
-			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
+			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world-app")
 			Expect(err).To(BeNil())
 
 			values, err := parseValuesFile("./test_data/helloworld_values.yaml", &HelmReleaseTemplateValues{

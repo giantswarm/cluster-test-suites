@@ -64,7 +64,7 @@ func runScale(autoScalingSupported bool) {
 			Expect(err).To(BeNil())
 
 			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
-			err = ensureTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
+			err = ensureTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world-app")
 			Expect(err).To(BeNil())
 
 			helmRelease = newTestHelmRelease(

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	testOCIRegistryURL = "oci://giantswarmpublic.azurecr.io/giantswarm-catalog"
+	testOCIRegistryURL = "oci://gsoci.azurecr.io/charts/giantswarm"
 )
 
 var helmReleaseGVK = schema.GroupVersionKind{
