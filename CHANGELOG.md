@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Enable autoscaling tests for CAPZ (Azure) provider.
+
 ## [6.1.0] - 2026-03-19
 
 ### Changed
