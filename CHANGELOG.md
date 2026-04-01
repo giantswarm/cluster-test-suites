@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Switch hello-world and scale-hello-world tests from App CR to HelmRelease to avoid values-schema-violation errors caused by chart-operator injecting additional properties.
+
 ## [6.1.0] - 2026-03-19
 
 ### Changed

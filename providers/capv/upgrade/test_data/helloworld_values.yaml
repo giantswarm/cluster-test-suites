@@ -1,5 +1,3 @@
-clusterName: {{ .ClusterName }}
-organization: {{ .Organization }}
 ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
