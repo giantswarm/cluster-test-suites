@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enable Team Tenet apps (cert-exporter, cluster-autoscaler, node-exporter, VPA, VPA CRD) in EKS standard test suite.
 - Enable autoscaling test for EKS standard suite.
 
+## [6.2.0] - 2026-04-01
+
+### Changed
+
+- Switch hello-world and scale-hello-world tests from App CR to HelmRelease to avoid values-schema-violation errors caused by chart-operator injecting additional properties.
+
 ## [6.1.0] - 2026-03-19
 
 ### Changed
@@ -1376,7 +1382,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.2.0...HEAD
+[6.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...v5.0.0
