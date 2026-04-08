@@ -10,6 +10,8 @@ cluster:
         enable: true
       coreDns:
         enable: true
+      networkPolicies:
+        enable: true
       observabilityBundle:
         enable: true
       securityBundle:
