@@ -1,5 +1,5 @@
 FROM curlimages/curl:latest AS crust-gather
-ARG CRUST_GATHER_VERSION=0.13.0
+ARG CRUST_GATHER_VERSION=0.13.1
 RUN curl -sSfL "https://github.com/crust-gather/crust-gather/releases/download/v${CRUST_GATHER_VERSION}/kubectl-crust-gather_${CRUST_GATHER_VERSION}_linux_amd64.tar.gz" \
     | tar -xz -C /tmp
 

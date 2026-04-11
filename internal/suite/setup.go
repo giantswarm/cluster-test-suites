@@ -365,12 +365,6 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	args = append(args, extraArgs...)
 
 	cmd := exec.CommandContext(ctx, "crust-gather", args...)
-	// Clear proxy env vars — crust-gather doesn't support HTTP proxies and will
-	// fail if these are set (the Tekton task sets them for VPN connectivity).
-	cmd.Env = append(os.Environ(),
-		"HTTP_PROXY=", "HTTPS_PROXY=", "NO_PROXY=",
-		"http_proxy=", "https_proxy=", "no_proxy=",
-	)
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
 
