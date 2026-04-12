@@ -357,12 +357,16 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
 	// The default path (./crust-gather) is inside /app which is read-only in the container
 	// image. We use /tmp which is writable.
+	// We exclude Node resources because crust-gather unconditionally creates privileged
+	// debug pods for node log collection, which Kyverno blocks. The debug pod retries
+	// consume the entire collection budget, preventing the OCI push from completing.
 	args := []string{
 		"collect",
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
 		"-f", fmt.Sprintf("/tmp/crust-gather-%s", strings.ToLower(label)),
+		"--exclude-kind", "Node",
 	}
 
 	if username != "" && password != "" {
