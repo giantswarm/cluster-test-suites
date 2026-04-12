@@ -278,7 +278,7 @@ func collectCrustGatherSnapshots() {
 	username := os.Getenv("CRUST_GATHER_REGISTRY_USERNAME")
 	password := os.Getenv("CRUST_GATHER_REGISTRY_PASSWORD")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()
 
 	// Collect workload cluster snapshot (full cluster).
@@ -349,11 +349,15 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
+	// crust-gather writes collected resources to a local directory before pushing to OCI.
+	// The default path (./crust-gather) is inside /app which is read-only in the container
+	// image. We use /tmp which is writable.
 	args := []string{
 		"collect",
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "3m",
+		"-f", fmt.Sprintf("/tmp/crust-gather-%s", strings.ToLower(label)),
 	}
 
 	if username != "" && password != "" {
