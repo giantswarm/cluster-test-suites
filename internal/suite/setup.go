@@ -278,14 +278,15 @@ func collectCrustGatherSnapshots() {
 	username := os.Getenv("CRUST_GATHER_REGISTRY_USERNAME")
 	password := os.Getenv("CRUST_GATHER_REGISTRY_PASSWORD")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	defer cancel()
-
 	// Collect workload cluster snapshot (full cluster).
 	// Read the CAPI kubeconfig secret directly (not Teleport) to avoid proxy/auth
 	// issues that crust-gather can't handle.
+	// Each cluster gets its own context for the kubeconfig read, since the MC client
+	// may be rate-limited after the test suite and a shared context could starve the second read.
 	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, clusterName)
-	if wcKubeconfigPath, err := writeCAPIKubeconfig(ctx, clusterName, clusterNamespace); err != nil {
+	wcCtx, wcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer wcCancel()
+	if wcKubeconfigPath, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
 		logger.Log("crust-gather: failed to get WC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(wcKubeconfigPath)
@@ -299,7 +300,9 @@ func collectCrustGatherSnapshots() {
 	mcName := state.GetFramework().MC().GetClusterName()
 	mcName = strings.TrimPrefix(mcName, "teleport.giantswarm.io-")
 	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, clusterName)
-	if mcKubeconfigPath, err := writeCAPIKubeconfig(ctx, mcName, "org-giantswarm"); err != nil {
+	mcCtx, mcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer mcCancel()
+	if mcKubeconfigPath, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
 		logger.Log("crust-gather: failed to get MC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(mcKubeconfigPath)
@@ -346,7 +349,9 @@ func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (st
 func runCrustGather(label, kubeconfig, reference, username, password string, extraArgs ...string) {
 	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	// The command timeout (8m) must be larger than the collection duration (5m)
+	// to allow time for the OCI push after collection finishes.
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Minute)
 	defer cancel()
 
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
@@ -356,7 +361,7 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 		"collect",
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
-		"--duration", "3m",
+		"--duration", "5m",
 		"-f", fmt.Sprintf("/tmp/crust-gather-%s", strings.ToLower(label)),
 	}
 
