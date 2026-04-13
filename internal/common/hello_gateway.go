@@ -17,6 +17,7 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
@@ -28,12 +29,13 @@ import (
 func runHelloWorldGateway(gatewayAPISupported bool) {
 	Context("hello world via gateway api", Ordered, func() {
 		var (
-			awsLBControllerApp *application.Application
-			gatewayAPIApp      *application.Application
-			helloApp           *application.Application
-			helloWorldHost     string
-			helloWorldUrl      string
-			awsLBDeployed      bool
+			awsLBControllerApp  *application.Application
+			gatewayAPIApp       *application.Application
+			helloHelmRelease    *unstructured.Unstructured
+			ociRepoName         string
+			helloWorldHost      string
+			helloWorldUrl       string
+			awsLBDeployed       bool
 		)
 
 		const (
@@ -214,28 +216,41 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 
 		It("should deploy hello-world app with HTTPRoute", func() {
 			org := state.GetCluster().Organization
+			clusterName := state.GetCluster().Name
+			namespace := org.GetNamespace()
 			helloWorldHost = fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone())
 			helloWorldUrl = fmt.Sprintf("https://%s", helloWorldHost)
 
-			helloApp = application.New(fmt.Sprintf("%s-hello-world-gateway", state.GetCluster().Name), "hello-world").
-				WithCatalog("giantswarm").
-				WithOrganization(*org).
-				WithVersion("latest").
-				WithClusterName(state.GetCluster().Name).
-				WithInCluster(false).
-				WithInstallNamespace("giantswarm").
-				MustWithValuesFile("./test_data/helloworld_route_values.yaml", &application.TemplateValues{
-					ClusterName: state.GetCluster().Name,
-					ExtraValues: map[string]string{"IngressUrl": helloWorldHost},
-				})
-
-			err := state.GetFramework().MC().DeployApp(state.GetContext(), *helloApp)
+			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
+			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
 			Expect(err).To(BeNil())
 
-			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.InstallName, helloApp.GetNamespace())).
+			values, err := parseValuesFile("./test_data/helloworld_route_values.yaml", &HelmReleaseTemplateValues{
+				ClusterName: clusterName,
+				ExtraValues: map[string]string{"IngressUrl": helloWorldHost},
+			})
+			Expect(err).To(BeNil())
+
+			helloHelmRelease = newTestHelmRelease(
+				fmt.Sprintf("%s-hello-world-gateway", clusterName),
+				namespace,
+				"hello-world",
+				"giantswarm",
+				clusterName,
+				ociRepoName,
+				values,
+			)
+
+			err = state.GetFramework().MC().Create(state.GetContext(), helloHelmRelease)
+			Expect(err).To(BeNil())
+
+			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
+				Name:      helloHelmRelease.GetName(),
+				Namespace: helloHelmRelease.GetNamespace(),
+			})).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' gateway App is not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' gateway HelmRelease is not ready"))
 		})
 
 		It("HTTPRoute should be accepted by gateway", func() {
@@ -310,8 +325,11 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 		})
 
 		It("uninstall apps", func() {
-			if helloApp != nil {
-				err := state.GetFramework().MC().DeleteApp(state.GetContext(), *helloApp)
+			if helloHelmRelease != nil {
+				err := state.GetFramework().MC().Delete(state.GetContext(), helloHelmRelease)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, helloHelmRelease.GetNamespace())
 				Expect(err).ShouldNot(HaveOccurred())
 			}
 			if gatewayAPIApp != nil {
