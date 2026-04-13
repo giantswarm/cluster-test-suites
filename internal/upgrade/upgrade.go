@@ -266,6 +266,12 @@ func Run(cfg *TestConfig) {
 			_, err = state.GetFramework().ApplyBuiltCluster(applyCtx, builtCluster)
 			Expect(err).NotTo(HaveOccurred())
 
+			// Signal to the App-vs-HelmRelease version helper that subsequent
+			// assertions should consult env.ReleaseVersion (the "to" version)
+			// rather than env.ReleasePreUpgradeVersion. See
+			// internal/common/release_version.go.
+			common.MarkUpgradeApplied()
+
 			Eventually(
 				wait.IsAppVersion(state.GetContext(), state.GetFramework().MC(), builtCluster.Cluster.App.Name, builtCluster.Cluster.App.Namespace, builtCluster.Cluster.App.Spec.Version),
 				10*time.Minute, 5*time.Second,

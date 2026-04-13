@@ -24,6 +24,10 @@ import (
 func RunApps(cfg *TestConfig) {
 	Context("default apps and helm releases", func() {
 		It("all HelmReleases are deployed without issues", func() {
+			if !UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release does not use HelmRelease-based default apps; the App-CR assertion covers this release.")
+			}
+
 			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
@@ -57,6 +61,10 @@ func RunApps(cfg *TestConfig) {
 		})
 
 		It("all default apps are deployed without issues", func() {
+			if UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release deploys default apps as HelmReleases; the HelmRelease assertion covers this release.")
+			}
+
 			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
 			logger.Log("Waiting for all apps to be deployed. Timeout: %s", timeout.String())
 			logger.Log("Checking default apps deployed from the unified %s app.", state.GetCluster().ClusterApp.AppName)
@@ -89,6 +97,9 @@ func RunApps(cfg *TestConfig) {
 			if !cfg.ObservabilityBundleInstalled {
 				Skip("observability-bundle is not installed")
 			}
+			if UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release deploys default apps as HelmReleases; the HelmRelease observability-bundle assertion covers this release.")
+			}
 
 			helper.SetResponsibleTeam(helper.TeamAtlas)
 
@@ -119,11 +130,28 @@ func RunApps(cfg *TestConfig) {
 					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
+
+		It("all observability-bundle HelmReleases are deployed without issues", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("observability-bundle is not installed")
+			}
+			if !UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release deploys default apps as App CRs; the App-CR observability-bundle assertion covers this release.")
+			}
+
+			helper.SetResponsibleTeam(helper.TeamAtlas)
+
+			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
+			waitForBundleHelmReleases(parent, 8*time.Minute)
+		})
 	})
 	Context("security-bundle apps", func() {
 		It("all security-bundle apps are deployed without issues", func() {
 			if !cfg.SecurityBundleInstalled {
 				Skip("security-bundle is not installed")
+			}
+			if UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release deploys default apps as HelmReleases; the HelmRelease security-bundle assertion covers this release.")
 			}
 
 			helper.SetResponsibleTeam(helper.TeamShield)
@@ -155,7 +183,58 @@ func RunApps(cfg *TestConfig) {
 					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
+
+		It("all security-bundle HelmReleases are deployed without issues", func() {
+			if !cfg.SecurityBundleInstalled {
+				Skip("security-bundle is not installed")
+			}
+			if !UsesHelmReleaseBasedDefaultApps() {
+				Skip("Release deploys default apps as App CRs; the App-CR security-bundle assertion covers this release.")
+			}
+
+			helper.SetResponsibleTeam(helper.TeamShield)
+
+			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
+			waitForBundleHelmReleases(parent, 10*time.Minute)
+		})
 	})
+}
+
+// waitForBundleHelmReleases waits for the named parent bundle HelmRelease to be
+// Ready and then for all its child HelmReleases (selected by the
+// giantswarm.io/managed-by=<parent> label, same convention as the App-CR
+// variant) to be Ready too. childrenTimeout bounds the children's wait; the
+// parent uses the shared BundleApps timeout (default 90s) to match the
+// App-based sibling's behaviour.
+func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration) {
+	mc := state.GetFramework().MC()
+	org := state.GetCluster().Organization.GetNamespace()
+
+	parentTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+	Eventually(WaitHelmReleaseReady(state.GetContext(), mc, parentName, org)).
+		WithTimeout(parentTimeout).
+		WithPolling(5 * time.Second).
+		Should(BeTrue())
+
+	helmReleaseList := newUnstructuredHelmReleaseList()
+	err := mc.List(state.GetContext(), helmReleaseList, ctrl.InNamespace(org), ctrl.MatchingLabels{"giantswarm.io/managed-by": parentName})
+	Expect(err).NotTo(HaveOccurred())
+
+	children := make([]types.NamespacedName, 0, len(helmReleaseList.Items))
+	for _, hr := range helmReleaseList.Items {
+		children = append(children, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
+	}
+
+	Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), mc, children), 5, 10*time.Second)).
+		WithTimeout(childrenTimeout).
+		WithPolling(10*time.Second).
+		Should(
+			Succeed(),
+			failurehandler.Bundle(
+				failurehandler.HelmReleasesNotReady(state.GetFramework(), state.GetCluster()),
+				reportHelmReleaseOwningTeams(),
+			),
+		)
 }
 
 func getDefaultAppsSelector() ctrl.MatchingLabels {

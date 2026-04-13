@@ -7,7 +7,9 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 	"gopkg.in/yaml.v3"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -172,6 +174,29 @@ func isHelmReleaseReady(ctx context.Context, c cr.Client, name types.NamespacedN
 		}
 		return false, nil
 	}
+}
+
+// WaitHelmReleaseReady returns a WaitCondition that polls the named HelmRelease
+// and becomes true when its Ready condition is True. The signature mirrors
+// wait.IsAppDeployed so call-sites can swap between App CRs and HelmReleases
+// cleanly.
+func WaitHelmReleaseReady(ctx context.Context, c cr.Client, name, namespace string) wait.WaitCondition {
+	return isHelmReleaseReady(ctx, c, types.NamespacedName{Name: name, Namespace: namespace})
+}
+
+// WaitDefaultAppReady returns a WaitCondition for a single default app (e.g.
+// cert-manager, external-dns, ingress-nginx), selecting the right CR kind
+// based on the current release version:
+//   - HelmRelease for releases >= helmReleaseAppsSinceRelease (including all
+//     v35.0.0 prereleases),
+//   - App CR for older releases.
+//
+// Signature matches wait.IsAppDeployed(ctx, client, name, namespace).
+func WaitDefaultAppReady(ctx context.Context, c *client.Client, name, namespace string) wait.WaitCondition {
+	if UsesHelmReleaseBasedDefaultApps() {
+		return WaitHelmReleaseReady(ctx, c, name, namespace)
+	}
+	return wait.IsAppDeployed(ctx, c, name, namespace)
 }
 
 // getHelmReleaseReadyCondition extracts the Ready condition from an unstructured HelmRelease.
