@@ -3,3 +3,4 @@ CVE-2025-47291 until=2026-05-02 # github.com/containerd/containerd@v1.7.30
 CVE-2026-33186 until=2026-04-19 # google.golang.org/grpc@v1.79.1
 CVE-2026-33487 until=2026-04-22 # github.com/russellhaering/goxmldsig@v1.5.0
 CVE-2026-39883 until=2026-05-10 # go.opentelemetry.io/otel/sdk@v1.42.0
+CVE-2026-35206 until=2026-05-13 # helm.sh/helm/v3@v3.20.0
