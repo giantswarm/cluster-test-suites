@@ -420,14 +420,24 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	defer cancel()
 
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
-	// The default path (./crust-gather) is inside /app which is read-only in the container
-	// image. We use /tmp which is writable.
+	// The path we pass to -f becomes the layer path prefix in the OCI image (e.g.,
+	// "-f /tmp/crust-gather-wc" results in layer titles like "/tmp/crust-gather-wc/api.json").
+	// However, `crust-gather serve --reference` expects layer titles starting with the default
+	// archive name "crust-gather/". To keep both the writable location and the expected layer
+	// prefix, we create a unique tmpdir and run crust-gather with that dir as the cwd while
+	// omitting -f, so it writes to "$tmpDir/crust-gather/" and pushes layers as "crust-gather/*".
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", strings.ToLower(label)))
+	if err != nil {
+		logger.Log("crust-gather: %s failed to create temp dir: %v", label, err)
+		return
+	}
+	defer os.RemoveAll(tmpDir)
+
 	args := []string{
 		"collect",
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
-		"-f", fmt.Sprintf("/tmp/crust-gather-%s", strings.ToLower(label)),
 	}
 
 	if username != "" && password != "" {
@@ -437,6 +447,7 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	args = append(args, extraArgs...)
 
 	cmd := exec.CommandContext(ctx, "crust-gather", args...)
+	cmd.Dir = tmpDir
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
 
