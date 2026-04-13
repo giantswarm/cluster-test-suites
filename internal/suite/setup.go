@@ -29,6 +29,8 @@ import (
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -290,6 +292,7 @@ func collectCrustGatherSnapshots() {
 		logger.Log("crust-gather: failed to get WC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(wcKubeconfigPath)
+		applyCrustGatherPolicyException(wcCtx, clusterName)
 		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password)
 	}
 
@@ -306,8 +309,13 @@ func collectCrustGatherSnapshots() {
 		logger.Log("crust-gather: failed to get MC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(mcKubeconfigPath)
+		// For the MC, we exclude Node resources because --include-namespace doesn't
+		// filter out cluster-scoped resources. Without this, crust-gather would try
+		// to create debug pods on the MC (blocked by Kyverno), and we don't want to
+		// maintain a permanent PolicyException on the long-lived MC.
 		runCrustGather("MC", mcKubeconfigPath, mcReference, username, password,
-			"--include-namespace", clusterNamespace)
+			"--include-namespace", clusterNamespace,
+			"--exclude-kind", "Node")
 	}
 }
 
@@ -344,6 +352,63 @@ func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (st
 	return f.Name(), nil
 }
 
+// applyCrustGatherPolicyException creates a Kyverno PolicyException on the workload cluster
+// so that crust-gather's privileged debug pods (used for node log collection) are allowed
+// despite the cluster's pod security policies. This is best-effort: if Kyverno isn't
+// installed or the apply fails, we log and continue. Without the exception, debug pod
+// creation fails but the rest of the resource collection still works.
+func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) {
+	wcClient, err := state.GetFramework().WC(wcClusterName)
+	if err != nil {
+		logger.Log("crust-gather: failed to get WC client for policy exception: %v", err)
+		return
+	}
+
+	policyException := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "kyverno.io/v2",
+			"kind":       "PolicyException",
+			"metadata": map[string]interface{}{
+				"name":      "crust-gather-debug-pods",
+				"namespace": "policy-exceptions",
+			},
+			"spec": map[string]interface{}{
+				"exceptions": []interface{}{
+					map[string]interface{}{"policyName": "disallow-capabilities-strict", "ruleNames": []interface{}{"require-drop-all"}},
+					map[string]interface{}{"policyName": "disallow-host-namespaces", "ruleNames": []interface{}{"host-namespaces"}},
+					map[string]interface{}{"policyName": "disallow-host-path", "ruleNames": []interface{}{"host-path"}},
+					map[string]interface{}{"policyName": "disallow-privilege-escalation", "ruleNames": []interface{}{"privilege-escalation"}},
+					map[string]interface{}{"policyName": "require-run-as-nonroot", "ruleNames": []interface{}{"run-as-non-root"}},
+					map[string]interface{}{"policyName": "restrict-seccomp-strict", "ruleNames": []interface{}{"check-seccomp-strict"}},
+					map[string]interface{}{"policyName": "restrict-volume-types", "ruleNames": []interface{}{"restricted-volumes"}},
+				},
+				"match": map[string]interface{}{
+					"any": []interface{}{
+						map[string]interface{}{
+							"resources": map[string]interface{}{
+								"kinds":      []interface{}{"Pod"},
+								"namespaces": []interface{}{"default"},
+								"names":      []interface{}{"node-debug-*"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	policyException.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "kyverno.io",
+		Version: "v2",
+		Kind:    "PolicyException",
+	})
+
+	if err := wcClient.Create(ctx, policyException); err != nil && !apierror.IsAlreadyExists(err) {
+		logger.Log("crust-gather: failed to create Kyverno PolicyException (debug pod collection may be blocked): %v", err)
+		return
+	}
+	logger.Log("crust-gather: applied Kyverno PolicyException for debug pods on WC")
+}
+
 // runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry.
 // Errors are logged but do not cause the test suite to fail.
 func runCrustGather(label, kubeconfig, reference, username, password string, extraArgs ...string) {
@@ -357,16 +422,12 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
 	// The default path (./crust-gather) is inside /app which is read-only in the container
 	// image. We use /tmp which is writable.
-	// We exclude Node resources because crust-gather unconditionally creates privileged
-	// debug pods for node log collection, which Kyverno blocks. The debug pod retries
-	// consume the entire collection budget, preventing the OCI push from completing.
 	args := []string{
 		"collect",
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
 		"-f", fmt.Sprintf("/tmp/crust-gather-%s", strings.ToLower(label)),
-		"--exclude-kind", "Node",
 	}
 
 	if username != "" && password != "" {
