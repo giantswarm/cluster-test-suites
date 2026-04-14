@@ -122,7 +122,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithOrganization(*org).
 				WithVersion("latest").
 				WithClusterName(state.GetCluster().Name).
-				WithInCluster(false).
+				WithInCluster(true).
 				WithInstallNamespace(org.GetNamespace()).
 				MustWithValuesFile("./test_data/gateway-api-bundle_values.yaml", &application.TemplateValues{
 					ClusterName: state.GetCluster().Name,
