@@ -78,7 +78,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithOrganization(*org).
 				WithVersion("latest").
 				WithClusterName(state.GetCluster().Name).
-				WithInCluster(false).
+				WithInCluster(true).
 				WithInstallNamespace(org.GetNamespace()).
 				MustWithValuesFile(awsLBValuesFile, &application.TemplateValues{
 					ClusterName: state.GetCluster().Name,
