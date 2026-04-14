@@ -87,14 +87,27 @@ func releaseVersionIsHelmReleaseBased(raw string) bool {
 		return false
 	}
 
-	// Some callers/env values include a leading "v". semver.NewVersion accepts
-	// that, but Release versions sometimes also carry a provider prefix like
-	// "aws-v1.2.3" — we don't support that here and fall through to false.
-	v, err := semver.NewVersion(strings.TrimPrefix(raw, "v"))
+	v, err := semver.NewVersion(stripProviderPrefix(raw))
 	if err != nil {
 		logger.Log("Could not parse release version %q as semver; treating as App-CR based: %v", raw, err)
 		return false
 	}
 
 	return !v.LessThan(cutover)
+}
+
+// stripProviderPrefix removes a leading non-digit provider prefix (e.g.
+// "aws-", "cloud-director-") from a release version string. GiantSwarm
+// Release versions are often formatted as "<provider>-<semver>", for example
+// "aws-35.0.0-t.umz0zjc0xx". This function finds the first digit and returns
+// everything from that position onward, so that the remainder is parseable as
+// semver. A leading "v" (as in "v35.0.0") is also handled since the digit
+// scan starts after it.
+func stripProviderPrefix(raw string) string {
+	for i, c := range raw {
+		if c >= '0' && c <= '9' {
+			return raw[i:]
+		}
+	}
+	return raw
 }

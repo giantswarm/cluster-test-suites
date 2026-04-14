@@ -28,6 +28,13 @@ func TestReleaseVersionIsHelmReleaseBased(t *testing.T) {
 		{"v35.0.0", true},
 		{"35.1.0", true},
 		{"36.1.0", true},
+
+		// Provider-prefixed versions (e.g. "aws-35.0.0-t.umz0zjc0xx").
+		{"aws-35.0.0-t.umz0zjc0xx", true},
+		{"aws-34.9.0", false},
+		{"azure-35.0.0", true},
+		{"cloud-director-35.1.0-abc", true},
+		{"vsphere-34.0.0", false},
 	}
 
 	for _, tc := range tests {
