@@ -24,10 +24,6 @@ import (
 func RunApps(cfg *TestConfig) {
 	Context("default apps and helm releases", func() {
 		It("all HelmReleases are deployed without issues", func() {
-			if !UsesHelmReleaseBasedDefaultApps() {
-				Skip("Release does not use HelmRelease-based default apps; the App-CR assertion covers this release.")
-			}
-
 			timeout := state.GetTestTimeout(timeout.DeployApps, 15*time.Minute)
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
