@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for `capmox` provider tests (disabled by default).
+
 ## [6.2.0] - 2026-04-01
 
 ### Changed

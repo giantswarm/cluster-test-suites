@@ -240,6 +240,10 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 		if provider == "capvcd" {
 			return "cloud-director", nil
 		}
+		// The CAPMOX test suite has a different provider name.
+		if provider == "capmox" {
+			return "proxmox", nil
+		}
 		return provider, nil
 	}
 
