@@ -1,6 +1,11 @@
+managementCluster:
+  name: {{ .ExtraValues.Installation }}
+  namespace: org-giantswarm
+
+provider: aws
+
 clusterName: {{ .ClusterName }}
 clusterID: {{ .ClusterName }}
-provider: capa
 global:
   podSecurityStandards:
     enforced: true

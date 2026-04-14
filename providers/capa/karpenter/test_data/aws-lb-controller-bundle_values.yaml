@@ -1,3 +1,7 @@
+managementCluster:
+  name: {{ .ExtraValues.Installation }}
+  namespace: org-giantswarm
+
 clusterName: {{ .ClusterName }}
 clusterID: {{ .ClusterName }}
 provider: capa

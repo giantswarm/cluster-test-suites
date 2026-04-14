@@ -82,6 +82,9 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithInstallNamespace(org.GetNamespace()).
 				MustWithValuesFile(awsLBValuesFile, &application.TemplateValues{
 					ClusterName: state.GetCluster().Name,
+					ExtraValues: map[string]string{
+						"Installation": state.GetFramework().MC().GetClusterName(),
+					},
 				})
 
 			err := state.GetFramework().MC().DeployApp(state.GetContext(), *awsLBControllerApp)
