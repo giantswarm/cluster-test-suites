@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Enable Team Tenet apps (cert-exporter, cluster-autoscaler, node-exporter, VPA, VPA CRD) in EKS standard test suite.
+- Enable autoscaling test for EKS standard suite.
+
 ## [6.2.0] - 2026-04-01
 
 ### Changed

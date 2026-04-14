@@ -2,3 +2,28 @@
 global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e-eks
+cluster:
+  providerIntegration:
+    apps:
+      # Dependencies needed for Team Tenet apps
+      cilium:
+        enable: true
+      coreDns:
+        enable: true
+      networkPolicies:
+        enable: true
+      observabilityBundle:
+        enable: true
+      securityBundle:
+        enable: true
+      # Team Tenet apps
+      certExporter:
+        enable: true
+      clusterAutoscaler:
+        enable: true
+      nodeExporter:
+        enable: true
+      verticalPodAutoscaler:
+        enable: true
+      verticalPodAutoscalerCrd:
+        enable: true
