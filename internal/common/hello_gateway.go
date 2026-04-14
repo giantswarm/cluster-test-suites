@@ -16,11 +16,10 @@ import (
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
@@ -261,26 +260,41 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			Eventually(func() (bool, error) {
-				httpRoute := &gatewayv1.HTTPRoute{}
+				httpRoute := &unstructured.Unstructured{}
+				httpRoute.SetGroupVersionKind(schema.GroupVersionKind{
+					Group:   "gateway.networking.k8s.io",
+					Version: "v1",
+					Kind:    "HTTPRoute",
+				})
 				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: "hello-world", Namespace: "giantswarm"}, httpRoute)
 				if err != nil {
 					logger.Log("Failed to get HTTPRoute: %v", err)
 					return false, err
 				}
 
-				if len(httpRoute.Status.Parents) == 0 {
+				parents, found, err := unstructured.NestedSlice(httpRoute.Object, "status", "parents")
+				if err != nil || !found || len(parents) == 0 {
 					logger.Log("HTTPRoute has no parent status yet")
 					return false, nil
 				}
 
 				accepted := false
 				resolvedRefs := false
-				for _, condition := range httpRoute.Status.Parents[0].Conditions {
-					if condition.Type == "Accepted" && condition.Status == metav1.ConditionTrue {
-						accepted = true
-					}
-					if condition.Type == "ResolvedRefs" && condition.Status == metav1.ConditionTrue {
-						resolvedRefs = true
+				if parent, ok := parents[0].(map[string]interface{}); ok {
+					conditions, _, _ := unstructured.NestedSlice(parent, "conditions")
+					for _, c := range conditions {
+						condition, ok := c.(map[string]interface{})
+						if !ok {
+							continue
+						}
+						condType, _ := condition["type"].(string)
+						condStatus, _ := condition["status"].(string)
+						if condType == "Accepted" && condStatus == "True" {
+							accepted = true
+						}
+						if condType == "ResolvedRefs" && condStatus == "True" {
+							resolvedRefs = true
+						}
 					}
 				}
 
