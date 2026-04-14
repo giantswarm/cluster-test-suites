@@ -10,6 +10,7 @@ type TestConfig struct {
 	ObservabilityBundleInstalled bool
 	SecurityBundleInstalled      bool
 	GatewayAPISupported          bool
+	IngressNginxSupported        bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -23,6 +24,7 @@ func NewTestConfigWithDefaults() *TestConfig {
 		ObservabilityBundleInstalled: true,
 		SecurityBundleInstalled:      true,
 		GatewayAPISupported:          true,
+		IngressNginxSupported:        false,
 	}
 }
 
@@ -33,7 +35,7 @@ func Run(cfg *TestConfig) {
 	runDNS(cfg.BastionSupported)
 	runMetrics(cfg)
 	runTeleport(cfg.TeleportSupported)
-	runHelloWorld(cfg.ExternalDnsSupported)
+	runHelloWorld(cfg.ExternalDnsSupported && cfg.IngressNginxSupported)
 	runHelloWorldGateway(cfg.GatewayAPISupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
