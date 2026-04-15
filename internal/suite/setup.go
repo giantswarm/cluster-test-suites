@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 	"time"
@@ -28,17 +29,32 @@ import (
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
 	OpenAIAPIKeySecretNamespace = "giantswarm"
 	OpenAIAPIKeySecretName      = "openai-api-key"
+
+	CrustGatherRegistry   = "crustgatherci.azurecr.io"
+	CrustGatherRepository = "snapshots"
 )
+
+// hasFailures tracks whether any test spec has failed during the suite run.
+// Set by ReportAfterEach, checked in AfterSuite to trigger crust-gather collection.
+var hasFailures bool
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+	ReportAfterEach(func(report SpecReport) {
+		if report.Failed() {
+			hasFailures = true
+		}
+	})
+
 	BeforeSuite(func() {
 		logger.LogWriter = GinkgoWriter
 		state.SetContext(context.Background())
@@ -192,6 +208,9 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 			return
 		}
 
+		// TODO: temporarily always collect for testing, revert to `if hasFailures {` once validated
+		collectCrustGatherSnapshots()
+
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
 		ctx, _ = context.WithTimeout(ctx, 1*time.Hour) //nolint:govet
@@ -244,6 +263,207 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 	}
 
 	return "", fmt.Errorf("could not determine provider from package path: %s", pkgPath)
+}
+
+// collectCrustGatherSnapshots collects cluster state from both the workload cluster
+// and the management cluster using crust-gather, and pushes the snapshots to an OCI registry.
+// This is best-effort: failures are logged but do not block cluster cleanup.
+func collectCrustGatherSnapshots() {
+	if _, err := exec.LookPath("crust-gather"); err != nil {
+		logger.Log("crust-gather binary not found, skipping snapshot collection")
+		return
+	}
+
+	cluster := state.GetCluster()
+	clusterName := cluster.Name
+	clusterNamespace := cluster.GetNamespace()
+	username := os.Getenv("CRUST_GATHER_REGISTRY_USERNAME")
+	password := os.Getenv("CRUST_GATHER_REGISTRY_PASSWORD")
+
+	// Collect workload cluster snapshot (full cluster).
+	// Read the CAPI kubeconfig secret directly (not Teleport) to avoid proxy/auth
+	// issues that crust-gather can't handle.
+	// Each cluster gets its own context for the kubeconfig read, since the MC client
+	// may be rate-limited after the test suite and a shared context could starve the second read.
+	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, clusterName)
+	wcCtx, wcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer wcCancel()
+	if wcKubeconfigPath, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
+		logger.Log("crust-gather: failed to get WC kubeconfig: %v", err)
+	} else {
+		defer os.Remove(wcKubeconfigPath)
+		applyCrustGatherPolicyException(wcCtx, clusterName)
+		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password)
+	}
+
+	// Collect management cluster snapshot (scoped to the test cluster's namespace).
+	// The MC manages itself, so its CAPI kubeconfig secret is available on the MC too.
+	// GetClusterName() may return the Teleport context name (e.g., "teleport.giantswarm.io-grizzly"),
+	// so we strip the prefix to get the actual cluster name for the CAPI secret lookup.
+	mcName := state.GetFramework().MC().GetClusterName()
+	mcName = strings.TrimPrefix(mcName, "teleport.giantswarm.io-")
+	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, clusterName)
+	mcCtx, mcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer mcCancel()
+	if mcKubeconfigPath, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
+		logger.Log("crust-gather: failed to get MC kubeconfig: %v", err)
+	} else {
+		defer os.Remove(mcKubeconfigPath)
+		// For the MC, we exclude Node resources because --include-namespace doesn't
+		// filter out cluster-scoped resources. Without this, crust-gather would try
+		// to create debug pods on the MC (blocked by Kyverno), and we don't want to
+		// maintain a permanent PolicyException on the long-lived MC.
+		runCrustGather("MC", mcKubeconfigPath, mcReference, username, password,
+			"--include-namespace", clusterNamespace,
+			"--exclude-kind", "Node")
+	}
+}
+
+// writeCAPIKubeconfig reads the CAPI kubeconfig secret for the given cluster from the MC
+// and writes it to a temp file. Returns the file path. Caller is responsible for cleanup.
+func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (string, error) {
+	var secret corev1.Secret
+	err := state.GetFramework().MC().Get(ctx, cr.ObjectKeyFromObject(&corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-kubeconfig", clusterName),
+			Namespace: namespace,
+		},
+	}), &secret)
+	if err != nil {
+		return "", fmt.Errorf("failed to get CAPI kubeconfig secret: %w", err)
+	}
+
+	kubeconfig := secret.Data["value"]
+	if len(kubeconfig) == 0 {
+		return "", fmt.Errorf("CAPI kubeconfig secret %s/%s-kubeconfig has empty 'value' key", namespace, clusterName)
+	}
+
+	f, err := os.CreateTemp("", fmt.Sprintf("crust-gather-%s-kubeconfig-*", clusterName))
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp file: %w", err)
+	}
+
+	if _, err := f.Write(kubeconfig); err != nil {
+		os.Remove(f.Name())
+		return "", fmt.Errorf("failed to write kubeconfig: %w", err)
+	}
+	f.Close()
+
+	return f.Name(), nil
+}
+
+// applyCrustGatherPolicyException creates a Kyverno PolicyException on the workload cluster
+// so that crust-gather's privileged debug pods (used for node log collection) are allowed
+// despite the cluster's pod security policies. This is best-effort: if Kyverno isn't
+// installed or the apply fails, we log and continue. Without the exception, debug pod
+// creation fails but the rest of the resource collection still works.
+func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) {
+	wcClient, err := state.GetFramework().WC(wcClusterName)
+	if err != nil {
+		logger.Log("crust-gather: failed to get WC client for policy exception: %v", err)
+		return
+	}
+
+	policyException := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "kyverno.io/v2",
+			"kind":       "PolicyException",
+			"metadata": map[string]interface{}{
+				"name":      "crust-gather-debug-pods",
+				"namespace": "policy-exceptions",
+			},
+			"spec": map[string]interface{}{
+				"exceptions": []interface{}{
+					map[string]interface{}{"policyName": "disallow-capabilities-strict", "ruleNames": []interface{}{"require-drop-all"}},
+					map[string]interface{}{"policyName": "disallow-host-namespaces", "ruleNames": []interface{}{"host-namespaces"}},
+					map[string]interface{}{"policyName": "disallow-host-path", "ruleNames": []interface{}{"host-path"}},
+					map[string]interface{}{"policyName": "disallow-privilege-escalation", "ruleNames": []interface{}{"privilege-escalation"}},
+					map[string]interface{}{"policyName": "require-run-as-nonroot", "ruleNames": []interface{}{"run-as-non-root"}},
+					map[string]interface{}{"policyName": "restrict-seccomp-strict", "ruleNames": []interface{}{"check-seccomp-strict"}},
+					map[string]interface{}{"policyName": "restrict-volume-types", "ruleNames": []interface{}{"restricted-volumes"}},
+				},
+				"match": map[string]interface{}{
+					"any": []interface{}{
+						map[string]interface{}{
+							"resources": map[string]interface{}{
+								"kinds":      []interface{}{"Pod"},
+								"namespaces": []interface{}{"default"},
+								"names":      []interface{}{"node-debug-*"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	policyException.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "kyverno.io",
+		Version: "v2",
+		Kind:    "PolicyException",
+	})
+
+	if err := wcClient.Create(ctx, policyException); err != nil && !apierror.IsAlreadyExists(err) {
+		logger.Log("crust-gather: failed to create Kyverno PolicyException (debug pod collection may be blocked): %v", err)
+		return
+	}
+	logger.Log("crust-gather: applied Kyverno PolicyException for debug pods on WC")
+}
+
+// runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry.
+// Errors are logged but do not cause the test suite to fail.
+func runCrustGather(label, kubeconfig, reference, username, password string, extraArgs ...string) {
+	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
+
+	// The command timeout (8m) must be larger than the collection duration (5m)
+	// to allow time for the OCI push after collection finishes.
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Minute)
+	defer cancel()
+
+	// crust-gather writes collected resources to a local directory before pushing to OCI.
+	// The path passed via -f becomes the layer path prefix in the OCI image (e.g., "-f wc"
+	// results in layer titles like "wc/api.json"). We use the lowercase label ("wc"/"mc") so
+	// that when a developer pulls both snapshots into the same local directory with `oras pull`,
+	// they land under distinct subdirectories and `crust-gather serve --archive` exposes each
+	// as its own kubeconfig context without manual renaming.
+	//
+	// We set cmd.Dir to a unique tmpdir so the relative "-f <label>" resolves somewhere writable
+	// (the container's /app cwd is read-only) and is cleaned up after the run.
+	snapshotLabel := strings.ToLower(label)
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", snapshotLabel))
+	if err != nil {
+		logger.Log("crust-gather: %s failed to create temp dir: %v", label, err)
+		return
+	}
+	defer os.RemoveAll(tmpDir)
+
+	args := []string{
+		"collect",
+		"--kubeconfig", kubeconfig,
+		"--reference", reference,
+		"--duration", "5m",
+		"-f", snapshotLabel,
+		// Reduce noise: crust-gather's default INFO level emits thousands of
+		// "Pushing layer" messages that drown the test logs. We still surface
+		// genuine warnings and errors via WARN.
+		"--verbosity", "WARN",
+	}
+
+	if username != "" && password != "" {
+		args = append(args, "--username", username, "--password", password)
+	}
+
+	args = append(args, extraArgs...)
+
+	cmd := exec.CommandContext(ctx, "crust-gather", args...)
+	cmd.Dir = tmpDir
+	cmd.Stdout = GinkgoWriter
+	cmd.Stderr = GinkgoWriter
+
+	if err := cmd.Run(); err != nil {
+		logger.Log("crust-gather: %s collection failed: %v", label, err)
+	} else {
+		logger.Log("crust-gather: %s snapshot pushed to %s", label, reference)
+	}
 }
 
 func cleanupPVs(ctx context.Context) error {
