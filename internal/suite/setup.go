@@ -420,13 +420,16 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	defer cancel()
 
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
-	// The path we pass to -f becomes the layer path prefix in the OCI image (e.g.,
-	// "-f /tmp/crust-gather-wc" results in layer titles like "/tmp/crust-gather-wc/api.json").
-	// However, `crust-gather serve --reference` expects layer titles starting with the default
-	// archive name "crust-gather/". To keep both the writable location and the expected layer
-	// prefix, we create a unique tmpdir and run crust-gather with that dir as the cwd while
-	// omitting -f, so it writes to "$tmpDir/crust-gather/" and pushes layers as "crust-gather/*".
-	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", strings.ToLower(label)))
+	// The path passed via -f becomes the layer path prefix in the OCI image (e.g., "-f wc"
+	// results in layer titles like "wc/api.json"). We use the lowercase label ("wc"/"mc") so
+	// that when a developer pulls both snapshots into the same local directory with `oras pull`,
+	// they land under distinct subdirectories and `crust-gather serve --archive` exposes each
+	// as its own kubeconfig context without manual renaming.
+	//
+	// We set cmd.Dir to a unique tmpdir so the relative "-f <label>" resolves somewhere writable
+	// (the container's /app cwd is read-only) and is cleaned up after the run.
+	snapshotLabel := strings.ToLower(label)
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", snapshotLabel))
 	if err != nil {
 		logger.Log("crust-gather: %s failed to create temp dir: %v", label, err)
 		return
@@ -438,6 +441,7 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
+		"-f", snapshotLabel,
 		// Reduce noise: crust-gather's default INFO level emits thousands of
 		// "Pushing layer" messages that drown the test logs. We still surface
 		// genuine warnings and errors via WARN.
