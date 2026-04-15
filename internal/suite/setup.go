@@ -438,6 +438,10 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
+		// Reduce noise: crust-gather's default INFO level emits thousands of
+		// "Pushing layer" messages that drown the test logs. We still surface
+		// genuine warnings and errors via WARN.
+		"--verbosity", "WARN",
 	}
 
 	if username != "" && password != "" {
