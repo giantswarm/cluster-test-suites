@@ -5,7 +5,7 @@ go 1.25.9
 require (
 	github.com/cert-manager/cert-manager v1.20.2
 	github.com/giantswarm/apiextensions-application v0.6.2
-	github.com/giantswarm/cluster-standup-teardown/v5 v5.0.1
+	github.com/giantswarm/cluster-standup-teardown/v5 v5.1.0
 	github.com/giantswarm/clustertest/v4 v4.1.0
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260413061816-b05a3a79864c
