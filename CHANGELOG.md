@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add support for `capmox` provider tests (disabled by default).
 - Support both App-CR and HelmRelease-based default apps in e2e assertions. Detection is presence-based (no hardcoded version constant): each App-CR assertion block checks whether the relevant resource exists on the MC and `Skip()`s with a clear message if it doesn't, deferring to the HelmRelease sibling. Likewise, each HelmRelease-bundle assertion skips when the HelmRelease doesn't exist, deferring to the App-CR sibling. `hello.go`'s cert-manager / external-dns preconditions use a new `WaitAppOrHelmReleaseReady` helper that polls both kinds and succeeds as soon as either is Ready.
 
 ## [6.2.0] - 2026-04-01
