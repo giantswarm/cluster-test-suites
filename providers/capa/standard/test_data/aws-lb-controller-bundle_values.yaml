@@ -1,0 +1,12 @@
+managementCluster:
+  name: {{ .ExtraValues.Installation }}
+  namespace: org-giantswarm
+
+provider: aws
+
+clusterName: {{ .ClusterName }}
+clusterID: {{ .ClusterName }}
+global:
+  podSecurityStandards:
+    enforced: true
+enableServiceMutatorWebhook: false
