@@ -7,7 +7,9 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v4/pkg/wait"
 	"gopkg.in/yaml.v3"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -169,6 +171,39 @@ func isHelmReleaseReady(ctx context.Context, c cr.Client, name types.NamespacedN
 			logger.Log("HelmRelease '%s' not yet ready: %s - %s", name.Name, reason, message)
 		default:
 			logger.Log("HelmRelease '%s' has no Ready condition yet", name.Name)
+		}
+		return false, nil
+	}
+}
+
+// WaitHelmReleaseReady returns a WaitCondition that polls the named HelmRelease
+// and becomes true when its Ready condition is True. The signature mirrors
+// wait.IsAppDeployed so call-sites can swap between App CRs and HelmReleases
+// cleanly.
+func WaitHelmReleaseReady(ctx context.Context, c cr.Client, name, namespace string) wait.WaitCondition {
+	return isHelmReleaseReady(ctx, c, types.NamespacedName{Name: name, Namespace: namespace})
+}
+
+// WaitAppOrHelmReleaseReady returns a WaitCondition that becomes true as soon
+// as either an App CR or a HelmRelease with the given name/namespace reaches a
+// Ready state. Use this for default apps (cert-manager, external-dns, ...)
+// that older cluster charts deploy as App CRs and newer ones deploy as
+// HelmReleases — the test doesn't need to know which kind exists, just that
+// the app is ready.
+//
+// Get errors (including NotFound) are suppressed so the outer Eventually
+// keeps polling until one of the two kinds appears and is Ready, or the
+// Eventually timeout fires.
+func WaitAppOrHelmReleaseReady(ctx context.Context, c *client.Client, name, namespace string) wait.WaitCondition {
+	appCheck := wait.IsAppDeployed(ctx, c, name, namespace)
+	hrCheck := isHelmReleaseReady(ctx, c, types.NamespacedName{Name: name, Namespace: namespace})
+
+	return func() (bool, error) {
+		if ok, _ := appCheck(); ok {
+			return true, nil
+		}
+		if ok, _ := hrCheck(); ok {
+			return true, nil
 		}
 		return false, nil
 	}
