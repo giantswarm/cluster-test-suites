@@ -6,7 +6,7 @@ require (
 	github.com/cert-manager/cert-manager v1.20.2
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v5 v5.1.0
-	github.com/giantswarm/clustertest/v4 v4.1.0
+	github.com/giantswarm/clustertest/v4 v4.2.0
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260413061816-b05a3a79864c
 	github.com/onsi/ginkgo/v2 v2.28.1
@@ -192,7 +192,7 @@ require (
 	k8s.io/kubectl v0.35.3 // indirect
 	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/e2e-framework v0.6.0 // indirect
-	sigs.k8s.io/gateway-api v1.5.0 // indirect
+	sigs.k8s.io/gateway-api v1.5.1 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/kustomize/api v0.21.1 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.21.1 // indirect
