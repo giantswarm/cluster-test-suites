@@ -50,12 +50,12 @@ func runHelloWorld(externalDnsSupported bool) {
 			org := state.GetCluster().Organization
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
-			Eventually(WaitDefaultAppReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
+			Eventually(WaitAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'cert-manager' not ready"))
 
-			Eventually(WaitDefaultAppReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
+			Eventually(WaitAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'external-dns' not ready"))

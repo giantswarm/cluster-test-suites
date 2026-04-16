@@ -184,19 +184,29 @@ func WaitHelmReleaseReady(ctx context.Context, c cr.Client, name, namespace stri
 	return isHelmReleaseReady(ctx, c, types.NamespacedName{Name: name, Namespace: namespace})
 }
 
-// WaitDefaultAppReady returns a WaitCondition for a single default app (e.g.
-// cert-manager, external-dns, ingress-nginx), selecting the right CR kind
-// based on the current release version:
-//   - HelmRelease for releases >= helmReleaseAppsSinceRelease (including all
-//     v35.0.0 prereleases),
-//   - App CR for older releases.
+// WaitAppOrHelmReleaseReady returns a WaitCondition that becomes true as soon
+// as either an App CR or a HelmRelease with the given name/namespace reaches a
+// Ready state. Use this for default apps (cert-manager, external-dns, ...)
+// that older cluster charts deploy as App CRs and newer ones deploy as
+// HelmReleases — the test doesn't need to know which kind exists, just that
+// the app is ready.
 //
-// Signature matches wait.IsAppDeployed(ctx, client, name, namespace).
-func WaitDefaultAppReady(ctx context.Context, c *client.Client, name, namespace string) wait.WaitCondition {
-	if UsesHelmReleaseBasedDefaultApps() {
-		return WaitHelmReleaseReady(ctx, c, name, namespace)
+// Get errors (including NotFound) are suppressed so the outer Eventually
+// keeps polling until one of the two kinds appears and is Ready, or the
+// Eventually timeout fires.
+func WaitAppOrHelmReleaseReady(ctx context.Context, c *client.Client, name, namespace string) wait.WaitCondition {
+	appCheck := wait.IsAppDeployed(ctx, c, name, namespace)
+	hrCheck := isHelmReleaseReady(ctx, c, types.NamespacedName{Name: name, Namespace: namespace})
+
+	return func() (bool, error) {
+		if ok, _ := appCheck(); ok {
+			return true, nil
+		}
+		if ok, _ := hrCheck(); ok {
+			return true, nil
+		}
+		return false, nil
 	}
-	return wait.IsAppDeployed(ctx, c, name, namespace)
 }
 
 // getHelmReleaseReadyCondition extracts the Ready condition from an unstructured HelmRelease.

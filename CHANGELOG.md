@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support both App-CR and HelmRelease-based default apps in e2e assertions, with the cutover at GiantSwarm Release `v35.0.0-0` (so all `v35.0.0` prereleases count as HelmRelease-based). `internal/common/apps.go` now splits each default-apps / observability-bundle / security-bundle assertion into an App-CR variant (runs on older releases) and a HelmRelease variant (runs on `v35.0.0+`), with explicit `Skip()` messages on the inapplicable one. `hello.go`'s `cert-manager` / `external-dns` preconditions use a new `WaitDefaultAppReady` facade that picks the right CR kind automatically. Upgrade tests detect the active release per phase: pre-upgrade assertions read `E2E_RELEASE_PRE_UPGRADE`, post-upgrade reads `E2E_RELEASE_VERSION`.
+- Support both App-CR and HelmRelease-based default apps in e2e assertions. Detection is presence-based (no hardcoded version constant): each App-CR assertion block checks whether the relevant resource exists on the MC and `Skip()`s with a clear message if it doesn't, deferring to the HelmRelease sibling. Likewise, each HelmRelease-bundle assertion skips when the HelmRelease doesn't exist, deferring to the App-CR sibling. `hello.go`'s cert-manager / external-dns preconditions use a new `WaitAppOrHelmReleaseReady` helper that polls both kinds and succeeds as soon as either is Ready.
 
 ## [6.2.0] - 2026-04-01
 
