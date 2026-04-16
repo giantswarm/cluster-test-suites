@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-04-16
+
 ### Added
 
 - Add support for `capmox` provider tests (disabled by default).
@@ -1382,7 +1384,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.3.0...HEAD
+[6.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.2.0...v6.3.0
 [6.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...v6.0.0
