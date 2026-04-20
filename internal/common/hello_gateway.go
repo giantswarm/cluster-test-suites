@@ -8,8 +8,6 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	"github.com/giantswarm/clustertest/v4/pkg/application"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/net"
@@ -28,13 +26,14 @@ import (
 func runHelloWorldGateway(gatewayAPISupported bool) {
 	Context("hello world via gateway api", Ordered, func() {
 		var (
-			awsLBControllerApp  *application.Application
-			gatewayAPIApp       *application.Application
-			helloHelmRelease    *unstructured.Unstructured
-			ociRepoName         string
-			helloWorldHost      string
-			helloWorldUrl       string
-			awsLBDeployed       bool
+			gatewayAPIHelmRelease *unstructured.Unstructured
+			awsLBHelmRelease      *unstructured.Unstructured
+			helloHelmRelease      *unstructured.Unstructured
+			ociRepoGatewayAPIName string
+			ociRepoAWSLBName      string
+			ociRepoName           string
+			helloWorldHost        string
+			helloWorldUrl         string
 		)
 
 		const (
@@ -70,85 +69,77 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			}
 
 			org := state.GetCluster().Organization
-			bundleAppName := fmt.Sprintf("%s-aws-lb-controller-bundle", state.GetCluster().Name)
+			clusterName := state.GetCluster().Name
+			namespace := org.GetNamespace()
 
-			awsLBControllerApp = application.New(bundleAppName, "aws-lb-controller-bundle").
-				WithCatalog("giantswarm").
-				WithOrganization(*org).
-				WithVersion("latest").
-				WithClusterName(state.GetCluster().Name).
-				WithInCluster(true).
-				WithInstallNamespace(org.GetNamespace()).
-				MustWithValuesFile(awsLBValuesFile, &application.TemplateValues{
-					ClusterName: state.GetCluster().Name,
-					ExtraValues: map[string]string{
-						"Installation": state.GetFramework().MC().GetClusterName(),
-					},
-				})
-
-			err := state.GetFramework().MC().DeployApp(state.GetContext(), *awsLBControllerApp)
+			ociRepoAWSLBName = fmt.Sprintf("%s-aws-lb-controller-bundle-chart", clusterName)
+			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoAWSLBName, namespace, "aws-lb-controller-bundle")
 			Expect(err).To(BeNil())
 
-			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), awsLBControllerApp.InstallName, awsLBControllerApp.GetNamespace())).
-				WithTimeout(5*time.Minute).
-				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-lb-controller-bundle App not ready"))
+			values, err := parseValuesFile(awsLBValuesFile, &HelmReleaseTemplateValues{
+				ClusterName: clusterName,
+				ExtraValues: map[string]string{
+					"Installation": state.GetFramework().MC().GetClusterName(),
+				},
+			})
+			Expect(err).To(BeNil())
 
-			// Wait for child apps
-			appList := &v1alpha1.AppList{}
-			err = state.GetFramework().MC().List(state.GetContext(), appList, ctrl.InNamespace(org.GetNamespace()), ctrl.MatchingLabels{"giantswarm.io/managed-by": bundleAppName})
-			Expect(err).NotTo(HaveOccurred())
+			awsLBHelmRelease = newTestHelmRelease(
+				fmt.Sprintf("%s-aws-lb-controller-bundle", clusterName),
+				namespace,
+				"aws-lb-controller-bundle",
+				"giantswarm",
+				clusterName,
+				ociRepoAWSLBName,
+				values,
+			)
 
-			appNamespacedNames := []types.NamespacedName{}
-			for _, app := range appList.Items {
-				appNamespacedNames = append(appNamespacedNames, types.NamespacedName{Name: app.Name, Namespace: app.Namespace})
-			}
+			err = state.GetFramework().MC().Create(state.GetContext(), awsLBHelmRelease)
+			Expect(err).To(BeNil())
 
-			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
+			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
+				Name:      awsLBHelmRelease.GetName(),
+				Namespace: awsLBHelmRelease.GetNamespace(),
+			})).
 				WithTimeout(10*time.Minute).
 				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-lb-controller-bundle child Apps not ready"))
-
-			awsLBDeployed = true
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate aws-lb-controller-bundle HelmRelease is not ready"))
 		})
 
 		It("should deploy gateway-api-bundle", func() {
 			org := state.GetCluster().Organization
-			bundleAppName := fmt.Sprintf("%s-gateway-api-bundle", state.GetCluster().Name)
+			clusterName := state.GetCluster().Name
+			namespace := org.GetNamespace()
 
-			gatewayAPIApp = application.New(bundleAppName, "gateway-api-bundle").
-				WithCatalog("giantswarm").
-				WithOrganization(*org).
-				WithVersion("latest").
-				WithClusterName(state.GetCluster().Name).
-				WithInCluster(true).
-				WithInstallNamespace(org.GetNamespace()).
-				MustWithValuesFile("./test_data/gateway-api-bundle_values.yaml", &application.TemplateValues{
-					ClusterName: state.GetCluster().Name,
-				})
-
-			err := state.GetFramework().MC().DeployApp(state.GetContext(), *gatewayAPIApp)
+			ociRepoGatewayAPIName = fmt.Sprintf("%s-gateway-api-bundle-chart", clusterName)
+			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoGatewayAPIName, namespace, "gateway-api-bundle")
 			Expect(err).To(BeNil())
 
-			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), gatewayAPIApp.InstallName, gatewayAPIApp.GetNamespace())).
-				WithTimeout(5*time.Minute).
-				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate gateway-api-bundle App not ready"))
+			values, err := parseValuesFile("./test_data/gateway-api-bundle_values.yaml", &HelmReleaseTemplateValues{
+				ClusterName: clusterName,
+			})
+			Expect(err).To(BeNil())
 
-			// Wait for child apps
-			appList := &v1alpha1.AppList{}
-			err = state.GetFramework().MC().List(state.GetContext(), appList, ctrl.InNamespace(org.GetNamespace()), ctrl.MatchingLabels{"giantswarm.io/managed-by": bundleAppName})
-			Expect(err).NotTo(HaveOccurred())
+			gatewayAPIHelmRelease = newTestHelmRelease(
+				fmt.Sprintf("%s-gateway-api-bundle", clusterName),
+				namespace,
+				"gateway-api-bundle",
+				"giantswarm",
+				clusterName,
+				ociRepoGatewayAPIName,
+				values,
+			)
 
-			appNamespacedNames := []types.NamespacedName{}
-			for _, app := range appList.Items {
-				appNamespacedNames = append(appNamespacedNames, types.NamespacedName{Name: app.Name, Namespace: app.Namespace})
-			}
+			err = state.GetFramework().MC().Create(state.GetContext(), gatewayAPIHelmRelease)
+			Expect(err).To(BeNil())
 
-			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), appNamespacedNames)).
+			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
+				Name:      gatewayAPIHelmRelease.GetName(),
+				Namespace: gatewayAPIHelmRelease.GetNamespace(),
+			})).
 				WithTimeout(10*time.Minute).
 				WithPolling(10*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate gateway-api-bundle child Apps not ready"))
+				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate gateway-api-bundle HelmRelease is not ready"))
 		})
 
 		It("cluster wildcard DNS must be resolvable", func() {
@@ -349,12 +340,18 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, helloHelmRelease.GetNamespace())
 				Expect(err).ShouldNot(HaveOccurred())
 			}
-			if gatewayAPIApp != nil {
-				err := state.GetFramework().MC().DeleteApp(state.GetContext(), *gatewayAPIApp)
+			if gatewayAPIHelmRelease != nil {
+				err := state.GetFramework().MC().Delete(state.GetContext(), gatewayAPIHelmRelease)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoGatewayAPIName, gatewayAPIHelmRelease.GetNamespace())
 				Expect(err).ShouldNot(HaveOccurred())
 			}
-			if awsLBDeployed && awsLBControllerApp != nil {
-				err := state.GetFramework().MC().DeleteApp(state.GetContext(), *awsLBControllerApp)
+			if awsLBHelmRelease != nil {
+				err := state.GetFramework().MC().Delete(state.GetContext(), awsLBHelmRelease)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoAWSLBName, awsLBHelmRelease.GetNamespace())
 				Expect(err).ShouldNot(HaveOccurred())
 			}
 		})
