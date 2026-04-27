@@ -8,7 +8,7 @@ require (
 	github.com/giantswarm/cluster-standup-teardown/v5 v5.1.0
 	github.com/giantswarm/clustertest/v4 v4.2.0
 	github.com/giantswarm/k8smetadata v0.26.0
-	github.com/gravitational/teleport/api v0.0.0-20260418144124-1bd317b98340
+	github.com/gravitational/teleport/api v0.0.0-20260427104242-665ad24abeec
 	github.com/onsi/ginkgo/v2 v2.28.2
 	github.com/onsi/gomega v1.39.1
 	gopkg.in/yaml.v3 v3.0.1
