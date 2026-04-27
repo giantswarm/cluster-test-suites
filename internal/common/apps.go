@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	helmv2 "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
 
@@ -29,7 +33,7 @@ func RunApps(cfg *TestConfig) {
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := newUnstructuredHelmReleaseList()
+			helmReleaseList := &helmv2.HelmReleaseList{}
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -43,7 +47,7 @@ func RunApps(cfg *TestConfig) {
 				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
 			}
 
-			Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
+			Eventually(wait.Consistent(helmrelease.AreAllReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
 				WithTimeout(timeout).
 				WithPolling(10*time.Second).
 				Should(
@@ -212,12 +216,12 @@ func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration)
 	org := state.GetCluster().Organization.GetNamespace()
 
 	parentTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
-	Eventually(WaitHelmReleaseReady(state.GetContext(), mc, parentName, org)).
+	Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), mc, parentName, org)).
 		WithTimeout(parentTimeout).
 		WithPolling(5 * time.Second).
 		Should(BeTrue())
 
-	helmReleaseList := newUnstructuredHelmReleaseList()
+	helmReleaseList := &helmv2.HelmReleaseList{}
 	err := mc.List(state.GetContext(), helmReleaseList, ctrl.InNamespace(org), ctrl.MatchingLabels{"giantswarm.io/managed-by": parentName})
 	Expect(err).NotTo(HaveOccurred())
 
@@ -226,7 +230,7 @@ func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration)
 		children = append(children, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
 	}
 
-	Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), mc, children), 5, 10*time.Second)).
+	Eventually(wait.Consistent(helmrelease.AreAllReady(state.GetContext(), mc, children), 5, 10*time.Second)).
 		WithTimeout(childrenTimeout).
 		WithPolling(10*time.Second).
 		Should(
@@ -258,7 +262,7 @@ func appExists(name, namespace string) bool {
 // assertions to decide whether the cluster chart is in HelmRelease mode for
 // this bundle.
 func helmReleaseExists(name, namespace string) bool {
-	hr := newUnstructuredHelmRelease()
+	hr := &helmv2.HelmRelease{}
 	err := state.GetFramework().MC().Get(state.GetContext(), ctrl.ObjectKey{Name: name, Namespace: namespace}, hr)
 	if err == nil {
 		return true
@@ -303,38 +307,6 @@ func reportOwningTeams() failurehandler.FailureHandler {
 	})
 }
 
-// areAllHelmReleasesReady checks if all HelmReleases in the list are ready
-func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleases []types.NamespacedName) func() error {
-	return func() error {
-		allReady := true
-		for _, hr := range helmReleases {
-			helmRelease := newUnstructuredHelmRelease()
-			err := client.Get(ctx, hr, helmRelease)
-			if err != nil {
-				logger.Log("HelmRelease status for '%s' failed to retrieve: %v", hr.Name, err)
-				allReady = false
-				continue
-			}
-
-			ready, reason, message := getHelmReleaseReadyCondition(helmRelease)
-			if ready {
-				logger.Log("HelmRelease status for '%s' is as expected: expectedStatus='Ready' actualStatus='Ready'", hr.Name)
-			} else if reason != "" {
-				logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='%s' (reason: '%s')", hr.Name, reason, message)
-				allReady = false
-			} else {
-				logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='Unknown' (reason: 'No Ready condition found')", hr.Name)
-				allReady = false
-			}
-		}
-
-		if !allReady {
-			return fmt.Errorf("not all HelmReleases are ready")
-		}
-		return nil
-	}
-}
-
 // reportHelmReleaseOwningTeams reports the teams responsible for failing HelmReleases
 func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 	return failurehandler.Wrap(func() {
@@ -343,7 +315,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := newUnstructuredHelmReleaseList()
+		helmReleaseList := &helmv2.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -351,13 +323,10 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 		}
 
 		for _, hr := range helmReleaseList.Items {
-			ready, _, _ := getHelmReleaseReadyCondition(&hr)
-			if !ready {
-				labels := hr.GetLabels()
-				if labels != nil {
-					if teamLabel, ok := labels["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
-						logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.GetName(), teamLabel)
-					}
+			condition := apimeta.FindStatusCondition(hr.Status.Conditions, "Ready")
+			if condition == nil || condition.Status != metav1.ConditionTrue {
+				if teamLabel, ok := hr.GetLabels()["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
+					logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.GetName(), teamLabel)
 				}
 			}
 		}
