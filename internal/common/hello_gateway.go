@@ -84,11 +84,12 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			})
 			Expect(err).To(BeNil())
 
-			awsLBHelmRelease = newMCHelmRelease(
+			awsLBHelmRelease = newTestHelmRelease(
 				fmt.Sprintf("%s-aws-lb-controller-bundle", clusterName),
 				namespace,
 				"aws-lb-controller-bundle",
-				namespace,
+				"giantswarm",
+				clusterName,
 				ociRepoAWSLBName,
 				values,
 			)
@@ -119,11 +120,12 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			})
 			Expect(err).To(BeNil())
 
-			gatewayAPIHelmRelease = newMCHelmRelease(
+			gatewayAPIHelmRelease = newTestHelmRelease(
 				fmt.Sprintf("%s-gateway-api-bundle", clusterName),
 				namespace,
 				"gateway-api-bundle",
-				namespace,
+				"giantswarm",
+				clusterName,
 				ociRepoGatewayAPIName,
 				values,
 			)

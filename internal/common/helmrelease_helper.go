@@ -84,41 +84,6 @@ func deleteTestOCIRepository(ctx context.Context, c cr.Client, name, namespace s
 	return err
 }
 
-// newMCHelmRelease creates a HelmRelease that runs on the management cluster
-// (no kubeConfig, so Flux uses in-cluster credentials). Use this for bundle
-// charts that create App CRs on the MC which the app-operator then reconciles
-// into the workload cluster.
-func newMCHelmRelease(name, namespace, releaseName, targetNamespace, ociRepoName string, values map[string]interface{}) *unstructured.Unstructured {
-	hr := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "helm.toolkit.fluxcd.io/v2",
-			"kind":       "HelmRelease",
-			"metadata": map[string]interface{}{
-				"name":      name,
-				"namespace": namespace,
-			},
-			"spec": map[string]interface{}{
-				"interval":         "1m",
-				"releaseName":      releaseName,
-				"targetNamespace":  targetNamespace,
-				"storageNamespace": targetNamespace,
-				"chartRef": map[string]interface{}{
-					"kind": "OCIRepository",
-					"name": ociRepoName,
-				},
-				"install": map[string]interface{}{
-					"createNamespace": true,
-					"remediation": map[string]interface{}{
-						"retries": int64(5),
-					},
-				},
-				"values": values,
-			},
-		},
-	}
-	return hr
-}
-
 func newTestHelmRelease(name, namespace, releaseName, targetNamespace, clusterName, ociRepoName string, values map[string]interface{}) *unstructured.Unstructured {
 	hr := &unstructured.Unstructured{
 		Object: map[string]interface{}{
