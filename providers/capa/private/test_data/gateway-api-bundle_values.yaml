@@ -12,6 +12,9 @@ apps:
           gateways:
             default:
               dnsName: ingress
+              service:
+                annotations:
+                  service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
               listeners:
                 http:
                   httpsRedirectEnabled: true
