@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	helmv2 "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v4/pkg/client"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
@@ -23,7 +23,7 @@ import (
 func runScale(autoScalingSupported bool) {
 	Context("scale", func() {
 		var (
-			helmRelease  *unstructured.Unstructured
+			helmRelease  *helmv2.HelmRelease
 			ociRepoName  string
 			wcClient     *client.Client
 			replicaCount int
@@ -55,35 +55,33 @@ func runScale(autoScalingSupported bool) {
 
 			replicaCount = len(nodes.Items) + 1
 
-			values, err := parseValuesFile("./test_data/scale_helloworld_values.yaml", &HelmReleaseTemplateValues{
-				ClusterName: clusterName,
-				ExtraValues: map[string]string{
-					"ReplicaCount": fmt.Sprintf("%d", replicaCount),
-				},
-			})
-			Expect(err).To(BeNil())
-
 			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
-			err = ensureTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
+			err = helmrelease.EnsureOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
 			Expect(err).To(BeNil())
 
-			helmRelease = newTestHelmRelease(
+			hrBuilder, err := helmrelease.New(
 				fmt.Sprintf("%s-scale-hello-world", clusterName),
-				namespace,
-				"scale-hello-world",
-				"giantswarm",
-				clusterName,
-				ociRepoName,
-				values,
-			)
+				"hello-world",
+			).
+				WithNamespace(namespace).
+				WithReleaseName("scale-hello-world").
+				WithTargetNamespace("giantswarm").
+				WithOCIRepoName(ociRepoName).
+				WithClusterName(clusterName).
+				WithValuesFile("./test_data/scale_helloworld_values.yaml", &helmrelease.TemplateValues{
+					ClusterName: clusterName,
+					ExtraValues: map[string]string{
+						"ReplicaCount": fmt.Sprintf("%d", replicaCount),
+					},
+				})
+			Expect(err).To(BeNil())
+			helmRelease, err = hrBuilder.Build()
+			Expect(err).To(BeNil())
 
 			err = state.GetFramework().MC().Create(ctx, helmRelease)
 			Expect(err).To(BeNil())
 
-			Eventually(isHelmReleaseReady(ctx, state.GetFramework().MC(), types.NamespacedName{
-				Name:      helmRelease.GetName(),
-				Namespace: helmRelease.GetNamespace(),
-			})).
+			Eventually(helmrelease.IsHelmReleaseReady(ctx, state.GetFramework().MC(), helmRelease.GetName(), helmRelease.GetNamespace())).
 				WithTimeout(5 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(BeTrue())
@@ -160,7 +158,7 @@ func runScale(autoScalingSupported bool) {
 			err := state.GetFramework().MC().Delete(ctx, helmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, helmRelease.GetNamespace())
+			err = helmrelease.DeleteOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, helmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})

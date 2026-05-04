@@ -8,8 +8,10 @@ import (
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	helmv2 "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v4/pkg/application"
 	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
 	"github.com/giantswarm/clustertest/v4/pkg/logger"
 	"github.com/giantswarm/clustertest/v4/pkg/net"
 	"github.com/giantswarm/clustertest/v4/pkg/wait"
@@ -17,7 +19,6 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	networkingv1 "k8s.io/api/networking/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -29,7 +30,7 @@ func runHelloWorld(externalDnsSupported bool) {
 	Context("hello world", Ordered, func() {
 		var (
 			nginxApp              *application.Application
-			helloHelmRelease      *unstructured.Unstructured
+			helloHelmRelease      *helmv2.HelmRelease
 			ociRepoName           string
 			helloWorldIngressHost string
 			helloWorldIngressUrl  string
@@ -50,12 +51,12 @@ func runHelloWorld(externalDnsSupported bool) {
 			org := state.GetCluster().Organization
 
 			// The hello-world app ingress requires a `Certificate` and a DNS record, so we need to make sure `cert-manager` and `external-dns` are deployed.
-			Eventually(WaitAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
+			Eventually(helmrelease.IsAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'cert-manager' not ready"))
 
-			Eventually(WaitAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
+			Eventually(helmrelease.IsAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'external-dns' not ready"))
@@ -121,34 +122,30 @@ func runHelloWorld(externalDnsSupported bool) {
 			helloWorldIngressUrl = fmt.Sprintf("https://%s", helloWorldIngressHost)
 
 			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
-			err := ensureTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
+			err := helmrelease.EnsureOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
 			Expect(err).To(BeNil())
 
-			values, err := parseValuesFile("./test_data/helloworld_values.yaml", &HelmReleaseTemplateValues{
-				ClusterName: clusterName,
-				ExtraValues: map[string]string{
-					"IngressUrl": helloWorldIngressHost,
-				},
-			})
-			Expect(err).To(BeNil())
-
-			helloHelmRelease = newTestHelmRelease(
+			hrBuilder, err := helmrelease.New(
 				fmt.Sprintf("%s-hello-world", clusterName),
-				namespace,
 				"hello-world",
-				"giantswarm",
-				clusterName,
-				ociRepoName,
-				values,
-			)
+			).
+				WithNamespace(namespace).
+				WithReleaseName("hello-world").
+				WithTargetNamespace("giantswarm").
+				WithOCIRepoName(ociRepoName).
+				WithClusterName(clusterName).
+				WithValuesFile("./test_data/helloworld_values.yaml", &helmrelease.TemplateValues{
+					ClusterName: clusterName,
+					ExtraValues: map[string]string{"IngressUrl": helloWorldIngressHost},
+				})
+			Expect(err).To(BeNil())
+			helloHelmRelease, err = hrBuilder.Build()
+			Expect(err).To(BeNil())
 
 			err = state.GetFramework().MC().Create(state.GetContext(), helloHelmRelease)
 			Expect(err).To(BeNil())
 
-			Eventually(isHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), types.NamespacedName{
-				Name:      helloHelmRelease.GetName(),
-				Namespace: helloHelmRelease.GetNamespace(),
-			})).
+			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetName(), helloHelmRelease.GetNamespace())).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
 				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' HelmRelease is not ready"))
@@ -263,7 +260,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			err = state.GetFramework().MC().Delete(state.GetContext(), helloHelmRelease)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			err = deleteTestOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, helloHelmRelease.GetNamespace())
+			err = helmrelease.DeleteOCIRepository(state.GetContext(), state.GetFramework().MC(), ociRepoName, helloHelmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
