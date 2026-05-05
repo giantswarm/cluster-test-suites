@@ -9,12 +9,12 @@ import (
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	helmv2 "github.com/fluxcd/helm-controller/api/v2"
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/net"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/net"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	networkingv1 "k8s.io/api/networking/v1"
