@@ -8,7 +8,7 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/suite"
 
-	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder/providers/capa"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder/providers/capa"
 )
 
 func TestCAPACiliumEniMode(t *testing.T) {

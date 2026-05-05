@@ -7,8 +7,8 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
 
-	"github.com/giantswarm/clustertest/v4"
-	"github.com/giantswarm/clustertest/v4/pkg/application"
+	"github.com/giantswarm/clustertest/v5"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
 )
 
 var lock = &sync.Mutex{}
