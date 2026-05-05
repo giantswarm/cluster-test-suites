@@ -6,10 +6,9 @@ import (
 	"time"
 
 	helmv2 "github.com/fluxcd/helm-controller/api/v2"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/api/apps/v1"
@@ -146,7 +145,7 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return false, nil
-			}, "15m", "10s").Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' deployment has not scaled up properly"))
+			}, "15m", "10s").Should(BeTrue())
 		})
 
 		AfterEach(func() {

@@ -9,12 +9,11 @@ import (
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	helmv2 "github.com/fluxcd/helm-controller/api/v2"
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/helmrelease"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/net"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/net"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	networkingv1 "k8s.io/api/networking/v1"
@@ -54,12 +53,12 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(helmrelease.IsAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'cert-manager' not ready"))
+				Should(BeTrue())
 
 			Eventually(helmrelease.IsAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'external-dns' not ready"))
+				Should(BeTrue())
 		})
 
 		It("should deploy ingress-nginx", func() {
@@ -88,7 +87,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), nginxApp.InstallName, nginxApp.GetNamespace())).
 				WithTimeout(appReadyTimeout).
 				WithPolling(appReadyInterval).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate ingress-nginx App not ready"))
+				Should(BeTrue())
 		})
 
 		It("cluster wildcard ingress DNS must be resolvable", func() {
@@ -148,7 +147,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetName(), helloHelmRelease.GetNamespace())).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' HelmRelease is not ready"))
+				Should(BeTrue())
 		})
 
 		It("ingress resource has load balancer in status", func() {
@@ -175,7 +174,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			}).
 				WithTimeout(6*time.Minute).
 				WithPolling(5*time.Second).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Ingress 'hello-world' has no load balancer set in status"))
+				Should(BeTrue())
 		})
 
 		It("should have a ready Certificate generated", func() {
@@ -215,10 +214,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			}).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(
-					Succeed(),
-					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), fmt.Sprintf("Investigate why Certificate %s/%s is not ready", certificateNamespace, certificateName)),
-				)
+				Should(Succeed())
 		})
 
 		It("hello world app responds successfully", func() {
@@ -247,10 +243,7 @@ func runHelloWorld(externalDnsSupported bool) {
 			}).
 				WithTimeout(15*time.Minute).
 				WithPolling(5*time.Second).
-				Should(
-					ContainSubstring("Hello World"),
-					failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate why I don't get a successful response from the 'hello-world' application deployed in the 'giantswarm' namespace"),
-				)
+				Should(ContainSubstring("Hello World"))
 		})
 
 		It("uninstall apps", func() {

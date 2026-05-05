@@ -9,11 +9,11 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
 	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
@@ -63,7 +63,7 @@ func runBasic() {
 				)).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate control plane nodes not ready"))
+				Should(Succeed())
 		})
 
 		It("has all the worker nodes running", func() {
@@ -77,7 +77,7 @@ func runBasic() {
 			Eventually(wait.Consistent(CheckWorkerNodesReady(state.GetContext(), wcClient, values), 12, 5*time.Second)).
 				WithTimeout(15*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate worker nodes not ready"))
+				Should(Succeed())
 		})
 
 		It("has all its Deployments Ready (means all replicas are running)", func() {
@@ -91,10 +91,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate deployments not ready"),
-					),
+					failurehandler.DeploymentsNotReady(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -109,10 +106,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.StatefulSetsNotReady(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate statefulsets not ready"),
-					),
+					failurehandler.StatefulSetsNotReady(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -127,10 +121,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.DaemonSetsNotReady(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate daemonsets not ready"),
-					),
+					failurehandler.DaemonSetsNotReady(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -145,10 +136,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.JobsUnsuccessful(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate kubernetes Jobs that have not finished successfully"),
-					),
+					failurehandler.JobsUnsuccessful(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -163,10 +151,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate pods that are not in Running state"),
-					),
+					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -188,10 +173,7 @@ func runBasic() {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
-					failurehandler.Bundle(
-						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate pods that are restarting"),
-					),
+					failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
 				)
 		})
 
@@ -204,7 +186,7 @@ func runBasic() {
 			Eventually(wait.IsClusterConditionSet(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace(), capi.AvailableCondition, metav1.ConditionTrue, "")).
 				WithTimeout(timeout).
 				WithPolling(wait.DefaultInterval).
-				Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Cluster API Cluster CR not ready"))
+				Should(BeTrue())
 		})
 
 		It("has all machine pools ready and running", func() {
@@ -220,7 +202,7 @@ func runBasic() {
 			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
 				WithTimeout(30*time.Minute).
 				WithPolling(wait.DefaultInterval).
-				Should(Succeed(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate MachinePools not ready"))
+				Should(Succeed())
 		})
 	})
 }

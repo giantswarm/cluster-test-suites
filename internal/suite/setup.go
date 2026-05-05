@@ -8,31 +8,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	cb "github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder"
-	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/standup"
-	"github.com/giantswarm/clustertest/v4"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/env"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/utils"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	cb "github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/standup"
+	"github.com/giantswarm/clustertest/v5"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/env"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/utils"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-)
-
-const (
-	OpenAIAPIKeySecretNamespace = "giantswarm"
-	OpenAIAPIKeySecretName      = "openai-api-key"
 )
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
@@ -163,14 +157,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 							logger.Log("Cluster condition with type '%s' and status '%s' - Message='%s', Reason='%s', Last Occurred='%v'", condition.Type, condition.Status, condition.Message, condition.Reason, condition.LastTransitionTime)
 						}
 
-						// Trigger LLM investigation for cluster setup failure
-						logger.Log("Triggering LLM investigation for cluster setup failure")
-						handler := failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate cluster setup failure in BeforeSuite")
-						if handlerFunc, ok := handler.(func() string); ok {
-							logger.Log("LLM investigation failure message: %s", handlerFunc())
-						} else {
-							logger.Log("Failed to cast failure handler to expected type")
-						}
 					}
 				}
 			}
