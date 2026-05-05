@@ -21,8 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
 func runHelloWorld(externalDnsSupported bool) {
@@ -145,8 +145,8 @@ func runHelloWorld(externalDnsSupported bool) {
 			Expect(err).To(BeNil())
 
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetName(), helloHelmRelease.GetNamespace())).
-				WithTimeout(6*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(6 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 		})
 
@@ -172,8 +172,8 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return false, nil
 			}).
-				WithTimeout(6*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(6 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 		})
 
@@ -212,7 +212,7 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return fmt.Errorf("certificate is not ready")
 			}).
-				WithTimeout(15*time.Minute).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -241,8 +241,8 @@ func runHelloWorld(externalDnsSupported bool) {
 
 				return string(bodyBytes), nil
 			}).
-				WithTimeout(15*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(15 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(ContainSubstring("Hello World"))
 		})
 

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/teleport"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/teleport"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	"github.com/giantswarm/clustertest/v5/pkg/wait"
 

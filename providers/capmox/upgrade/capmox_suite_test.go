@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder/providers/capmox"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/suite"
 )
 
 func TestCAPMOXUpgrade(t *testing.T) {

@@ -15,8 +15,8 @@ import (
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	"github.com/giantswarm/clustertest/v5/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
@@ -61,7 +61,7 @@ func runBasic() {
 					5,
 					5*time.Second,
 				)).
-				WithTimeout(15*time.Minute).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -75,7 +75,7 @@ func runBasic() {
 			Expect(err).NotTo(HaveOccurred())
 
 			Eventually(wait.Consistent(CheckWorkerNodesReady(state.GetContext(), wcClient, values), 12, 5*time.Second)).
-				WithTimeout(15*time.Minute).
+				WithTimeout(15 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})
@@ -200,7 +200,7 @@ func runBasic() {
 			}
 
 			Eventually(wait.Consistent(CheckMachinePoolsReadyAndRunning(state.GetContext(), mcClient, cluster.Name, cluster.GetNamespace()), 5, 5*time.Second)).
-				WithTimeout(30*time.Minute).
+				WithTimeout(30 * time.Minute).
 				WithPolling(wait.DefaultInterval).
 				Should(Succeed())
 		})

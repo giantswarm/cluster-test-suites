@@ -12,9 +12,9 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	batchv1 "k8s.io/api/batch/v1"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -52,7 +52,7 @@ func runCertManager(certManagerSupported bool) {
 			for _, clusterIssuerName := range clusterIssuers {
 				Eventually(checkClusterIssuer(state.GetContext(), wcClient, clusterIssuerName)).
 					WithTimeout(certManagerTimeout).
-					WithPolling(5*time.Second).
+					WithPolling(5 * time.Second).
 					Should(Succeed())
 			}
 		})
