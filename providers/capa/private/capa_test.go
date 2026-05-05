@@ -3,8 +3,8 @@ package standard
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/ecr"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/ecr"
 )
 
 var _ = Describe("Common tests", func() {
