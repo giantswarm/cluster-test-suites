@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Basic connectivity tests now use `Eventually` with a 1-minute timeout and 5-second polling instead of `FlakeAttempts`. `FlakeAttempts` retries with no delay, so on transient DNS/connection failures all attempts would burn through in milliseconds before the underlying condition had a chance to clear.
+
 ## [7.0.1] - 2026-05-08
 
 ### Changed

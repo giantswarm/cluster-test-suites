@@ -35,12 +35,22 @@ func runBasic() {
 			}
 		})
 
-		It("should be able to connect to the management cluster", FlakeAttempts(3), func() {
-			Expect(state.GetFramework().MC().CheckConnection()).To(Succeed())
+		It("should be able to connect to the management cluster", func() {
+			Eventually(func() error {
+				return state.GetFramework().MC().CheckConnection()
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 		})
 
-		It("should be able to connect to the workload cluster", FlakeAttempts(5), func() {
-			Expect(wcClient.CheckConnection()).To(Succeed())
+		It("should be able to connect to the workload cluster", func() {
+			Eventually(func() error {
+				return wcClient.CheckConnection()
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 		})
 
 		It("has all the control-plane nodes running", func() {
