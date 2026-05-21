@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Pin `nginx-unprivileged` image tag to `1.31-alpine` in PVC storage test. The image had no `:latest` tag in `gsoci.azurecr.io`, causing the pod to fail with `ErrImagePull` and the test to time out across all providers.
+
 ## [7.0.1] - 2026-05-08
 
 ### Changed
