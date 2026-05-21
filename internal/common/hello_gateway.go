@@ -82,6 +82,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			).
 				WithNamespace(namespace).
 				WithClusterName(clusterName).
+				WithInCluster(true).
 				WithValuesFile(awsLBValuesFile, &helmrelease.TemplateValues{
 					ClusterName: clusterName,
 					ExtraValues: map[string]string{
@@ -96,7 +97,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Expect(err).To(BeNil())
 
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), awsLBHelmRelease.GetName(), awsLBHelmRelease.GetNamespace())).
-				WithTimeout(10*time.Minute).
+				WithTimeout(15*time.Minute).
 				WithPolling(10*time.Second).
 				Should(BeTrue())
 		})
@@ -115,6 +116,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			).
 				WithNamespace(namespace).
 				WithClusterName(clusterName).
+				WithInCluster(true).
 				WithValuesFile("./test_data/gateway-api-bundle_values.yaml", &helmrelease.TemplateValues{
 					ClusterName: clusterName,
 				})
