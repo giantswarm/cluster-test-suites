@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.1.0] - 2026-05-21
+
 ### Changed
 
 - Basic connectivity tests now use `Eventually` with a 1-minute timeout and 5-second polling instead of `FlakeAttempts`. `FlakeAttempts` retries with no delay, so on transient DNS/connection failures all attempts would burn through in milliseconds before the underlying condition had a chance to clear.
@@ -1410,7 +1412,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...HEAD
+[7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
 [7.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.0...v7.0.1
 [7.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.4.0...v7.0.0
 [6.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.3.0...v6.4.0
