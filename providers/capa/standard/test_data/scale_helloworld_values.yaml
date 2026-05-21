@@ -1,3 +1,5 @@
+ingress:
+  enabled: false
 autoscaling:
   enabled: false
 replicaCount: {{ index .ExtraValues "ReplicaCount" }}
