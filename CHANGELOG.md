@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Basic connectivity tests now use `Eventually` with a 1-minute timeout and 5-second polling instead of `FlakeAttempts`. `FlakeAttempts` retries with no delay, so on transient DNS/connection failures all attempts would burn through in milliseconds before the underlying condition had a chance to clear.
 
+### Fixed
+
+- Pin `nginx-unprivileged` image tag to `1.31-alpine` in PVC storage test. The image had no `:latest` tag in `gsoci.azurecr.io`, causing the pod to fail with `ErrImagePull` and the test to time out across all providers.
+
 ## [7.0.1] - 2026-05-08
 
 ### Changed
