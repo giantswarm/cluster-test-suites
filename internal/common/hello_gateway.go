@@ -163,7 +163,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 					Version: "v1",
 					Kind:    "Gateway",
 				})
-				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: "giantswarm-default", Namespace: "giantswarm"}, gateway)
+				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: "giantswarm-default", Namespace: "envoy-gateway-system"}, gateway)
 				if err != nil {
 					logger.Log("Failed to get Gateway: %v", err)
 					return false, err
