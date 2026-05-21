@@ -83,6 +83,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithNamespace(namespace).
 				WithClusterName(clusterName).
 				WithInCluster(true).
+				WithTargetNamespace(namespace).
+				WithServiceAccountName("automation").
 				WithValuesFile(awsLBValuesFile, &helmrelease.TemplateValues{
 					ClusterName: clusterName,
 					ExtraValues: map[string]string{
@@ -117,6 +119,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithNamespace(namespace).
 				WithClusterName(clusterName).
 				WithInCluster(true).
+				WithTargetNamespace(namespace).
+				WithServiceAccountName("automation").
 				WithValuesFile("./test_data/gateway-api-bundle_values.yaml", &helmrelease.TemplateValues{
 					ClusterName: clusterName,
 				})
