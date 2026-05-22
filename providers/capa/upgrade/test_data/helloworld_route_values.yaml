@@ -1,0 +1,12 @@
+clusterName: {{ .ClusterName }}
+organization: {{ .Organization }}
+ingress:
+  enabled: false
+route:
+  enabled: true
+  kind: HTTPRoute
+  hostnames:
+    - {{ index .ExtraValues "IngressUrl" }}
+  parentRefs:
+    - name: giantswarm-default
+      namespace: envoy-gateway-system

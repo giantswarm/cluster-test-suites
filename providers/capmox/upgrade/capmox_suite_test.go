@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder/providers/capmox"
+
 	"github.com/giantswarm/cluster-test-suites/v7/internal/suite"
 )
 

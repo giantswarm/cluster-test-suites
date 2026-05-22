@@ -4,10 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/v7/assets/storage"
-	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 	"github.com/giantswarm/clustertest/v5/pkg/client"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	"github.com/giantswarm/clustertest/v5/pkg/wait"
@@ -16,6 +12,11 @@ import (
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/cluster-test-suites/v7/assets/storage"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck

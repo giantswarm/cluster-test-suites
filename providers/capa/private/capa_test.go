@@ -8,7 +8,9 @@ import (
 )
 
 var _ = Describe("Common tests", func() {
-	common.Run(common.NewTestConfigWithDefaults())
+	cfg := common.NewTestConfigWithDefaults()
+	cfg.GatewayAPISupported = false
+	common.Run(cfg)
 
 	// ECR Credential Provider specific tests
 	ecr.Run()
