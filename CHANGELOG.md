@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.
 - Add a temporary `ARMNodePoolEnabled` suite config flag. When set, the basic pod health checks ("Running state" and "restarting pods") exclude `net-exporter` and `cert-exporter-daemonset`, whose released app versions aren't multi-arch yet and crashloop on arm64 nodes. Enabled for the CAPA standard suite; to be removed once release v35 ships the multi-arch versions.
+- Add `hello world via gateway api` e2e test to CAPA suites. Deploys `gateway-api-bundle` and a `hello-world` app via `HTTPRoute`, verifying gateway, DNS, certificate, and HTTP connectivity end-to-end.
+- Extend the gateway API e2e test to capv, capz, capvcd, and EKS suites. Provider-specific steps (external-dns check, certificate readiness, HTTP test) are skipped when the underlying capability is not available.
 
 ## [7.1.0] - 2026-05-21
 

@@ -24,7 +24,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
-func runHelloWorldGateway(gatewayAPISupported bool) {
+func runHelloWorldGateway(gatewayAPISupported, externalDnsSupported, certManagerSupported bool) {
 	Context("hello world via gateway api", Ordered, func() {
 		var (
 			helloHelmRelease    *helmv2.HelmRelease
@@ -49,17 +49,25 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 		})
 
 		It("should have cert-manager and external-dns deployed", func() {
+			if !certManagerSupported && !externalDnsSupported {
+				Skip("Neither cert-manager nor external-dns is supported")
+			}
+
 			org := state.GetCluster().Organization
 
-			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
-				WithTimeout(appReadyTimeout).
-				WithPolling(appReadyInterval).
-				Should(BeTrue())
+			if certManagerSupported {
+				Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
+					WithTimeout(appReadyTimeout).
+					WithPolling(appReadyInterval).
+					Should(BeTrue())
+			}
 
-			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
-				WithTimeout(appReadyTimeout).
-				WithPolling(appReadyInterval).
-				Should(BeTrue())
+			if externalDnsSupported {
+				Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-external-dns", state.GetCluster().Name), org.GetNamespace())).
+					WithTimeout(appReadyTimeout).
+					WithPolling(appReadyInterval).
+					Should(BeTrue())
+			}
 		})
 
 		It("should deploy aws-lb-controller-bundle", func() {
@@ -203,6 +211,10 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 		})
 
 		It("certificate in envoy-gateway-system should be ready", func() {
+			if !certManagerSupported {
+				Skip("cert-manager is not supported")
+			}
+
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).ShouldNot(HaveOccurred())
 
@@ -337,6 +349,10 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 		})
 
 		It("hello world app responds successfully", func() {
+			if !certManagerSupported {
+				Skip("cert-manager is not supported")
+			}
+
 			httpClient := net.NewHttpClient()
 
 			Eventually(func() (string, error) {

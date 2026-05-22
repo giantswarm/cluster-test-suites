@@ -38,7 +38,7 @@ func Run(cfg *TestConfig) {
 	runMetrics(cfg)
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorld(cfg.ExternalDnsSupported && cfg.IngressNginxSupported)
-	runHelloWorldGateway(cfg.GatewayAPISupported)
+	runHelloWorldGateway(cfg.GatewayAPISupported, cfg.ExternalDnsSupported, cfg.CertManagerSupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
 }

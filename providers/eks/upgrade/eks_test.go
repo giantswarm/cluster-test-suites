@@ -25,6 +25,5 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	ccfg.ExternalDnsSupported = false
 	ccfg.AutoScalingSupported = false
 	ccfg.CertManagerSupported = false
-	ccfg.GatewayAPISupported = false
 	common.Run(ccfg)
 })
