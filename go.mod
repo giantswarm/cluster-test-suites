@@ -7,7 +7,7 @@ require (
 	github.com/fluxcd/helm-controller/api v1.5.5
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.0.1
-	github.com/giantswarm/clustertest/v5 v5.1.0
+	github.com/giantswarm/clustertest/v5 v5.1.1-0.20260524063828-b0c31be2c916
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260525194042-be383ce680b6
 	github.com/onsi/ginkgo/v2 v2.29.0
