@@ -10,6 +10,7 @@ import (
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	helmv2 "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/failurehandler"
 	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	"github.com/giantswarm/clustertest/v5/pkg/net"
@@ -210,7 +211,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			}).
 				WithTimeout(10 * time.Minute).
 				WithPolling(10 * time.Second).
-				Should(BeTrue())
+				Should(BeTrue(), failurehandler.ExternalDNSIssues(state.GetFramework(), state.GetCluster()))
 		})
 
 		It("certificate in envoy-gateway-system should be ready", func() {
@@ -252,6 +253,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithPolling(wait.DefaultInterval).
 				Should(
 					Succeed(),
+					failurehandler.CertificatesNotReady(state.GetFramework(), state.GetCluster(), "envoy-gateway-system"),
 				)
 		})
 
