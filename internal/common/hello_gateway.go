@@ -143,6 +143,16 @@ func runHelloWorldGateway(gatewayAPISupported, externalDnsSupported, certManager
 				WithTimeout(10*time.Minute).
 				WithPolling(10*time.Second).
 				Should(BeTrue())
+
+			childApps := []types.NamespacedName{
+				{Name: fmt.Sprintf("%s-gateway-api-crds", clusterName), Namespace: namespace},
+				{Name: fmt.Sprintf("%s-envoy-gateway", clusterName), Namespace: namespace},
+				{Name: fmt.Sprintf("%s-gateway-api-config", clusterName), Namespace: namespace},
+			}
+			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), childApps)).
+				WithTimeout(10*time.Minute).
+				WithPolling(10*time.Second).
+				Should(BeTrue())
 		})
 
 		It("gateway giantswarm-default should be programmed", func() {
