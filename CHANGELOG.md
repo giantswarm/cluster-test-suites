@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.
+- Add a temporary `ARMNodePoolEnabled` suite config flag. When set, the basic pod health checks ("Running state" and "restarting pods") exclude `net-exporter` and `cert-exporter-daemonset`, whose released app versions aren't multi-arch yet and crashloop on arm64 nodes. Enabled for the CAPA standard suite; to be removed once release v35 ships the multi-arch versions.
+
 ## [7.1.0] - 2026-05-21
 
 ### Changed

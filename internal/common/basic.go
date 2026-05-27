@@ -3,9 +3,12 @@ package common
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -22,7 +25,7 @@ import (
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 )
 
-func runBasic() {
+func runBasic(cfg *TestConfig) {
 	Context("basic", func() {
 		var wcClient *client.Client
 
@@ -153,7 +156,7 @@ func runBasic() {
 		It("has all of its Pods in the Running state", func() {
 			Eventually(
 				wait.ConsistentWaitCondition(
-					wait.AreAllPodsInSuccessfulPhase(state.GetContext(), wcClient),
+					AreAllPodsInSuccessfulPhaseWithFilter(state.GetContext(), wcClient, armExcludedPodLabels(cfg)),
 					10,
 					time.Second,
 				)).
@@ -166,11 +169,13 @@ func runBasic() {
 		})
 
 		It("doesn't have restarting pods", func() {
+			// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
+			// Excluding karpenter because it's deployed using a HelmRelease and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process.
+			// Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
+			excludedAppNames := []string{"cluster-autoscaler-app", "karpenter"}
+			excludedAppNames = append(excludedAppNames, armExcludedAppNames(cfg)...)
 			filterLabels := []string{
-				// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
-				// Excluding karpenter because it's deployed using a HelmRelease and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process.
-				// Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
-				"app.kubernetes.io/name notin (cluster-autoscaler-app, karpenter)",
+				fmt.Sprintf("app.kubernetes.io/name notin (%s)", strings.Join(excludedAppNames, ", ")),
 			}
 
 			Eventually(
@@ -215,6 +220,66 @@ func runBasic() {
 				Should(Succeed())
 		})
 	})
+}
+
+// armExcludedAppNames returns the `app.kubernetes.io/name` values to exclude from pod
+// health checks when an arm64 node pool is present. The released net-exporter and
+// cert-exporter app versions aren't multi-arch yet, so their DaemonSet pods crashloop on
+// arm64 nodes. cluster-test-suites always pulls the latest release, which lags the fixed
+// app versions, so exclude them until those versions ship.
+//
+// TODO(arm64): temporary. Remove this exclusion (and the ARMNodePoolEnabled plumbing)
+// once release v35 ships the multi-arch net-exporter and cert-exporter versions.
+// See: https://github.com/giantswarm/roadmap/issues/4302
+func armExcludedAppNames(cfg *TestConfig) []string {
+	if !cfg.ARMNodePoolEnabled {
+		return nil
+	}
+	// net-exporter pods use `app.kubernetes.io/name: net-exporter`; cert-exporter's
+	// DaemonSet pods use `app.kubernetes.io/name: cert-exporter-daemonset`.
+	return []string{"net-exporter", "cert-exporter-daemonset"}
+}
+
+// armExcludedPodLabels returns label selectors filtering out the arm64-incompatible apps,
+// or an empty slice when there's nothing to exclude (so checks behave as before).
+func armExcludedPodLabels(cfg *TestConfig) []string {
+	names := armExcludedAppNames(cfg)
+	if len(names) == 0 {
+		return nil
+	}
+	return []string{fmt.Sprintf("app.kubernetes.io/name notin (%s)", strings.Join(names, ", "))}
+}
+
+// AreAllPodsInSuccessfulPhaseWithFilter checks that all Pods (minus those matched by the
+// exclusion label selectors) are in a running or completed phase. It mirrors
+// wait.AreAllPodsInSuccessfulPhase, which has no filtered variant upstream.
+func AreAllPodsInSuccessfulPhaseWithFilter(ctx context.Context, wcClient *client.Client, filterLabels []string) wait.WaitCondition {
+	return func() (bool, error) {
+		podList := &corev1.PodList{}
+		podListOptions := []cr.ListOption{}
+		for _, filter := range filterLabels {
+			parsedLabel, err := labels.Parse(filter)
+			if err != nil {
+				logger.Log("Failed to parse label '%s', skipping...", filter)
+				continue
+			}
+			podListOptions = append(podListOptions, &cr.ListOptions{LabelSelector: parsedLabel})
+		}
+		if err := wcClient.List(ctx, podList, podListOptions...); err != nil {
+			return false, err
+		}
+
+		for _, pod := range podList.Items {
+			phase := pod.Status.Phase
+			if phase != corev1.PodRunning && phase != corev1.PodSucceeded {
+				logger.Log("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
+				return false, fmt.Errorf("pod %s/%s in %s phase", pod.Namespace, pod.Name, phase)
+			}
+		}
+
+		logger.Log("All (%d) pods currently in a running or completed state", len(podList.Items))
+		return true, nil
+	}
 }
 
 func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values *application.ClusterValues) func() error {
