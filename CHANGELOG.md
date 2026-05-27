@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.0] - 2026-05-27
+
 ### Added
 
 - CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.
@@ -1417,7 +1419,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...HEAD
+[7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
 [7.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.0...v7.0.1
 [7.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.4.0...v7.0.0
