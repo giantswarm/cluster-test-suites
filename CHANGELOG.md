@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CAPA standard suite: gate the ARM/Graviton node pool (and the `ARMNodePoolEnabled` exporter exclusions) on `E2E_RELEASE_VERSION >= v35.0.0`. The `architecture` / `instanceType` fields require cluster-aws 8.5.0+, but `/run release-test-suites` always pulls the latest cluster-test-suites — so without a gate, release PRs on older lines (v33.x, v34.x) failed (example: giantswarm/releases#2315). Conservative default: empty / unparseable `E2E_RELEASE_VERSION` skips ARM. Moved the arm-specific values into `test_data/cluster_values_arm.yaml`, loaded conditionally via the new `suite.WithExtraClusterValues` option.
+
+### Added
+
+- `suite.SetupWithOptions` plus a `suite.WithExtraClusterValues(fn)` functional option, so a suite can append extra cluster-values YAML on top of `./test_data/cluster_values.yaml` based on runtime conditions (e.g. release version). The existing `suite.Setup` signature is unchanged.
+
 ## [7.2.0] - 2026-05-27
 
 ### Added
