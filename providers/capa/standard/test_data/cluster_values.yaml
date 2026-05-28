@@ -9,22 +9,10 @@ global:
   # testing both node provisioning models in a single run — which also reflects how customers
   # run in production (mixed ASG + Karpenter pools).
   # See: https://github.com/giantswarm/roadmap/issues/4249
-  #
-  # Additionally, exercise ARM/Graviton support with an ASG-based arm64 pool (np-arm64).
-  # The pool is tainted so amd64-only workloads from the suite don't land on arm nodes.
   nodePools:
     nodepool-0:
       minSize: 1
       maxSize: 1
-    np-arm64:
-      architecture: arm64
-      instanceType: m7g.xlarge
-      minSize: 1
-      maxSize: 1
-      customNodeTaints:
-        - effect: NoSchedule
-          key: kubernetes.io/arch
-          value: arm64
     np-karpntr:
       type: karpenter
       rootVolumeSizeGB: 15

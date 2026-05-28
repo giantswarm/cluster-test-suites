@@ -11,7 +11,6 @@ type TestConfig struct {
 	SecurityBundleInstalled      bool
 	GatewayAPISupported          bool
 	IngressNginxSupported        bool
-	ARMNodePoolEnabled           bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -26,13 +25,12 @@ func NewTestConfigWithDefaults() *TestConfig {
 		SecurityBundleInstalled:      true,
 		GatewayAPISupported:          true,
 		IngressNginxSupported:        false,
-		ARMNodePoolEnabled:           false,
 	}
 }
 
 func Run(cfg *TestConfig) {
 	RunApps(cfg)
-	runBasic(cfg)
+	runBasic()
 	runCertManager(cfg.CertManagerSupported)
 	runDNS(cfg.BastionSupported)
 	runMetrics(cfg)

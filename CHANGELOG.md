@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Revert the ARM/Graviton node pool and the `ARMNodePoolEnabled` suite flag added in v7.2.0 (#1040). The static `architecture` / `instanceType` fields on the ASG nodepool require cluster-aws 8.5.0+, but cluster-test-suites is always pulled at `latest` by `/run release-test-suites`, so any release PR using a cluster-aws version older than 8.5.0 (e.g. release v34.x.x lines) fails Helm schema validation up front (example: giantswarm/releases#2315). Reverting until the ARM additions can be gated on the release version under test.
+
 ## [7.2.0] - 2026-05-27
 
 ### Added

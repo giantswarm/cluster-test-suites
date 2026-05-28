@@ -17,12 +17,7 @@ var _ = Describe("Common tests", func() {
 		state.SetTestTimeout(timeout.DeployApps, time.Minute*30)
 	})
 
-	cfg := common.NewTestConfigWithDefaults()
-	// This suite runs an arm64 node pool. net-exporter and cert-exporter aren't multi-arch
-	// in the currently-released app versions, so exclude their pods from the health checks.
-	// TODO(arm64): remove once release v35 ships the multi-arch versions. https://github.com/giantswarm/roadmap/issues/4302
-	cfg.ARMNodePoolEnabled = true
-	common.Run(cfg)
+	common.Run(common.NewTestConfigWithDefaults())
 
 	// ECR Credential Provider specific tests
 	ecr.Run()
