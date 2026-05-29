@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove the ingress-nginx hello-world test (`runHelloWorld`) and the `IngressNginxSupported` config flag. The test was permanently disabled (`IngressNginxSupported` defaulted to `false` and was never enabled by any provider). Associated `helloworld_values.yaml` and `ingress-nginx_values.yaml` test data files have been deleted from all provider directories.
+
 ### Added
 
 - CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.

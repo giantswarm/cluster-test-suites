@@ -9,6 +9,7 @@ import (
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	helmv2 "github.com/fluxcd/helm-controller/api/v2"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
 	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	"github.com/giantswarm/clustertest/v5/pkg/net"
@@ -390,4 +391,16 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			}
 		})
 	})
+}
+
+func getWorkloadClusterDnsZone() string {
+	values := &application.ClusterValues{}
+	err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+	Expect(err).NotTo(HaveOccurred())
+
+	if values.BaseDomain == "" {
+		Fail("baseDomain field missing from cluster helm values")
+	}
+
+	return fmt.Sprintf("%s.%s", state.GetCluster().Name, values.BaseDomain)
 }
