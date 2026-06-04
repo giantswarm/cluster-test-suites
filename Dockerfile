@@ -1,7 +1,13 @@
-FROM golang:1.26 AS build-tests
+# Pin the build stage to the host platform so its RUN steps never run under
+# QEMU emulation. Cross-compilation is driven by TARGETOS/TARGETARCH instead.
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build-tests
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
+# ginkgo here runs natively (host arch) to orchestrate the build.
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@latest
 
 ADD go.mod go.sum ./
@@ -10,17 +16,22 @@ RUN go mod download
 
 ADD . .
 
-RUN ginkgo build --skip-package /X -r ./
+# GOOS/GOARCH make the underlying `go test -c` cross-compile the .test binaries
+# for the target architecture, without emulating ginkgo itself.
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} ginkgo build --skip-package /X -r ./
+
+# Cross-build the ginkgo runner that ships in the final image (must be target arch).
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/ginkgo github.com/onsi/ginkgo/v2/ginkgo
 
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-RUN apt-get update \
-  && apt-get install --no-install-recommends --no-install-suggests -y ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+# Copy the CA bundle from the build stage instead of `apt-get install`, so the
+# target stage has no RUN step and is never emulated.
+COPY --from=build-tests /etc/ssl/certs /etc/ssl/certs
 
 COPY --from=build-tests /app /app
-COPY --from=build-tests /go/bin/ginkgo /usr/local/bin/ginkgo
+COPY --from=build-tests /out/ginkgo /usr/local/bin/ginkgo
 
 ENTRYPOINT ["/app/entrypoint.sh"]

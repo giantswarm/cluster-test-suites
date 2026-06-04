@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Dockerfile: cross-compile instead of emulating for multi-arch builds.
 - Gateway e2e: verify child apps (`gateway-api-crds`, `envoy-gateway`, `gateway-api-config`) are ready after the bundle HelmRelease deploys.
 - Gateway e2e: attach `CertificatesNotReady` and `ExternalDNSIssues` failure handlers to certificate and DNS steps for better failure diagnostics.
 
