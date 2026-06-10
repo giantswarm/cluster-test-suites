@@ -36,7 +36,7 @@ WORKDIR /app
 # target stage has no RUN step and is never emulated.
 COPY --from=build-tests /etc/ssl/certs /etc/ssl/certs
 
-COPY --from=crust-gather /tmp/kubectl-crust-gather /usr/local/bin/crust-gather
+COPY --from=build-tests /tmp/kubectl-crust-gather /usr/local/bin/crust-gather
 COPY --from=build-tests /app /app
 COPY --from=build-tests /out/ginkgo /usr/local/bin/ginkgo
 
