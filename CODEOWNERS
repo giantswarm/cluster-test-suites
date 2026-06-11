@@ -1,3 +1,5 @@
+# Managed in https://github.com/giantswarm/github/tree/main/repositories/override/cluster-test-suites/CODEOWNERS
+
 # Main / Shared
 * @giantswarm/team-tenet
 /common @giantswarm/team-phoenix @giantswarm/team-rocket
