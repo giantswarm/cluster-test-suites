@@ -3,6 +3,7 @@ module github.com/giantswarm/cluster-test-suites/v7
 go 1.26.3
 
 require (
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/cert-manager/cert-manager v1.20.2
 	github.com/fluxcd/helm-controller/api v1.5.5
 	github.com/giantswarm/apiextensions-application v0.6.2
@@ -27,7 +28,6 @@ require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect

@@ -15,7 +15,9 @@ import (
 
 	cb "github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder"
 	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/standup"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/values"
 	"github.com/giantswarm/clustertest/v5"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
 	"github.com/giantswarm/clustertest/v5/pkg/client"
 	"github.com/giantswarm/clustertest/v5/pkg/env"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
@@ -29,10 +31,37 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
+// Options controls optional Setup behavior.
+type Options struct {
+	// ExtraClusterValuesFn, if set, returns an additional YAML values string to merge
+	// on top of ./test_data/cluster_values.yaml. Returning "" skips the overlay. Used
+	// by suites that need to apply overrides conditionally (e.g. release-version-gated
+	// schema fields).
+	ExtraClusterValuesFn func() (string, error)
+}
+
+// Option mutates Options.
+type Option func(*Options)
+
+// WithExtraClusterValues registers a callback that may return extra cluster-values YAML
+// to merge on top of ./test_data/cluster_values.yaml.
+func WithExtraClusterValues(fn func() (string, error)) Option {
+	return func(o *Options) { o.ExtraClusterValuesFn = fn }
+}
+
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+	SetupWithOptions(isUpgrade, clusterBuilder, nil, clusterReadyFns...)
+}
+
+// SetupWithOptions is like Setup but accepts functional options.
+func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []Option, clusterReadyFns ...func(client *client.Client)) {
+	o := &Options{}
+	for _, opt := range opts {
+		opt(o)
+	}
 	BeforeSuite(func() {
 		logger.LogWriter = GinkgoWriter
 		state.SetContext(context.Background())
@@ -83,7 +112,7 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		Expect(err).NotTo(HaveOccurred())
 		state.SetFramework(framework)
 
-		cluster := cb.LoadOrBuildCluster(framework, clusterBuilder)
+		cluster := loadOrBuildCluster(framework, clusterBuilder, o)
 		state.SetCluster(cluster)
 
 		// We'll use this to track if the BeforeSuite failed and if we should do extra debug logging
@@ -190,6 +219,32 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
+}
+
+// loadOrBuildCluster mirrors cb.LoadOrBuildCluster but allows appending an extra YAML
+// overlay (via Options.ExtraClusterValuesFn) to the cluster values. Used by suites that
+// need to apply overrides conditionally — e.g. release-version-gated nodepool fields
+// that only exist in newer schemas.
+func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.ClusterBuilder, o *Options) *application.Cluster {
+	cluster, err := framework.LoadCluster()
+	Expect(err).NotTo(HaveOccurred())
+	if cluster != nil {
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.GetNamespace())
+		return cluster
+	}
+
+	overrides := []string{values.MustLoadValuesFile("./test_data/cluster_values.yaml")}
+	if o != nil && o.ExtraClusterValuesFn != nil {
+		extra, err := o.ExtraClusterValuesFn()
+		Expect(err).NotTo(HaveOccurred())
+		if extra != "" {
+			overrides = append(overrides, extra)
+		}
+	}
+
+	cluster = clusterBuilder.NewClusterApp("", "", overrides)
+	cluster = cb.ApplyAppOverridesFromEnv(cluster)
+	return cluster
 }
 
 func getProviderFromBuilder(clusterBuilder cb.ClusterBuilder) (string, error) {

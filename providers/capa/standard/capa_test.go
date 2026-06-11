@@ -18,10 +18,12 @@ var _ = Describe("Common tests", func() {
 	})
 
 	cfg := common.NewTestConfigWithDefaults()
-	// This suite runs an arm64 node pool. net-exporter and cert-exporter aren't multi-arch
-	// in the currently-released app versions, so exclude their pods from the health checks.
-	// TODO(arm64): remove once release v35 ships the multi-arch versions. https://github.com/giantswarm/roadmap/issues/4302
-	cfg.ARMNodePoolEnabled = true
+	// Tie the net-exporter / cert-exporter pod-check exclusions to the same release-version
+	// gate that decides whether the arm64 node pool is applied (see capa_suite_test.go).
+	// Older releases don't get the arm pool, and shouldn't apply the exclusions either.
+	// TODO(arm64): drop this gate once v35.0.0 is the minimum release across CI.
+	// https://github.com/giantswarm/roadmap/issues/4302
+	cfg.ARMNodePoolEnabled = armSupported()
 	common.Run(cfg)
 
 	// ECR Credential Provider specific tests
