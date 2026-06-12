@@ -11,7 +11,7 @@ require (
 	github.com/giantswarm/clustertest/v5 v5.3.0
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260607191544-1ade7127911b
-	github.com/onsi/ginkgo/v2 v2.29.0
+	github.com/onsi/ginkgo/v2 v2.30.0
 	github.com/onsi/gomega v1.41.0
 	k8s.io/api v0.36.1
 	k8s.io/apiextensions-apiserver v0.36.1
