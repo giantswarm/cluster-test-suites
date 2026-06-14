@@ -4,6 +4,11 @@ FROM --platform=$BUILDPLATFORM golang:1.26 AS build-tests
 
 ARG TARGETOS
 ARG TARGETARCH
+ARG CRUST_GATHER_VERSION=0.13.0
+
+RUN curl -sSfL \
+    "https://github.com/crust-gather/crust-gather/releases/download/v${CRUST_GATHER_VERSION}/kubectl-crust-gather_${CRUST_GATHER_VERSION}_linux_${TARGETARCH}.tar.gz" \
+    | tar -xz -C /tmp
 
 WORKDIR /app
 
@@ -31,6 +36,7 @@ WORKDIR /app
 # target stage has no RUN step and is never emulated.
 COPY --from=build-tests /etc/ssl/certs /etc/ssl/certs
 
+COPY --from=build-tests /tmp/kubectl-crust-gather /usr/local/bin/crust-gather
 COPY --from=build-tests /app /app
 COPY --from=build-tests /out/ginkgo /usr/local/bin/ginkgo
 
