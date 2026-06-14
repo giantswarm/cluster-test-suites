@@ -508,12 +508,31 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	cmd.Dir = tmpDir
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
+	// Strip proxy env vars: crust-gather connects directly via the kubeconfig endpoint,
+	// and a proxy in the environment triggers the disabled kube/http-proxy feature gate.
+	cmd.Env = removeProxyEnv(os.Environ())
 
 	if err := cmd.Run(); err != nil {
 		logger.Log("crust-gather: %s collection failed: %v", label, err)
 	} else {
 		logger.Log("crust-gather: %s snapshot pushed to %s", label, reference)
 	}
+}
+
+func removeProxyEnv(env []string) []string {
+	proxyKeys := map[string]bool{
+		"HTTP_PROXY": true, "http_proxy": true,
+		"HTTPS_PROXY": true, "https_proxy": true,
+		"NO_PROXY": true, "no_proxy": true,
+	}
+	result := make([]string, 0, len(env))
+	for _, e := range env {
+		key := strings.SplitN(e, "=", 2)[0]
+		if !proxyKeys[key] {
+			result = append(result, e)
+		}
+	}
+	return result
 }
 
 func cleanupPVs(ctx context.Context) error {
