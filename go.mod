@@ -8,7 +8,7 @@ require (
 	github.com/fluxcd/helm-controller/api v1.5.5
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.0.1
-	github.com/giantswarm/clustertest/v5 v5.3.1
+	github.com/giantswarm/clustertest/v5 v5.4.0
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260608121040-679d6278399d
 	github.com/onsi/ginkgo/v2 v2.31.0
@@ -56,7 +56,7 @@ require (
 	github.com/fluxcd/cli-utils v1.2.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.10.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.18.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.29.0 // indirect
+	github.com/fluxcd/pkg/apis/meta v1.30.0 // indirect
 	github.com/fluxcd/source-controller/api v1.8.5 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
@@ -201,12 +201,12 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v4 v4.2.0 // indirect
 	k8s.io/apiserver v0.36.2 // indirect
-	k8s.io/cli-runtime v0.36.1 // indirect
+	k8s.io/cli-runtime v0.36.2 // indirect
 	k8s.io/cluster-bootstrap v0.36.1 // indirect
 	k8s.io/component-base v0.36.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260519202549-bbf5c5577288 // indirect
-	k8s.io/kubectl v0.36.1 // indirect
+	k8s.io/kubectl v0.36.2 // indirect
 	k8s.io/streaming v0.36.2 // indirect
 	oras.land/oras-go/v2 v2.6.0 // indirect
 	sigs.k8s.io/e2e-framework v0.7.0 // indirect
