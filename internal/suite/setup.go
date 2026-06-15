@@ -520,6 +520,9 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 		// "Pushing layer" messages that drown the test logs. We still surface
 		// genuine warnings and errors via WARN.
 		"--verbosity", "WARN",
+		// Limit concurrent OCI layer uploads to avoid hitting the ACR Basic tier
+		// rate limit (20k requests/60s per identity).
+		"--buffer-size", "4",
 	}
 
 	if username != "" && password != "" {
