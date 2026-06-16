@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Explicitly request the `latest` provider cluster chart when building a cluster, unless the cluster app version is pinned via `E2E_OVERRIDE_VERSIONS`. This keeps daily Cluster Test Suites running against the latest chart after clustertest stopped bumping the release's pinned cluster app version by default (giantswarm/clustertest#730).
+
 - CAPA standard suite: gate the ARM/Graviton node pool (and the `ARMNodePoolEnabled` exporter exclusions) on `E2E_RELEASE_VERSION >= v35.0.0`. The `architecture` / `instanceType` fields require cluster-aws 8.5.0+, but `/run release-test-suites` always pulls the latest cluster-test-suites — so without a gate, release PRs on older lines (v33.x, v34.x) failed (example: giantswarm/releases#2315). Conservative default: empty / unparseable `E2E_RELEASE_VERSION` skips ARM. Moved the arm-specific values into `test_data/cluster_values_arm.yaml`, loaded conditionally via the new `suite.WithExtraClusterValues` option.
 
 ### Added

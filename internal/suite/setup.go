@@ -244,7 +244,31 @@ func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.Clus
 
 	cluster = clusterBuilder.NewClusterApp("", "", overrides)
 	cluster = cb.ApplyAppOverridesFromEnv(cluster)
+
+	// Cluster Test Suites intentionally test against the latest provider cluster chart to
+	// surface chart issues as early as possible. clustertest only keeps the release's pinned
+	// cluster app version when no version is explicitly requested, so we opt into "latest" here.
+	//
+	// We must not do this when the cluster app version is pinned via E2E_OVERRIDE_VERSIONS
+	// (e.g. when testing a provider cluster chart PR), otherwise the version under test would be
+	// replaced by the latest released version.
+	if !clusterAppOverriddenFromEnv(cluster.ClusterApp.AppName) {
+		cluster = cluster.WithAppVersions("latest")
+	}
+
 	return cluster
+}
+
+// clusterAppOverriddenFromEnv reports whether the given cluster app (e.g. "cluster-aws") has an
+// explicit version override set via the E2E_OVERRIDE_VERSIONS environment variable.
+func clusterAppOverriddenFromEnv(clusterAppName string) bool {
+	for _, pair := range strings.Split(os.Getenv(env.OverrideVersions), ",") {
+		name := strings.TrimSpace(strings.SplitN(pair, "=", 2)[0])
+		if strings.EqualFold(name, clusterAppName) {
+			return true
+		}
+	}
+	return false
 }
 
 func getProviderFromBuilder(clusterBuilder cb.ClusterBuilder) (string, error) {
