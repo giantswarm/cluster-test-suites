@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.0] - 2026-06-16
+
 ### Changed
 
 - Explicitly request the `latest` provider cluster chart when building a cluster, unless the cluster app version is pinned via `E2E_OVERRIDE_VERSIONS`. This keeps daily Cluster Test Suites running against the latest chart after clustertest stopped bumping the release's pinned cluster app version by default (giantswarm/clustertest#730).
@@ -1440,6 +1442,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dockerfile for running tests in CI
 
 [Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...HEAD
+[7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.0
 [7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
 [7.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.0...v7.0.1
