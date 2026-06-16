@@ -367,7 +367,10 @@ func collectCrustGatherSnapshots() {
 	} else {
 		defer os.Remove(wcKubeconfigPath)
 		applyCrustGatherPolicyException(wcCtx, clusterName)
-		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password)
+		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password,
+				"--exclude-kind", "Lease",
+				"--exclude-kind", "EndpointSlice",
+				"--exclude-kind", "ControllerRevision")
 	}
 
 	// Collect management cluster snapshot (scoped to the test cluster's namespace).
