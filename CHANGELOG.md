@@ -7,25 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- Explicitly request the `latest` provider cluster chart when building a cluster, unless the cluster app version is pinned via `E2E_OVERRIDE_VERSIONS`. This keeps daily Cluster Test Suites running against the latest chart after clustertest stopped bumping the release's pinned cluster app version by default (giantswarm/clustertest#730).
-
-- CAPA standard suite: gate the ARM/Graviton node pool (and the `ARMNodePoolEnabled` exporter exclusions) on `E2E_RELEASE_VERSION >= v35.0.0`. The `architecture` / `instanceType` fields require cluster-aws 8.5.0+, but `/run release-test-suites` always pulls the latest cluster-test-suites — so without a gate, release PRs on older lines (v33.x, v34.x) failed (example: giantswarm/releases#2315). Conservative default: empty / unparseable `E2E_RELEASE_VERSION` skips ARM. Moved the arm-specific values into `test_data/cluster_values_arm.yaml`, loaded conditionally via the new `suite.WithExtraClusterValues` option.
+## [7.2.0] - 2026-06-16
 
 ### Added
 
 - `suite.SetupWithOptions` plus a `suite.WithExtraClusterValues(fn)` functional option, so a suite can append extra cluster-values YAML on top of `./test_data/cluster_values.yaml` based on runtime conditions (e.g. release version). The existing `suite.Setup` signature is unchanged.
-
-## [7.2.0] - 2026-05-27
-
-### Added
-
 - CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.
 - Add a temporary `ARMNodePoolEnabled` suite config flag. When set, the basic pod health checks ("Running state" and "restarting pods") exclude `net-exporter` and `cert-exporter-daemonset`, whose released app versions aren't multi-arch yet and crashloop on arm64 nodes. Enabled for the CAPA standard suite; to be removed once release v35 ships the multi-arch versions.
 
 ### Changed
 
+- Explicitly request the `latest` provider cluster chart when building a cluster, unless the cluster app version is pinned via `E2E_OVERRIDE_VERSIONS`. This keeps daily Cluster Test Suites running against the latest chart after clustertest stopped bumping the release's pinned cluster app version by default (giantswarm/clustertest#730).
+- CAPA standard suite: gate the ARM/Graviton node pool (and the `ARMNodePoolEnabled` exporter exclusions) on `E2E_RELEASE_VERSION >= v35.0.0`. The `architecture` / `instanceType` fields require cluster-aws 8.5.0+, but `/run release-test-suites` always pulls the latest cluster-test-suites — so without a gate, release PRs on older lines (v33.x, v34.x) failed (example: giantswarm/releases#2315). Conservative default: empty / unparseable `E2E_RELEASE_VERSION` skips ARM. Moved the arm-specific values into `test_data/cluster_values_arm.yaml`, loaded conditionally via the new `suite.WithExtraClusterValues` option.
 - Dockerfile: cross-compile instead of emulating for multi-arch builds.
 - Gateway e2e: verify child apps (`gateway-api-crds`, `envoy-gateway`, `gateway-api-config`) are ready after the bundle HelmRelease deploys.
 - Gateway e2e: attach `CertificatesNotReady` and `ExternalDNSIssues` failure handlers to certificate and DNS steps for better failure diagnostics.
