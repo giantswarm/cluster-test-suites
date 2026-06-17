@@ -465,7 +465,6 @@ func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) 
 							"resources": map[string]interface{}{
 								"kinds":      []interface{}{"Pod"},
 								"namespaces": []interface{}{"default"},
-								"names":      []interface{}{"node-debug-*"},
 							},
 						},
 					},
@@ -492,9 +491,8 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
 
 	// The command timeout must be larger than the collection duration (5m)
-	// to allow time for the OCI push after collection finishes. The WC push
-	// is slow with low --buffer-size, so we allow 15m on top of the 5m collect.
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+	// to allow time for the OCI push after collection finishes.
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
 	defer cancel()
 
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
@@ -525,9 +523,9 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 		// genuine warnings and errors via WARN.
 		"--verbosity", "WARN",
 		// Limit concurrent OCI layer uploads to avoid hitting the ACR Basic tier
-		// rate limit. 8 is double the previous value (4) but well below the
-		// default (32), balancing push speed against rate limit risk.
-		"--buffer-size", "8",
+		// rate limit. 16 is half the default (32), balancing push speed against
+		// rate limit risk.
+		"--buffer-size", "16",
 	}
 
 	if username != "" && password != "" {
