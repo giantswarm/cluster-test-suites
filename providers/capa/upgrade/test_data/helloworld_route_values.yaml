@@ -1,5 +1,3 @@
-clusterName: {{ .ClusterName }}
-organization: {{ index .ExtraValues "Organization" }}
 ingress:
   enabled: false
 route:
