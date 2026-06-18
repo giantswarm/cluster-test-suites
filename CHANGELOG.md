@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CAPA/Upgrade: Do not pass cluster name and organization to Hello World.
+
 ## [7.2.1] - 2026-06-18
 
 ### Changed
