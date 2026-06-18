@@ -279,7 +279,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithClusterName(clusterName).
 				WithValuesFile("./test_data/helloworld_route_values.yaml", &helmrelease.TemplateValues{
 					ClusterName: clusterName,
-					ExtraValues: map[string]string{"Organization": org.Name, "IngressUrl": helloWorldHost},
+					ExtraValues: map[string]string{"IngressUrl": helloWorldHost},
 				})
 			Expect(err).To(BeNil())
 			helloHelmRelease, err = hrBuilder.Build()
