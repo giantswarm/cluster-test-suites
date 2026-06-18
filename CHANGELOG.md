@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.1] - 2026-06-18
+
 ### Changed
 
 - CAPA/Upgrade: Pass organization as extra value.
@@ -1436,7 +1438,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...HEAD
+[7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
 [7.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.0...v7.0.1
