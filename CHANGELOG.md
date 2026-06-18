@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.2] - 2026-06-18
+
 ### Changed
 
 - CAPA/Upgrade: Do not pass cluster name and organization to Hello World.
@@ -1442,7 +1444,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...HEAD
+[7.2.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
