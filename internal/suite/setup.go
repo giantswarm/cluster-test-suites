@@ -44,6 +44,11 @@ type Options struct {
 	// by suites that need to apply overrides conditionally (e.g. release-version-gated
 	// schema fields).
 	ExtraClusterValuesFn func() (string, error)
+
+	// SuiteSlug, if set, is appended to crust-gather snapshot tags so snapshots from
+	// different providers and test configurations are easy to identify in the registry.
+	// Use WithSuiteIdentifier to set this. When empty the tag has no suite suffix.
+	SuiteSlug string
 }
 
 // Option mutates Options.
@@ -54,6 +59,7 @@ type Option func(*Options)
 func WithExtraClusterValues(fn func() (string, error)) Option {
 	return func(o *Options) { o.ExtraClusterValuesFn = fn }
 }
+
 
 const (
 	OpenAIAPIKeySecretNamespace = "giantswarm"
@@ -74,11 +80,38 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	SetupWithOptions(isUpgrade, clusterBuilder, nil, clusterReadyFns...)
 }
 
+// detectSuiteSlug derives a provider/suite slug from the TARGET_SUITES environment
+// variable set by the CI pipeline (e.g. TARGET_SUITES=./providers/capa/private).
+// Returns "capa-private" for that input, or "" if the variable is absent or doesn't
+// contain a recognisable providers/ path — in which case no suite suffix is added.
+func detectSuiteSlug() string {
+	target := os.Getenv("TARGET_SUITES")
+	const marker = "providers/"
+	idx := strings.Index(target, marker)
+	if idx < 0 {
+		return ""
+	}
+	// Grab everything after "providers/", stopping at the first space in case
+	// multiple suites are listed.
+	path := target[idx+len(marker):]
+	if i := strings.IndexByte(path, ' '); i >= 0 {
+		path = path[:i]
+	}
+	path = strings.Trim(path, "/")
+	if path == "" {
+		return ""
+	}
+	return strings.ToLower(strings.ReplaceAll(path, "/", "-"))
+}
+
 // SetupWithOptions is like Setup but accepts functional options.
 func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []Option, clusterReadyFns ...func(client *client.Client)) {
 	o := &Options{}
 	for _, opt := range opts {
 		opt(o)
+	}
+	if o.SuiteSlug == "" {
+		o.SuiteSlug = detectSuiteSlug()
 	}
 	ReportAfterEach(func(report SpecReport) {
 		if report.Failed() {
@@ -232,7 +265,7 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 		}
 
 		// TODO: temporarily always collect for testing, revert to `if hasFailures {` once validated
-		collectCrustGatherSnapshots()
+		collectCrustGatherSnapshots(o.SuiteSlug)
 
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
@@ -345,7 +378,7 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 // collectCrustGatherSnapshots collects cluster state from both the workload cluster
 // and the management cluster using crust-gather, and pushes the snapshots to an OCI registry.
 // This is best-effort: failures are logged but do not block cluster cleanup.
-func collectCrustGatherSnapshots() {
+func collectCrustGatherSnapshots(suiteSlug string) {
 	if _, err := exec.LookPath("crust-gather"); err != nil {
 		logger.Log("crust-gather binary not found, skipping snapshot collection")
 		return
@@ -357,12 +390,19 @@ func collectCrustGatherSnapshots() {
 	username := os.Getenv("CRUST_GATHER_REGISTRY_USERNAME")
 	password := os.Getenv("CRUST_GATHER_REGISTRY_PASSWORD")
 
+	// Build the tag suffix: "<clusterName>[-<suiteSlug>]-{wc,mc}".
+	// suiteSlug is set via WithSuiteIdentifier; empty means no suite suffix (backwards-compatible).
+	tagPrefix := clusterName
+	if suiteSlug != "" {
+		tagPrefix = clusterName + "-" + suiteSlug
+	}
+
 	// Collect workload cluster snapshot (full cluster).
 	// Read the CAPI kubeconfig secret directly (not Teleport) to avoid proxy/auth
 	// issues that crust-gather can't handle.
 	// Each cluster gets its own context for the kubeconfig read, since the MC client
 	// may be rate-limited after the test suite and a shared context could starve the second read.
-	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, clusterName)
+	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, tagPrefix)
 	wcCtx, wcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer wcCancel()
 	if wcKubeconfigPath, wcPrivate, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
@@ -382,7 +422,7 @@ func collectCrustGatherSnapshots() {
 	// so we strip the prefix to get the actual cluster name for the CAPI secret lookup.
 	mcName := state.GetFramework().MC().GetClusterName()
 	mcName = strings.TrimPrefix(mcName, "teleport.giantswarm.io-")
-	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, clusterName)
+	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, tagPrefix)
 	mcCtx, mcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer mcCancel()
 	if mcKubeconfigPath, mcPrivate, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
