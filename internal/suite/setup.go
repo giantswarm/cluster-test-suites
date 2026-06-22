@@ -80,21 +80,26 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 	SetupWithOptions(isUpgrade, clusterBuilder, nil, clusterReadyFns...)
 }
 
-// detectSuiteSlug derives a provider/suite slug from the TARGET_SUITES environment
-// variable set by the CI pipeline (e.g. TARGET_SUITES=./providers/capa/private).
-// Returns "capa-private" for that input, or "" if the variable is absent or doesn't
-// contain a recognisable providers/ path — in which case no suite suffix is added.
+// detectSuiteSlug derives a provider/suite slug from the path of the running test
+// binary. The Tekton pipeline invokes each suite as e.g.
+// /app/providers/capa/standard/capa.test, so the path already encodes the two
+// directory levels we need. Returns "capa-standard" for that input, or "" if the
+// executable path doesn't contain a recognisable providers/ segment — in which case
+// no suite suffix is added to the snapshot tag.
 func detectSuiteSlug() string {
-	target := os.Getenv("TARGET_SUITES")
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
 	const marker = "providers/"
-	idx := strings.Index(target, marker)
+	idx := strings.Index(exe, marker)
 	if idx < 0 {
 		return ""
 	}
-	// Grab everything after "providers/", stopping at the first space in case
-	// multiple suites are listed.
-	path := target[idx+len(marker):]
-	if i := strings.IndexByte(path, ' '); i >= 0 {
+	// Strip the binary filename, keeping only the provider/suite path segments.
+	// e.g. "capa/standard/capa.test" → "capa/standard"
+	path := exe[idx+len(marker):]
+	if i := strings.LastIndex(path, "/"); i >= 0 {
 		path = path[:i]
 	}
 	path = strings.Trim(path, "/")
