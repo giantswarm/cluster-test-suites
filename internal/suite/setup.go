@@ -3,6 +3,8 @@ package suite
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"reflect"
@@ -32,6 +34,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // Options controls optional Setup behavior.
@@ -362,15 +365,15 @@ func collectCrustGatherSnapshots() {
 	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, clusterName)
 	wcCtx, wcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer wcCancel()
-	if wcKubeconfigPath, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
+	if wcKubeconfigPath, wcPrivate, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
 		logger.Log("crust-gather: failed to get WC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(wcKubeconfigPath)
 		applyCrustGatherPolicyException(wcCtx, clusterName)
-		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password,
-				"--exclude-kind", "Lease",
-				"--exclude-kind", "EndpointSlice",
-				"--exclude-kind", "ControllerRevision")
+		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password, !wcPrivate,
+			"--exclude-kind", "Lease",
+			"--exclude-kind", "EndpointSlice",
+			"--exclude-kind", "ControllerRevision")
 	}
 
 	// Collect management cluster snapshot (scoped to the test cluster's namespace).
@@ -382,7 +385,7 @@ func collectCrustGatherSnapshots() {
 	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, clusterName)
 	mcCtx, mcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer mcCancel()
-	if mcKubeconfigPath, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
+	if mcKubeconfigPath, mcPrivate, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
 		logger.Log("crust-gather: failed to get MC kubeconfig: %v", err)
 	} else {
 		defer os.Remove(mcKubeconfigPath)
@@ -390,15 +393,16 @@ func collectCrustGatherSnapshots() {
 		// filter out cluster-scoped resources. Without this, crust-gather would try
 		// to create debug pods on the MC (blocked by Kyverno), and we don't want to
 		// maintain a permanent PolicyException on the long-lived MC.
-		runCrustGather("MC", mcKubeconfigPath, mcReference, username, password,
+		runCrustGather("MC", mcKubeconfigPath, mcReference, username, password, !mcPrivate,
 			"--include-namespace", clusterNamespace,
 			"--exclude-kind", "Node")
 	}
 }
 
 // writeCAPIKubeconfig reads the CAPI kubeconfig secret for the given cluster from the MC
-// and writes it to a temp file. Returns the file path. Caller is responsible for cleanup.
-func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (string, error) {
+// and writes it to a temp file. Returns the file path, whether the API server endpoint is
+// private (RFC1918 or private DNS), and any error. Caller is responsible for cleanup.
+func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (string, bool, error) {
 	var secret corev1.Secret
 	err := state.GetFramework().MC().Get(ctx, cr.ObjectKeyFromObject(&corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
@@ -407,26 +411,26 @@ func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (st
 		},
 	}), &secret)
 	if err != nil {
-		return "", fmt.Errorf("failed to get CAPI kubeconfig secret: %w", err)
+		return "", false, fmt.Errorf("failed to get CAPI kubeconfig secret: %w", err)
 	}
 
 	kubeconfig := secret.Data["value"]
 	if len(kubeconfig) == 0 {
-		return "", fmt.Errorf("CAPI kubeconfig secret %s/%s-kubeconfig has empty 'value' key", namespace, clusterName)
+		return "", false, fmt.Errorf("CAPI kubeconfig secret %s/%s-kubeconfig has empty 'value' key", namespace, clusterName)
 	}
 
 	f, err := os.CreateTemp("", fmt.Sprintf("crust-gather-%s-kubeconfig-*", clusterName))
 	if err != nil {
-		return "", fmt.Errorf("failed to create temp file: %w", err)
+		return "", false, fmt.Errorf("failed to create temp file: %w", err)
 	}
 
 	if _, err := f.Write(kubeconfig); err != nil {
 		os.Remove(f.Name())
-		return "", fmt.Errorf("failed to write kubeconfig: %w", err)
+		return "", false, fmt.Errorf("failed to write kubeconfig: %w", err)
 	}
 	f.Close()
 
-	return f.Name(), nil
+	return f.Name(), hasPrivateEndpoint(kubeconfig), nil
 }
 
 // applyCrustGatherPolicyException creates a Kyverno PolicyException on the workload cluster
@@ -487,7 +491,7 @@ func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) 
 
 // runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry.
 // Errors are logged but do not cause the test suite to fail.
-func runCrustGather(label, kubeconfig, reference, username, password string, extraArgs ...string) {
+func runCrustGather(label, kubeconfig, reference, username, password string, stripProxy bool, extraArgs ...string) {
 	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
 
 	// The command timeout must be larger than the collection duration (5m)
@@ -538,15 +542,53 @@ func runCrustGather(label, kubeconfig, reference, username, password string, ext
 	cmd.Dir = tmpDir
 	cmd.Stdout = GinkgoWriter
 	cmd.Stderr = GinkgoWriter
-	// Strip proxy env vars: crust-gather connects directly via the kubeconfig endpoint,
-	// and a proxy in the environment triggers the disabled kube/http-proxy feature gate.
-	cmd.Env = removeProxyEnv(os.Environ())
+	// For public endpoints, strip proxy env vars: a proxy in the environment triggers
+	// the disabled kube/http-proxy feature gate in crust-gather. For private endpoints
+	// the proxy is needed to route traffic through the VPN to the cluster API server.
+	if stripProxy {
+		cmd.Env = removeProxyEnv(os.Environ())
+	}
 
 	if err := cmd.Run(); err != nil {
 		logger.Log("crust-gather: %s collection failed: %v", label, err)
 	} else {
 		logger.Log("crust-gather: %s snapshot pushed to %s", label, reference)
 	}
+}
+
+// hasPrivateEndpoint reports whether the kubeconfig's API server resolves to a
+// private (non-routable) address: an RFC1918 IP or a private DNS name such as
+// AWS internal load balancers ("internal-*"), ".internal", or ".local" hostnames.
+// Private clusters require the VPN proxy to be kept in the subprocess environment.
+func hasPrivateEndpoint(kubeconfigData []byte) bool {
+	cfg, err := clientcmd.Load(kubeconfigData)
+	if err != nil {
+		return false
+	}
+	privateRanges := []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}
+	for _, cluster := range cfg.Clusters {
+		u, err := url.Parse(cluster.Server)
+		if err != nil {
+			continue
+		}
+		host := u.Hostname()
+		if ip := net.ParseIP(host); ip != nil {
+			for _, cidr := range privateRanges {
+				_, network, _ := net.ParseCIDR(cidr)
+				if network.Contains(ip) {
+					return true
+				}
+			}
+		} else {
+			lower := strings.ToLower(host)
+			if strings.HasPrefix(lower, "internal-") ||
+				strings.HasSuffix(lower, ".internal") ||
+				strings.HasSuffix(lower, ".local") {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func removeProxyEnv(env []string) []string {
