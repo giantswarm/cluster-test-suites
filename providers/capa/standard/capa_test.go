@@ -28,4 +28,9 @@ var _ = Describe("Common tests", func() {
 
 	// ECR Credential Provider specific tests
 	ecr.Run()
+
+	// TODO(temp): remove after validating crust-gather failure-gating — intentional failure
+	It("TEMP: intentional failure to trigger crust-gather collection", func() {
+		Fail("intentional failure for crust-gather validation")
+	})
 })
