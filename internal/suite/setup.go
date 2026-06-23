@@ -269,8 +269,11 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 			return
 		}
 
-		// TODO: temporarily always collect for testing, revert to `if hasFailures {` once validated
-		collectCrustGatherSnapshots(o.SuiteSlug)
+		// Only collect crust-gather snapshots when at least one spec has failed —
+		// snapshots are large and expensive to push, so we skip them on green runs.
+		if hasFailures {
+			collectCrustGatherSnapshots(o.SuiteSlug)
+		}
 
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
