@@ -548,16 +548,11 @@ func runCrustGather(label, kubeconfig, reference, username, password string, str
 	defer cancel()
 
 	// crust-gather writes collected resources to a local directory before pushing to OCI.
-	// The path passed via -f becomes the layer path prefix in the OCI image (e.g., "-f wc"
-	// results in layer titles like "wc/api.json"). We use the lowercase label ("wc"/"mc") so
-	// that when a developer pulls both snapshots into the same local directory with `oras pull`,
-	// they land under distinct subdirectories and `crust-gather serve --archive` exposes each
-	// as its own kubeconfig context without manual renaming.
-	//
-	// We set cmd.Dir to a unique tmpdir so the relative "-f <label>" resolves somewhere writable
-	// (the container's /app cwd is read-only) and is cleaned up after the run.
-	snapshotLabel := strings.ToLower(label)
-	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", snapshotLabel))
+	// We set cmd.Dir to a unique tmpdir so crust-gather has a writable working directory
+	// (the container's /app cwd is read-only) and it is cleaned up after the run.
+	// We do not pass -f: crust-gather serve does not support that flag, so layers must
+	// use the default "crust-gather/" prefix for serve --reference to read them.
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", strings.ToLower(label)))
 	if err != nil {
 		logger.Log("crust-gather: %s failed to create temp dir: %v", label, err)
 		return
@@ -569,7 +564,6 @@ func runCrustGather(label, kubeconfig, reference, username, password string, str
 		"--kubeconfig", kubeconfig,
 		"--reference", reference,
 		"--duration", "5m",
-		"-f", snapshotLabel,
 		// Reduce noise: crust-gather's default INFO level emits thousands of
 		// "Pushing layer" messages that drown the test logs. We still surface
 		// genuine warnings and errors via WARN.
