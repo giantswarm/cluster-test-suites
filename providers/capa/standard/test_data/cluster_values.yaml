@@ -16,8 +16,6 @@ global:
   # older releases (e.g. v33.x, v34.x) don't break.
   nodePools:
     nodepool-0:
-      # TODO(temp): remove after validating crust-gather BeforeSuite failure gating
-      instanceType: m99.fake
       minSize: 1
       maxSize: 1
     np-karpntr:
