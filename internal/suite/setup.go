@@ -73,6 +73,12 @@ const (
 // Set by ReportAfterEach, checked in AfterSuite to trigger crust-gather collection.
 var hasFailures bool
 
+// beforeSuiteFailed tracks whether BeforeSuite failed (e.g. cluster standup or app install
+// timed out). ReportAfterEach only fires for specs, so BeforeSuite failures would otherwise
+// be invisible to the hasFailures check. Set by the BeforeSuite defer alongside the existing
+// debug-logging path.
+var beforeSuiteFailed bool
+
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
@@ -181,6 +187,7 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 		setupComplete := false
 		defer (func() {
 			if !setupComplete {
+				beforeSuiteFailed = true
 				// If we fail to standup the cluster, let's grab the status of the cluster App to see if there's an error
 				ctx := context.Background()
 				ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
@@ -269,9 +276,10 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 			return
 		}
 
-		// Only collect crust-gather snapshots when at least one spec has failed —
-		// snapshots are large and expensive to push, so we skip them on green runs.
-		if hasFailures {
+		// Only collect crust-gather snapshots when there is a failure — either a spec
+		// failed or BeforeSuite failed (e.g. cluster standup or app install timed out).
+		// Snapshots are large and expensive to push, so we skip them on green runs.
+		if hasFailures || beforeSuiteFailed {
 			collectCrustGatherSnapshots(o.SuiteSlug)
 		}
 
