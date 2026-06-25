@@ -39,6 +39,7 @@ var _ = Describe("Common tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		ctx := state.GetContext()
+		falseVal := false
 		dep := &appsv1.Deployment{
 			ObjectMeta: v1.ObjectMeta{Name: "crust-gather-test", Namespace: "default"},
 			Spec: appsv1.DeploymentSpec{
@@ -46,8 +47,23 @@ var _ = Describe("Common tests", func() {
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: v1.ObjectMeta{Labels: map[string]string{"app": "crust-gather-test"}},
 					Spec: corev1.PodSpec{
+						SecurityContext: &corev1.PodSecurityContext{
+							RunAsNonRoot: &[]bool{true}[0],
+							SeccompProfile: &corev1.SeccompProfile{
+								Type: corev1.SeccompProfileTypeRuntimeDefault,
+							},
+						},
 						Containers: []corev1.Container{
-							{Name: "test", Image: "invalid.registry.does.not.exist/test:invalid"},
+							{
+								Name:  "test",
+								Image: "invalid.registry.does.not.exist/test:invalid",
+								SecurityContext: &corev1.SecurityContext{
+									AllowPrivilegeEscalation: &falseVal,
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"ALL"},
+									},
+								},
+							},
 						},
 					},
 				},
