@@ -28,5 +28,4 @@ var _ = Describe("Common tests", func() {
 
 	// ECR Credential Provider specific tests
 	ecr.Run()
-
 })

@@ -62,8 +62,6 @@ func WithExtraClusterValues(fn func() (string, error)) Option {
 
 
 const (
-	OpenAIAPIKeySecretNamespace = "giantswarm"
-	OpenAIAPIKeySecretName      = "openai-api-key"
 
 	CrustGatherRegistry   = "crustgatherci.azurecr.io"
 	CrustGatherRepository = "snapshots"
