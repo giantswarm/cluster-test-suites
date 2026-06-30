@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
 
+
 ## [7.2.2] - 2026-06-18
 
 ### Changed
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - CAPA/Upgrade: Pass organization as extra value.
+
 ## [7.2.0] - 2026-06-16
 
 ### Added
