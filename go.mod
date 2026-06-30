@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/cert-manager/cert-manager v1.20.3
-	github.com/fluxcd/helm-controller/api v1.6.0
+	github.com/fluxcd/helm-controller/api v1.6.1
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.0.1
 	github.com/giantswarm/clustertest/v5 v5.4.0
@@ -55,8 +55,8 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fluxcd/cli-utils v1.2.0 // indirect
 	github.com/fluxcd/pkg/apis/acl v0.10.0 // indirect
-	github.com/fluxcd/pkg/apis/kustomize v1.19.0 // indirect
-	github.com/fluxcd/pkg/apis/meta v1.30.0 // indirect
+	github.com/fluxcd/pkg/apis/kustomize v1.19.1 // indirect
+	github.com/fluxcd/pkg/apis/meta v1.30.1 // indirect
 	github.com/fluxcd/source-controller/api v1.8.5 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
