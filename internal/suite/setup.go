@@ -62,7 +62,6 @@ func WithExtraClusterValues(fn func() (string, error)) Option {
 
 
 const (
-
 	CrustGatherRegistry   = "crustgatherci.azurecr.io"
 	CrustGatherRepository = "snapshots"
 )
