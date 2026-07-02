@@ -158,6 +158,245 @@ E.g.
 /run cluster-test-suites RELEASE_VERSION=v25.0.0
 ```
 
+## 🔍 Investigating Cluster Failures with crust-gather
+
+### What is crust-gather?
+
+[crust-gather](https://github.com/crust-gather/crust-gather) is a kubectl plugin that takes a point-in-time snapshot of a Kubernetes cluster's state resources, events, and logs and pushes it to an OCI registry. The snapshot can then be "served" locally, letting you use familiar `kubectl` commands to explore the cluster as it looked at the moment of failure, even long after the cluster has been torn down.
+
+In this test suite, crust-gather runs automatically at the end of every failed test suite run. It captures two snapshots:
+
+- **WC snapshot** — the full workload cluster state (pods, deployments, events, logs, etc.)
+- **MC snapshot** — the management cluster state scoped to the WC's namespace (CAPI resources, App CRs, MachineDeployments, events for the failing cluster)
+
+Snapshots are only collected on failure. Green runs produce no snapshots.
+
+---
+
+### Where are snapshots stored?
+
+Snapshots are pushed to:
+
+```
+crustgatherci.azurecr.io/snapshots
+```
+
+Tags follow the pattern:
+
+```
+<clusterName>-<suiteSlug>-wc    # workload cluster
+<clusterName>-<suiteSlug>-mc    # management cluster (scoped to WC namespace)
+```
+
+For example, a failed `capa/standard` run for cluster `abc12` would produce:
+
+```
+crustgatherci.azurecr.io/snapshots:abc12-capa-standard-wc
+crustgatherci.azurecr.io/snapshots:abc12-capa-standard-mc
+```
+
+The cluster name is visible in the Tekton pipeline logs or the test output.
+
+---
+
+### Prerequisites
+
+Install the crust-gather kubectl plugin:
+
+```sh
+# Replace <version> and <arch> with the appropriate values (e.g. 0.15.1 / amd64)
+curl -sSfL \
+  "https://github.com/crust-gather/crust-gather/releases/download/v<version>/kubectl-crust-gather_<version>_linux_<arch>.tar.gz" \
+  | tar -xz -C /usr/local/bin
+```
+
+Log in to the snapshot registry (credentials in the team's secrets store):
+
+```sh
+docker login crustgatherci.azurecr.io
+```
+
+Or authenticate via `oras`:
+
+```sh
+oras login crustgatherci.azurecr.io
+```
+
+---
+
+### Exploring a snapshot
+
+#### Option 1: Serve the snapshot locally
+
+Pick the tag for the snapshot you want to investigate (WC or MC) and run:
+
+```sh
+kubectl crust-gather serve --reference crustgatherci.azurecr.io/snapshots:<tag>
+```
+
+Example:
+
+```sh
+kubectl crust-gather serve --reference crustgatherci.azurecr.io/snapshots:abc12-capa-standard-wc
+```
+
+This starts a local API server (default port 8080) that replays the snapshot. Leave this running in one terminal.
+
+In a second terminal, set the kubeconfig to target the local server:
+
+```sh
+export KUBECONFIG=$(kubectl crust-gather kubeconfig)
+```
+
+Now all `kubectl` commands run against the snapshot:
+
+```sh
+kubectl get nodes
+kubectl get pods -A
+kubectl get events -A --sort-by='.lastTimestamp'
+```
+
+#### Option 2: Pull and browse the snapshot directly
+
+If you prefer to browse the raw resource files or if you want to grep across the entire snapshot without a running local server, you can pull the OCI layers directly using [`oras`](https://oras.land/docs/installation).
+
+**Install oras:**
+
+```sh
+# macOS
+brew install oras
+
+# Linux (replace version/arch as needed)
+curl -sSfL https://github.com/oras-project/oras/releases/download/v1.2.0/oras_1.2.0_linux_amd64.tar.gz \
+  | tar -xz -C /usr/local/bin oras
+```
+
+**Pull the snapshot layers:**
+
+```sh
+mkdir -p ./snapshot && cd ./snapshot
+oras pull crustgatherci.azurecr.io/snapshots:<tag>
+```
+
+This writes the snapshot contents into a `crust-gather/` subdirectory. The files are newline-delimited JSON (one Kubernetes resource object per line), organised by resource kind:
+
+```
+crust-gather/
+  pods.json
+  deployments.json
+  events.json
+  nodes.json
+  apps.json          # App CRs (in MC snapshots)
+  awsmachines.json   # CAPI machine resources (in MC snapshots)
+  ...
+```
+
+**Browse the files with `jq`:**
+
+```sh
+# List all pods and their phase
+jq -r '[.metadata.namespace, .metadata.name, .status.phase] | @tsv' crust-gather/pods.json
+
+# Find pods not in Running/Succeeded state
+jq 'select(.status.phase != "Running" and .status.phase != "Succeeded")
+    | [.metadata.namespace, .metadata.name, .status.phase] | @tsv' \
+    crust-gather/pods.json
+
+# Find App CRs that are not deployed (MC snapshot)
+jq 'select(.status.release.status != "deployed")
+    | [.metadata.name, .status.release.status, .status.release.reason] | @tsv' \
+    crust-gather/apps.json
+
+# Get events sorted by time
+jq -s 'sort_by(.lastTimestamp) | .[] | [.lastTimestamp, .involvedObject.name, .reason, .message] | @tsv' \
+    crust-gather/events.json
+```
+
+**When to use each approach:**
+
+| | `crust-gather serve` | `oras pull` + `jq` |
+| --- | --- | --- |
+| Familiar `kubectl` commands | Yes | No |
+| Grep / script across all resources | Harder | Easy |
+| Requires a running local server | Yes | No |
+| Works offline after pull | Yes (once served) | Yes |
+| Good for quick one-off lookups | No | Yes |
+
+---
+
+### What to look for
+
+#### For WC (workload cluster) failures
+
+WC failures are typically app or workload problems visible inside the cluster itself.
+
+```sh
+# Pods that are not running
+kubectl get pods -A | grep -v Running | grep -v Completed
+
+# Recent events sorted by time (shows scheduling failures, image pull errors, etc.)
+kubectl get events -A --sort-by='.lastTimestamp' | tail -40
+
+# Logs from a failing pod
+kubectl logs <pod-name> -n <namespace>
+kubectl logs <pod-name> -n <namespace> --previous   # last crash
+
+# Deployments not at desired replica count
+kubectl get deployments -A | grep -v "1/1\|2/2\|3/3"
+```
+
+#### For MC (management cluster) failures
+
+MC failures typically involve cluster provisioning, CAPI infrastructure, or App CR problems. Because the MC snapshot is scoped to the WC's namespace, everything here relates directly to the failing cluster.
+
+```sh
+# App CR status — shows if any app failed to deploy
+kubectl get apps -A
+# Look for status: deploy-failed or anything not "deployed"
+
+# CAPI Cluster and machine status
+kubectl get cluster,machinedeployment,awscluster,awsmachine -A
+
+# Why did a machine fail to provision?
+kubectl describe awsmachine <name> -n <namespace>
+
+# Events in the WC namespace — often contains the root cause message
+kubectl get events -n <namespace> --sort-by='.lastTimestamp'
+```
+
+---
+
+### Common failure patterns
+
+| Symptom | Where to look |
+| --- | --- |
+| Cluster never became ready (standup timeout) | MC snapshot → `kubectl describe cluster` and `kubectl get events` |
+| EC2 instance failed to provision | MC snapshot → `kubectl describe awsmachine` |
+| App installed but pods crashing | WC snapshot → `kubectl get pods -A`, `kubectl logs` |
+| App CR stuck in `deploy-failed` | MC snapshot → `kubectl get apps -A`, `kubectl describe app` |
+| ImagePullBackOff | WC snapshot → `kubectl describe pod`, check image name and registry |
+| Node not joining the cluster | MC snapshot → events + CAPI machine status; WC snapshot → `kubectl get nodes` |
+
+---
+
+### What is NOT captured
+
+- **Secrets** — crust-gather excludes secret contents by default
+- **`Lease` resources** — excluded to reduce noise (leader election objects)
+- **`EndpointSlice` and `ControllerRevision`** — excluded from WC snapshots to reduce size
+- **MC `Node` resources** — excluded from MC snapshots (the MC manages itself; node collection would try to create debug pods on the long-lived MC which is blocked by policy)
+- **Cluster state after teardown** — the snapshot is taken before cluster deletion; if teardown itself fails there is no second snapshot
+
+---
+
+### Notes
+
+- Snapshots are collected for a **5-minute window** at the point of failure. Resources created or deleted after that window are not captured.
+- The MC snapshot is **namespace-scoped** to the WC's namespace (e.g. `org-giantswarm`). Cluster-scoped resources on the MC (like `Node`) are not included.
+- If crust-gather itself fails (network issue, registry auth failure), collection is best-effort and the test suite still proceeds to cluster cleanup. Check the Tekton logs for `crust-gather:` log lines to confirm the snapshot was pushed successfully.
+
+---
+
 ## ⬆️ Upgrade Tests
 
 Each of the providers have a test suite called `upgrade` that is designed to first install a cluster using the latest released version of the cluster App. It then upgrades that cluster to whatever currently needs testing.
