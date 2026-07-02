@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
 
+## [7.3.0] - 2026-07-02
+
+### Changed
+
+- Hello Gateway: Support cert-manager and ExternalDNS to be HelmReleases.
+
 ## [7.2.2] - 2026-06-18
 
 ### Changed
@@ -1448,7 +1454,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...HEAD
+[7.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...v7.3.0
 [7.2.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
