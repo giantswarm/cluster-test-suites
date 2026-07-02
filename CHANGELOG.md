@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Hello Gateway: Support cert-manager and ExternalDNS to be HelmReleases.
+
 ## [7.2.2] - 2026-06-18
 
 ### Changed
