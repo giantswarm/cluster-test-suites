@@ -14,3 +14,7 @@ CVE-2025-58058 until=2026-07-15 # github.com/ulikunitz/xz@v0.5.9
 CVE-2026-5160 until=2026-07-15 # github.com/yuin/goldmark@v1.4.13
 CVE-2026-47262 until=2026-07-29 # github.com/containerd/containerd@v1.7.31
 CVE-2026-53488 until=2026-07-29 # github.com/containerd/containerd@v1.7.31
+CVE-2026-48978 until=2026-08-02 # oras.land/oras-go/v2@v2.6.0
+CVE-2026-50151 until=2026-08-02 # oras.land/oras-go/v2@v2.6.0
+CVE-2026-50162 until=2026-08-02 # oras.land/oras-go/v2@v2.6.0
+CVE-2026-50163 until=2026-08-02 # oras.land/oras-go/v2@v2.6.0
