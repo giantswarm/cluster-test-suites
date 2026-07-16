@@ -60,7 +60,6 @@ func WithExtraClusterValues(fn func() (string, error)) Option {
 	return func(o *Options) { o.ExtraClusterValuesFn = fn }
 }
 
-
 const (
 	CrustGatherRegistry   = "crustgatherci.azurecr.io"
 	CrustGatherRepository = "snapshots"
@@ -364,6 +363,12 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 		// We can detect this by checking for the unique builder struct name and that it comes from the capa provider.
 		if structName == "ManagedClusterBuilder" && provider == "capa" {
 			return "eks", nil
+		}
+
+		// The AKS test suite uses the CAPZ managed cluster builder, but is considered the "aks" provider.
+		// We can detect this by checking for the unique builder struct name and that it comes from the capz provider.
+		if structName == "ManagedClusterBuilder" && provider == "capz" {
+			return "aks", nil
 		}
 
 		// The CAPZ test suite has a different provider name.

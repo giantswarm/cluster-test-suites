@@ -16,7 +16,7 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
-func runDNS(bastionSuppoted bool) {
+func runDNS(cfg *TestConfig) {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
@@ -42,6 +42,9 @@ func runDNS(bastionSuppoted bool) {
 		})
 
 		It("sets up the api DNS records", func() {
+			if !cfg.APIServerDNSRecordSupported {
+				Skip("The Kubernetes API endpoint is managed by the cloud provider, so no DNS record is set up by our controllers.")
+			}
 			apiDomain := fmt.Sprintf("api.%s.%s", state.GetCluster().Name, values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
@@ -56,7 +59,7 @@ func runDNS(bastionSuppoted bool) {
 		})
 
 		It("sets up the bastion DNS records", func() {
-			if !bastionSuppoted {
+			if !cfg.BastionSupported {
 				Skip("Bastion is not supported.")
 			}
 			bastionDomain := fmt.Sprintf("bastion1.%s.%s", state.GetCluster().Name, values.BaseDomain)
