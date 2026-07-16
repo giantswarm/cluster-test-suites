@@ -11,6 +11,10 @@ type TestConfig struct {
 	SecurityBundleInstalled      bool
 	GatewayAPISupported          bool
 	ARMNodePoolEnabled           bool
+	// APIServerDNSRecordSupported indicates whether our DNS controllers set up
+	// an A record for the Kubernetes API endpoint. Managed control planes (e.g.
+	// AKS) provide their own API endpoint, so no such record is created.
+	APIServerDNSRecordSupported bool
 }
 
 func NewTestConfigWithDefaults() *TestConfig {
@@ -25,6 +29,7 @@ func NewTestConfigWithDefaults() *TestConfig {
 		SecurityBundleInstalled:      true,
 		GatewayAPISupported:          true,
 		ARMNodePoolEnabled:           false,
+		APIServerDNSRecordSupported:  true,
 	}
 }
 
@@ -32,7 +37,7 @@ func Run(cfg *TestConfig) {
 	RunApps(cfg)
 	runBasic(cfg)
 	runCertManager(cfg.CertManagerSupported)
-	runDNS(cfg.BastionSupported)
+	runDNS(cfg)
 	runMetrics(cfg)
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorldGateway(cfg.GatewayAPISupported)
