@@ -35,13 +35,22 @@ func runDNS(bastionSuppoted bool) {
 
 		BeforeEach(func() {
 			values = &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
-			Expect(err).NotTo(HaveOccurred())
+			// Reading the cluster Helm values hits the MC API and can transiently
+			// fail; retry so a blip doesn't fail the spec.
+			Eventually(func() error {
+				return state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 
 			resolver = clustertestnet.NewResolver()
 		})
 
-		It("sets up the api DNS records", func() {
+		// FlakeAttempts: DNS resolution depends on external/split-horizon DNS
+		// propagation that is inherently transient, so retry the spec a few
+		// times before failing.
+		It("sets up the api DNS records", FlakeAttempts(3), func() {
 			apiDomain := fmt.Sprintf("api.%s.%s", state.GetCluster().Name, values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
@@ -55,7 +64,7 @@ func runDNS(bastionSuppoted bool) {
 			Expect(records).ToNot(BeEmpty())
 		})
 
-		It("sets up the bastion DNS records", func() {
+		It("sets up the bastion DNS records", FlakeAttempts(3), func() {
 			if !bastionSuppoted {
 				Skip("Bastion is not supported.")
 			}

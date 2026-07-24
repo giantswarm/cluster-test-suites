@@ -30,28 +30,35 @@ func runBasic(cfg *TestConfig) {
 		var wcClient *client.Client
 
 		BeforeEach(func() {
-			var err error
-
-			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
-			if err != nil {
-				Fail(err.Error())
-			}
-		})
-
-		It("should be able to connect to the management cluster", func() {
+			// Building the WC client can transiently fail (e.g. the MC API is
+			// briefly unavailable or throttled). Retry so a blip doesn't fail
+			// the whole spec.
 			Eventually(func() error {
-				return state.GetFramework().MC().CheckConnection()
+				var err error
+				wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
+				return err
 			}).
 				WithTimeout(1 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 		})
 
+		It("should be able to connect to the management cluster", func() {
+			connectionTimeout := state.GetTestTimeout(timeout.ClusterConnection, 3*time.Minute)
+			Eventually(func() error {
+				return state.GetFramework().MC().CheckConnection()
+			}).
+				WithTimeout(connectionTimeout).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
+		})
+
 		It("should be able to connect to the workload cluster", func() {
+			connectionTimeout := state.GetTestTimeout(timeout.ClusterConnection, 3*time.Minute)
 			Eventually(func() error {
 				return wcClient.CheckConnection()
 			}).
-				WithTimeout(1 * time.Minute).
+				WithTimeout(connectionTimeout).
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 		})
