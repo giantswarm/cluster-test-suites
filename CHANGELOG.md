@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.4.0] - 2026-07-26
+
 ### Added
 
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve test resilience: retry transient API calls in setup (`BeforeEach`) blocks instead of failing on a single blip, and add targeted `FlakeAttempts` to specs that depend on inherently-external systems (DNS, HTTPS, Teleport, Mimir).
 - Right-size the tightest timeouts (bundle-app checks 90s → 5m, cluster connection 1m → 3m, gateway app readiness 3m → 5m), all overridable via the `timeout` package.
+- Go: Update dependencies.
 
 ### Fixed
 
@@ -1463,7 +1466,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.4.0...HEAD
+[7.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...v7.3.0
 [7.2.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1
