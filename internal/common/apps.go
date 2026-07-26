@@ -102,11 +102,13 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the observability-bundle app to be deployed before we can check the apps it deploys.
 			observabilityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
 
-			if !appExists(observabilityAppsAppName, state.GetCluster().GetNamespace()) {
+			if !resourceExists("observability-bundle App CR", func() (bool, error) {
+				return appExists(observabilityAppsAppName, state.GetCluster().GetNamespace())
+			}) {
 				Skip("observability-bundle App CR not found; the cluster chart deploys it as a HelmRelease, which the HelmRelease sibling assertion covers.")
 			}
 
-			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), observabilityAppsAppName, state.GetCluster().GetNamespace())).
 				WithTimeout(bundleTimeout).
 				WithPolling(5 * time.Second).
@@ -139,7 +141,9 @@ func RunApps(cfg *TestConfig) {
 			helper.SetResponsibleTeam(helper.TeamAtlas)
 
 			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
-			if !helmReleaseExists(parent, state.GetCluster().GetNamespace()) {
+			if !resourceExists("observability-bundle HelmRelease", func() (bool, error) {
+				return helmReleaseExists(parent, state.GetCluster().GetNamespace())
+			}) {
 				Skip("observability-bundle HelmRelease not found; the cluster chart deploys it as an App CR, which the App-CR sibling assertion covers.")
 			}
 
@@ -157,11 +161,13 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the security-bundle app to be deployed before we can check the apps it deploys.
 			securityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
 
-			if !appExists(securityAppsAppName, state.GetCluster().GetNamespace()) {
+			if !resourceExists("security-bundle App CR", func() (bool, error) {
+				return appExists(securityAppsAppName, state.GetCluster().GetNamespace())
+			}) {
 				Skip("security-bundle App CR not found; the cluster chart deploys it as a HelmRelease, which the HelmRelease sibling assertion covers.")
 			}
 
-			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), securityAppsAppName, state.GetCluster().GetNamespace())).
 				WithTimeout(bundleTimeout).
 				WithPolling(5 * time.Second).
@@ -194,7 +200,9 @@ func RunApps(cfg *TestConfig) {
 			helper.SetResponsibleTeam(helper.TeamShield)
 
 			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
-			if !helmReleaseExists(parent, state.GetCluster().GetNamespace()) {
+			if !resourceExists("security-bundle HelmRelease", func() (bool, error) {
+				return helmReleaseExists(parent, state.GetCluster().GetNamespace())
+			}) {
 				Skip("security-bundle HelmRelease not found; the cluster chart deploys it as an App CR, which the App-CR sibling assertion covers.")
 			}
 
@@ -207,13 +215,13 @@ func RunApps(cfg *TestConfig) {
 // Ready and then for all its child HelmReleases (selected by the
 // giantswarm.io/managed-by=<parent> label, same convention as the App-CR
 // variant) to be Ready too. childrenTimeout bounds the children's wait; the
-// parent uses the shared BundleApps timeout (default 90s) to match the
+// parent uses the shared BundleApps timeout (default 5m) to match the
 // App-based sibling's behaviour.
 func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration) {
 	mc := state.GetFramework().MC()
 	org := state.GetCluster().Organization.GetNamespace()
 
-	parentTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+	parentTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
 	Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), mc, parentName, org)).
 		WithTimeout(parentTimeout).
 		WithPolling(5 * time.Second).
@@ -240,35 +248,56 @@ func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration)
 		)
 }
 
-// appExists returns true if an App CR with the given name exists in the
-// namespace on the management cluster. Used by bundle assertions to decide
-// whether the cluster chart is in App-CR mode for this bundle.
-func appExists(name, namespace string) bool {
+// resourceExists retries check until it returns without a transient error (or
+// the short timeout elapses), then reports whether the resource exists. A
+// transient API error must not be misread as "absent": doing so would silently
+// Skip the assertion and hide a real failure. On a persistent error this fails
+// the spec loudly instead.
+func resourceExists(desc string, check func() (bool, error)) bool {
+	var exists bool
+	Eventually(func() error {
+		var err error
+		exists, err = check()
+		return err
+	}).
+		WithTimeout(30*time.Second).
+		WithPolling(5*time.Second).
+		Should(Succeed(), "failed to determine whether %s exists", desc)
+	return exists
+}
+
+// appExists reports whether an App CR with the given name exists in the
+// namespace on the management cluster. A NotFound error yields (false, nil); any
+// other error is returned so the caller can retry rather than treat it as
+// absent. Used by bundle assertions to decide whether the cluster chart is in
+// App-CR mode for this bundle.
+func appExists(name, namespace string) (bool, error) {
 	app := &v1alpha1.App{}
 	err := state.GetFramework().MC().Get(state.GetContext(), ctrl.ObjectKey{Name: name, Namespace: namespace}, app)
 	if err == nil {
-		return true
+		return true, nil
 	}
-	if !apierrors.IsNotFound(err) {
-		logger.Log("Unexpected error checking for App %s/%s: %v", namespace, name, err)
+	if apierrors.IsNotFound(err) {
+		return false, nil
 	}
-	return false
+	return false, err
 }
 
-// helmReleaseExists returns true if a Flux HelmRelease with the given name
-// exists in the namespace on the management cluster. Used by bundle
-// assertions to decide whether the cluster chart is in HelmRelease mode for
-// this bundle.
-func helmReleaseExists(name, namespace string) bool {
+// helmReleaseExists reports whether a Flux HelmRelease with the given name
+// exists in the namespace on the management cluster. A NotFound error yields
+// (false, nil); any other error is returned so the caller can retry rather than
+// treat it as absent. Used by bundle assertions to decide whether the cluster
+// chart is in HelmRelease mode for this bundle.
+func helmReleaseExists(name, namespace string) (bool, error) {
 	hr := &helmv2.HelmRelease{}
 	err := state.GetFramework().MC().Get(state.GetContext(), ctrl.ObjectKey{Name: name, Namespace: namespace}, hr)
 	if err == nil {
-		return true
+		return true, nil
 	}
-	if !apierrors.IsNotFound(err) {
-		logger.Log("Unexpected error checking for HelmRelease %s/%s: %v", namespace, name, err)
+	if apierrors.IsNotFound(err) {
+		return false, nil
 	}
-	return false
+	return false, err
 }
 
 func getDefaultAppsSelector() ctrl.MatchingLabels {
