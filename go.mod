@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/cert-manager/cert-manager v1.21.0
+	github.com/cert-manager/cert-manager v1.21.1
 	github.com/fluxcd/helm-controller/api v1.6.3
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.0.2
