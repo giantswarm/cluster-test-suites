@@ -301,6 +301,17 @@ func Run(cfg *TestConfig) {
 					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
+				// The generation changed, so a roll is expected. A fast controller can complete the
+				// roll before we ever observe the in-progress condition. Treat an already-satisfied
+				// complete condition as evidence the roll happened, so we verify completion below
+				// instead of falsely skipping.
+				if completeCond, completeErr := capiconditions.UnstructuredGet(controlPlane, spec.completeCondition); completeErr == nil && completeCond != nil &&
+					completeCond.Status == spec.completeStatus && (spec.completeReason == "" || completeCond.Reason == spec.completeReason) {
+					logger.Log("Control plane roll already completed (condition %s Status='%s' Reason='%s') before the in-progress condition was observed", spec.completeCondition, completeCond.Status, completeCond.Reason)
+					controlPlaneUpdateStarted = true
+					break
+				}
+
 				cond, condErr := capiconditions.UnstructuredGet(controlPlane, spec.inProgressCondition)
 				if condErr != nil || cond == nil {
 					logger.Log("Control plane condition %s is not set, expected Status='%s'", spec.inProgressCondition, spec.inProgressStatus)
@@ -315,7 +326,10 @@ func Run(cfg *TestConfig) {
 			}
 
 			if !controlPlaneUpdateStarted {
-				Skip("Control plane update is not happening")
+				// The generation changed but we never observed the roll starting or completing.
+				// Fail loudly rather than skip: a silent skip here would hide a real upgrade that
+				// never progressed.
+				Fail("Control plane resource generation changed but the rolling update was never observed to start or complete")
 			}
 
 			mcClient := state.GetFramework().MC()
