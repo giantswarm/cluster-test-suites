@@ -410,6 +410,10 @@ func collectCrustGatherSnapshots(suiteSlug string) {
 		tagPrefix = clusterName + "-" + suiteSlug
 	}
 
+	// wcResult and mcResult stay "failed" if writeCAPIKubeconfig fails below and
+	// runCrustGather is never called for that side.
+	wcResult, mcResult := "failed", "failed"
+
 	// Collect workload cluster snapshot (full cluster).
 	// Read the CAPI kubeconfig secret directly (not Teleport) to avoid proxy/auth
 	// issues that crust-gather can't handle.
@@ -423,7 +427,7 @@ func collectCrustGatherSnapshots(suiteSlug string) {
 	} else {
 		defer os.Remove(wcKubeconfigPath)
 		applyCrustGatherPolicyException(wcCtx, clusterName)
-		runCrustGather("WC", wcKubeconfigPath, wcReference, username, password, !wcPrivate,
+		wcResult = runCrustGather("WC", wcKubeconfigPath, wcReference, username, password, !wcPrivate,
 			"--exclude-kind", "Lease",
 			"--exclude-kind", "EndpointSlice",
 			"--exclude-kind", "ControllerRevision")
@@ -446,10 +450,12 @@ func collectCrustGatherSnapshots(suiteSlug string) {
 		// filter out cluster-scoped resources. Without this, crust-gather would try
 		// to create debug pods on the MC (blocked by Kyverno), and we don't want to
 		// maintain a permanent PolicyException on the long-lived MC.
-		runCrustGather("MC", mcKubeconfigPath, mcReference, username, password, !mcPrivate,
+		mcResult = runCrustGather("MC", mcKubeconfigPath, mcReference, username, password, !mcPrivate,
 			"--include-namespace", clusterNamespace,
 			"--exclude-kind", "Node")
 	}
+
+	logger.Log("crust-gather: SUMMARY wc=%s mc=%s", wcResult, mcResult)
 }
 
 // writeCAPIKubeconfig reads the CAPI kubeconfig secret for the given cluster from the MC
@@ -542,11 +548,46 @@ func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) 
 	logger.Log("crust-gather: applied Kyverno PolicyException for debug pods on WC")
 }
 
-// runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry.
-// Errors are logged but do not cause the test suite to fail.
-func runCrustGather(label, kubeconfig, reference, username, password string, stripProxy bool, extraArgs ...string) {
+// crustGatherFullAttempts bounds the full-fidelity retry cascade in runCrustGather.
+// crust-gather's own retry policy for individual resource fetches is unbounded (only the
+// outer --duration stops a stuck fetch), and when --duration fires the archive is never
+// finalized -- so a single stuck resource discards everything collected so far, not just
+// that resource.
+const crustGatherFullAttempts = 3
+
+// runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry,
+// retrying up to crustGatherFullAttempts times. If every full-fidelity attempt fails, it makes
+// one last attempt without pod logs so a persistently unreachable node yields a resource/events
+// archive instead of nothing. Errors are logged but do not cause the test suite to fail.
+// Returns "ok" (full archive), "degraded" (archive without pod logs), or "failed" (no archive).
+func runCrustGather(label, kubeconfig, reference, username, password string, stripProxy bool, extraArgs ...string) string {
 	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
 
+	var lastErr error
+	for attempt := 1; attempt <= crustGatherFullAttempts; attempt++ {
+		logger.Log("crust-gather: %s attempt %d/%d", label, attempt, crustGatherFullAttempts)
+		if err := attemptCrustGather(label, attempt, kubeconfig, reference, username, password, stripProxy, extraArgs); err != nil {
+			lastErr = err
+			logger.Log("crust-gather: %s attempt %d/%d failed: %v", label, attempt, crustGatherFullAttempts, err)
+			continue
+		}
+		logger.Log("crust-gather: %s snapshot pushed to %s (attempt %d/%d)", label, reference, attempt, crustGatherFullAttempts)
+		return "ok"
+	}
+
+	logger.Log("crust-gather: %s all %d attempts failed (%v), retrying once without pod logs", label, crustGatherFullAttempts, lastErr)
+	fallbackArgs := append(append([]string{}, extraArgs...), "--skip-logs-collection")
+	if err := attemptCrustGather(label, crustGatherFullAttempts+1, kubeconfig, reference, username, password, stripProxy, fallbackArgs); err != nil {
+		logger.Log("crust-gather: %s logs-skip fallback also failed, giving up: %v", label, err)
+		return "failed"
+	}
+	logger.Log("crust-gather: %s snapshot pushed to %s (no pod logs)", label, reference)
+	return "degraded"
+}
+
+// attemptCrustGather runs a single crust-gather collect invocation in its own working
+// directory. attemptNum is used only to keep each attempt's tmpDir unique.
+func attemptCrustGather(label string, attemptNum int, kubeconfig, reference, username, password string, stripProxy bool, extraArgs []string) error {
 	// The command timeout must be larger than the collection duration (5m)
 	// to allow time for the OCI push after collection finishes.
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
@@ -557,10 +598,9 @@ func runCrustGather(label, kubeconfig, reference, username, password string, str
 	// (the container's /app cwd is read-only) and it is cleaned up after the run.
 	// We do not pass -f: crust-gather serve does not support that flag, so layers must
 	// use the default "crust-gather/" prefix for serve --reference to read them.
-	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-", strings.ToLower(label)))
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-%d-", strings.ToLower(label), attemptNum))
 	if err != nil {
-		logger.Log("crust-gather: %s failed to create temp dir: %v", label, err)
-		return
+		return fmt.Errorf("failed to create temp dir: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -596,11 +636,7 @@ func runCrustGather(label, kubeconfig, reference, username, password string, str
 		cmd.Env = removeProxyEnv(os.Environ())
 	}
 
-	if err := cmd.Run(); err != nil {
-		logger.Log("crust-gather: %s collection failed: %v", label, err)
-	} else {
-		logger.Log("crust-gather: %s snapshot pushed to %s", label, reference)
-	}
+	return cmd.Run()
 }
 
 // hasPrivateEndpoint reports whether the kubeconfig's API server resolves to a
