@@ -1,6 +1,6 @@
 # Pin the build stage to the host platform so its RUN steps never run under
 # QEMU emulation. Cross-compilation is driven by TARGETOS/TARGETARCH instead.
-FROM --platform=$BUILDPLATFORM golang:1.26 AS build-tests
+FROM --platform=$BUILDPLATFORM golang:1.27 AS build-tests
 
 ARG TARGETOS
 ARG TARGETARCH
