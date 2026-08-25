@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add a `cluster values` spec that cross-checks the `clusterDNSIP` emitted by `cluster-apps-operator`
+  into `<cluster>-cluster-values` against the live `coredns` Service `ClusterIP`, and against
+  `chart-operator`'s `dnsConfig.nameservers[0]`.
+
+  The two values are derived independently from the same upstream field: the Service `ClusterIP` by a
+  Helm helper in `giantswarm/cluster`, and `clusterDNSIP` by Go code in `cluster-apps-operator`.
+  Nothing couples them, which is what makes comparing them worthwhile. In
+  [giantswarm/giantswarm#37031](https://github.com/giantswarm/giantswarm/issues/37031) the Go path
+  silently diverged -- still reading a `KubeadmControlPlane` field that the CAPI v1beta2 migration had
+  removed, so it fell back to a hardcoded default -- while the Helm path stayed correct. Unit tests
+  could not catch it, because their fixtures supplied the field by hand and so never noticed the real
+  producer had stopped emitting it. This spec would have failed immediately on every affected cluster.
+
+  The `chart-operator` assertion skips where the chart omits `dnsConfig` entirely (private clusters
+  and management clusters, observed on CAPZ and CAPVCD); the primary assertion still covers those.
+
 ## [7.5.2] - 2026-08-22
 
 ### Changed
