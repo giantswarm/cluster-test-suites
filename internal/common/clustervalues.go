@@ -38,13 +38,11 @@ import (
 //     (`key.DNSIP`, using net.ParseCIDR).
 //
 // Nothing couples the two, which is exactly why comparing them is worth doing.
-// In giantswarm/giantswarm#37031 the Go path silently diverged -- it was still
-// reading a KubeadmControlPlane field that the CAPI v1beta2 migration had
-// removed, so it fell back to a hardcoded installation default -- while the
-// Helm path stayed correct. Unit tests could not catch it: their fixtures
-// supplied the field by hand, so they never noticed the real producer had
-// stopped emitting it. This comparison would have failed immediately, on every
-// affected cluster.
+// The Go path has diverged before -- reading a KubeadmControlPlane field that a
+// CAPI version bump had removed, and so falling back to a hardcoded
+// installation default -- while the Helm path stayed correct. Unit tests cannot
+// catch that: their fixtures supply the field by hand, so they never notice the
+// real producer has stopped emitting it.
 func runClusterValues() {
 	Context("cluster values", func() {
 		var (
@@ -137,8 +135,7 @@ func runClusterValues() {
 
 			Expect(clusterDNSIP).To(Equal(coreDNSIP),
 				"clusterDNSIP in the cluster-values ConfigMap must equal the coredns Service ClusterIP. "+
-					"chart-operator uses it as its only resolver, so a mismatch breaks every chart pull "+
-					"(see giantswarm/giantswarm#37031).")
+					"chart-operator uses it as its only resolver, so a mismatch breaks every chart pull.")
 		})
 
 		It("propagates clusterDNSIP into the chart-operator resolver", func() {
