@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- capa/china: disable hello world gateway API tests.
+
 ## [7.5.2] - 2026-08-22
 
 ### Changed
