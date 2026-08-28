@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- capa/upgrade: add a Karpenter node pool alongside the ASG one, restricted to on-demand capacity.
+
 ## [7.5.3] - 2026-08-27
 
 ### Changed
