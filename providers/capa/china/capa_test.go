@@ -16,5 +16,7 @@ var _ = Describe("Common tests", func() {
 		state.SetTestTimeout(timeout.DeployApps, time.Minute*25)
 	})
 
-	common.Run(common.NewTestConfigWithDefaults())
+	cfg := common.NewTestConfigWithDefaults()
+	cfg.GatewayAPISupported = false
+	common.Run(cfg)
 })

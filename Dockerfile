@@ -1,10 +1,10 @@
 # Pin the build stage to the host platform so its RUN steps never run under
 # QEMU emulation. Cross-compilation is driven by TARGETOS/TARGETARCH instead.
-FROM --platform=$BUILDPLATFORM golang:1.26 AS build-tests
+FROM --platform=$BUILDPLATFORM golang:1.27 AS build-tests
 
 ARG TARGETOS
 ARG TARGETARCH
-ARG CRUST_GATHER_VERSION=0.15.1
+ARG CRUST_GATHER_VERSION=0.17.0
 RUN curl -sSfL \
     "https://github.com/crust-gather/crust-gather/releases/download/v${CRUST_GATHER_VERSION}/kubectl-crust-gather_${CRUST_GATHER_VERSION}_linux_${TARGETARCH}.tar.gz" \
     | tar -xz -C /tmp

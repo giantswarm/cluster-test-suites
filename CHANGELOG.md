@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.5.3] - 2026-08-27
+
+### Changed
+
+- capa/china: disable hello world gateway API tests.
+
+## [7.5.2] - 2026-08-22
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.5.1] - 2026-08-21
+
+### Changed
+
+- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing. 
+- Bump crust-gather to v0.17.0.
+- Go: Update dependencies.
+
 ## [7.5.0] - 2026-08-06
 
 ### Changed
@@ -1473,7 +1493,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...HEAD
+[7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
+[7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
+[7.5.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.0...v7.5.1
 [7.5.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.4.0...v7.5.0
 [7.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...v7.3.0
