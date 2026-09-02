@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.5.4] - 2026-09-02
+
 ### Added
 
 - Add a `cluster values` spec asserting that the `clusterDNSIP` emitted into `<cluster>-cluster-values`
@@ -1501,7 +1503,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
 [7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
 [7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
 [7.5.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.0...v7.5.1
