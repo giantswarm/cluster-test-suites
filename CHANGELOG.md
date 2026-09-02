@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a `cluster values` spec asserting that the `clusterDNSIP` emitted into `<cluster>-cluster-values`
   matches the live `coredns` Service `ClusterIP` and `chart-operator`'s `dnsConfig.nameservers[0]`.
 
+### Changed
+
+- Go: Update dependencies.
+
 ## [7.5.3] - 2026-08-27
 
 ### Changed
