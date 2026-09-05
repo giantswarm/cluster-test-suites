@@ -13,3 +13,4 @@ CVE-2025-58058 until=2026-09-30 # github.com/ulikunitz/xz@v0.5.9
 CVE-2026-5160 until=2026-09-30 # github.com/yuin/goldmark@v1.4.13
 CVE-2026-81871 until=2026-10-03 # go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc@v0.18.0
 CVE-2026-81872 until=2026-10-03 # go.opentelemetry.io/otel/sdk/log@v0.19.0
+CVE-2026-81870 until=2026-10-04 # go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp@v1.43.0
