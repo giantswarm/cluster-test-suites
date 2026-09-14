@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add a `cluster values` spec asserting that the `clusterDNSIP` emitted into `<cluster>-cluster-values`
   matches the live `coredns` Service `ClusterIP` and `chart-operator`'s `dnsConfig.nameservers[0]`.
+- capa/upgrade: add a Karpenter node pool alongside the ASG one, restricted to on-demand capacity.
 
 ### Changed
 
