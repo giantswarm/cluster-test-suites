@@ -1,7 +1,6 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -37,20 +36,31 @@ func runScale(autoScalingSupported bool) {
 
 			var err error
 
-			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
-			if err != nil {
-				Fail(err.Error())
-			}
+			ctx := state.GetContext()
 
-			ctx := context.Background()
+			// Building the WC client can transiently fail; retry so a blip
+			// doesn't fail the spec.
+			Eventually(func() error {
+				wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
+				return err
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
+
 			org := state.GetCluster().Organization
 			clusterName := state.GetCluster().Name
 			namespace := org.GetNamespace()
 
-			// Get the current number of worker nodes and set the replicas to one more to force scale up
+			// Get the current number of worker nodes and set the replicas to one more to force scale up.
+			// The List call can transiently fail against a busy MC; retry it.
 			nodes := corev1.NodeList{}
-			err = wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
-			Expect(err).To(BeNil())
+			Eventually(func() error {
+				return wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 
 			replicaCount = len(nodes.Items) + 1
 
@@ -91,7 +101,7 @@ func runScale(autoScalingSupported bool) {
 				Skip("autoscaling is not supported")
 			}
 
-			ctx := context.Background()
+			ctx := state.GetContext()
 
 			expectedReplicas := fmt.Sprintf("%d", replicaCount)
 			Eventually(func() (bool, error) {
@@ -145,7 +155,10 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return false, nil
-			}, "15m", "10s").Should(BeTrue())
+			}).
+				WithTimeout(15 * time.Minute).
+				WithPolling(10 * time.Second).
+				Should(BeTrue())
 		})
 
 		AfterEach(func() {

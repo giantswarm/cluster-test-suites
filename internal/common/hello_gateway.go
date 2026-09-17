@@ -24,25 +24,23 @@ import (
 
 	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
 	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 )
 
 func runHelloWorldGateway(gatewayAPISupported bool) {
 	Context("hello world via gateway api", Ordered, func() {
 		var (
-			helloHelmRelease    *helmv2.HelmRelease
-			awsLBHelmRelease    *helmv2.HelmRelease
+			helloHelmRelease      *helmv2.HelmRelease
+			awsLBHelmRelease      *helmv2.HelmRelease
 			gatewayAPIHelmRelease *helmv2.HelmRelease
-			ociRepoName         string
-			awsLBOCIRepoName    string
+			ociRepoName           string
+			awsLBOCIRepoName      string
 			gatewayAPIOCIRepoName string
-			helloWorldHost      string
-			helloWorldUrl       string
+			helloWorldHost        string
+			helloWorldUrl         string
 		)
 
-		const (
-			appReadyTimeout  = 3 * time.Minute
-			appReadyInterval = 5 * time.Second
-		)
+		const appReadyInterval = 5 * time.Second
 
 		BeforeEach(func() {
 			if !gatewayAPISupported {
@@ -52,6 +50,13 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 
 		It("should have cert-manager and external-dns deployed", func() {
 			org := state.GetCluster().Organization
+
+			// appReadyTimeout bounds the cert-manager/external-dns app readiness
+			// waits. Overridable so slow clusters (app reconcile + LB
+			// provisioning) don't fail on a merely-slow environment. Resolved
+			// here (spec runtime) rather than at tree construction, since the
+			// state context is only set in BeforeSuite.
+			appReadyTimeout := state.GetTestTimeout(timeout.GatewayAppReady, 5*time.Minute)
 
 			Eventually(helmrelease.IsAppOrHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), fmt.Sprintf("%s-cert-manager", state.GetCluster().Name), org.GetNamespace())).
 				WithTimeout(appReadyTimeout).
@@ -101,8 +106,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Expect(err).To(BeNil())
 
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), awsLBHelmRelease.GetName(), awsLBHelmRelease.GetNamespace())).
-				WithTimeout(15*time.Minute).
-				WithPolling(10*time.Second).
+				WithTimeout(15 * time.Minute).
+				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})
 
@@ -134,8 +139,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Expect(err).To(BeNil())
 
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), gatewayAPIHelmRelease.GetName(), gatewayAPIHelmRelease.GetNamespace())).
-				WithTimeout(10*time.Minute).
-				WithPolling(10*time.Second).
+				WithTimeout(10 * time.Minute).
+				WithPolling(10 * time.Second).
 				Should(BeTrue())
 
 			childApps := []types.NamespacedName{
@@ -144,8 +149,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				{Name: fmt.Sprintf("%s-gateway-api-config", clusterName), Namespace: namespace},
 			}
 			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), childApps)).
-				WithTimeout(10*time.Minute).
-				WithPolling(10*time.Second).
+				WithTimeout(10 * time.Minute).
+				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})
 
@@ -187,12 +192,13 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				logger.Log("Gateway 'giantswarm-default' is not yet Programmed")
 				return false, nil
 			}).
-				WithTimeout(10*time.Minute).
-				WithPolling(10*time.Second).
+				WithTimeout(10 * time.Minute).
+				WithPolling(10 * time.Second).
 				Should(BeTrue())
 		})
 
-		It("cluster wildcard DNS must be resolvable", func() {
+		// FlakeAttempts: depends on external/split-horizon DNS propagation.
+		It("cluster wildcard DNS must be resolvable", FlakeAttempts(3), func() {
 			resolver := net.NewResolver()
 			Eventually(func() (bool, error) {
 				result, err := resolver.LookupIP(context.Background(), "ip", fmt.Sprintf("hello-world.%s", getWorkloadClusterDnsZone()))
@@ -209,8 +215,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				logger.Log("DNS record 'hello-world.%s' resolved to %s", getWorkloadClusterDnsZone(), resultString)
 				return true, nil
 			}).
-				WithTimeout(10 * time.Minute).
-				WithPolling(10 * time.Second).
+				WithTimeout(10*time.Minute).
+				WithPolling(10*time.Second).
 				Should(BeTrue(), failurehandler.ExternalDNSIssues(state.GetFramework(), state.GetCluster()))
 		})
 
@@ -289,8 +295,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 			Expect(err).To(BeNil())
 
 			Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), state.GetFramework().MC(), helloHelmRelease.GetName(), helloHelmRelease.GetNamespace())).
-				WithTimeout(6*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(6 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 		})
 
@@ -344,12 +350,14 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 
 				return true, nil
 			}).
-				WithTimeout(6*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(6 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(BeTrue())
 		})
 
-		It("hello world app responds successfully", func() {
+		// FlakeAttempts: performs a live HTTPS request through external DNS and
+		// a cloud load balancer, both inherently transient.
+		It("hello world app responds successfully", FlakeAttempts(3), func() {
 			httpClient := net.NewHttpClient()
 
 			Eventually(func() (string, error) {
@@ -372,8 +380,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 
 				return string(bodyBytes), nil
 			}).
-				WithTimeout(15*time.Minute).
-				WithPolling(5*time.Second).
+				WithTimeout(15 * time.Minute).
+				WithPolling(5 * time.Second).
 				Should(
 					ContainSubstring("Hello World"),
 				)

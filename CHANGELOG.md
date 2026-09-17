@@ -7,10 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.5.4] - 2026-09-02
+
+### Added
+
+- Add a `cluster values` spec asserting that the `clusterDNSIP` emitted into `<cluster>-cluster-values`
+  matches the live `coredns` Service `ClusterIP` and `chart-operator`'s `dnsConfig.nameservers[0]`.
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.5.3] - 2026-08-27
+
+### Changed
+
+- capa/china: disable hello world gateway API tests.
+
+## [7.5.2] - 2026-08-22
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.5.1] - 2026-08-21
+
+### Changed
+
+- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing. 
+- Bump crust-gather to v0.17.0.
+- Go: Update dependencies.
+
+## [7.5.0] - 2026-08-06
+
+### Changed
+
+- Go: bump cluster-standup-teardown to v6.0.3.
+
+## [7.4.0] - 2026-07-26
+
 ### Added
 
 - Add support for the `aks` (Azure managed clusters) cluster provider, with `standard` and `upgrade` test suites.
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
+
+### Changed
+
+- Improve test resilience: retry transient API calls in setup (`BeforeEach`) blocks instead of failing on a single blip, and add targeted `FlakeAttempts` to specs that depend on inherently-external systems (DNS, HTTPS, Teleport, Mimir).
+- Right-size the tightest timeouts (bundle-app checks 90s → 5m, cluster connection 1m → 3m, gateway app readiness 3m → 5m), all overridable via the `timeout` package.
+- Go: Update dependencies.
+
+### Fixed
+
+- Stop hiding real failures behind false `Skip`s: bundle app/HelmRelease existence checks no longer treat a transient API error as "absent", and the control-plane rolling-update check no longer skips when a fast controller completes the roll before the in-progress condition is observed.
 
 ## [7.3.0] - 2026-07-02
 
@@ -1455,7 +1504,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
+[7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
+[7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
+[7.5.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.0...v7.5.1
+[7.5.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.4.0...v7.5.0
+[7.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...v7.3.0
 [7.2.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1

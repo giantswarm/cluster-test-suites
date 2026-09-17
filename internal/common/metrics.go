@@ -99,7 +99,10 @@ func runMetrics(cfg *TestConfig) {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("ensure key metrics are available on mimir", func() {
+		// FlakeAttempts: querying Mimir depends on the full observability
+		// pipeline (scrape → ingest → query) and an ExecInPod round-trip, both
+		// inherently eventually-consistent.
+		It("ensure key metrics are available on mimir", FlakeAttempts(3), func() {
 			if !cfg.ObservabilityBundleInstalled {
 				Skip("Observability bundle is not installed in this cluster configuration")
 			}

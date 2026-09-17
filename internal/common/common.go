@@ -36,6 +36,7 @@ func NewTestConfigWithDefaults() *TestConfig {
 func Run(cfg *TestConfig) {
 	RunApps(cfg)
 	runBasic(cfg)
+	runClusterValues()
 	runCertManager(cfg.CertManagerSupported)
 	runDNS(cfg)
 	runMetrics(cfg)
