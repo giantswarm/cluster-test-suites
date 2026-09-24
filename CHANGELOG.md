@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
   (`TestConfig.DNSServiceName`, defaulting to `coredns`). AKS ships its own managed DNS add-on,
   where the Service is named `kube-dns`.
+- aks: The AKS test cluster now comes up with a single `System` node pool, following the removal of
+  the extra `User` pool from the cluster builder defaults in `cluster-standup-teardown` v6.0.8. Both
+  AKS suites now wait for 1 worker node instead of 2.
 - Go: Update dependencies.
 
 ## [7.5.4] - 2026-09-02

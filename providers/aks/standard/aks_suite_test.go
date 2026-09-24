@@ -17,10 +17,10 @@ import (
 
 func TestAKSStandard(t *testing.T) {
 	suite.Setup(false, &capz.ManagedClusterBuilder{}, func(client *clustertestclient.Client) {
-		// AKS has a managed control plane, so we wait for the worker nodes (the System and
-		// User node pools, none of which carry the control-plane label) to become ready.
+		// AKS has a managed control plane, so we wait for the worker nodes (the System node
+		// pool, which does not carry the control-plane label) to become ready.
 		Eventually(
-			wait.AreNumNodesReady(state.GetContext(), client, 2, clustertestclient.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"}),
+			wait.AreNumNodesReady(state.GetContext(), client, 1, clustertestclient.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"}),
 			20*time.Minute, 15*time.Second,
 		).Should(BeTrue())
 	})
