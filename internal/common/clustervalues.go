@@ -31,7 +31,7 @@ import (
 // The value is derived twice, independently, from the same upstream field
 // (`Cluster.spec.clusterNetwork.services.cidrBlocks[0]`):
 //
-//   - the coredns Service ClusterIP comes from a Helm regex in
+//   - the cluster DNS Service ClusterIP comes from a Helm regex in
 //     giantswarm/cluster (`cluster.internal.apps.coredns.dns`), passed to
 //     coredns-app as `service.clusterIP`;
 //   - `clusterDNSIP` comes from Go code in cluster-apps-operator
@@ -43,7 +43,7 @@ import (
 // installation default -- while the Helm path stayed correct. Unit tests cannot
 // catch that: their fixtures supply the field by hand, so they never notice the
 // real producer has stopped emitting it.
-func runClusterValues() {
+func runClusterValues(cfg *TestConfig) {
 	Context("cluster values", func() {
 		var (
 			wcClient     *client.Client
@@ -101,19 +101,22 @@ func runClusterValues() {
 				Should(Succeed())
 		})
 
-		It("emits a clusterDNSIP that matches the coredns Service", func() {
-			var coreDNSIP string
+		It("emits a clusterDNSIP that matches the cluster DNS Service", func() {
+			var clusterDNSServiceIP string
 
-			// Fetched by name, which is the stable contract: coredns-app names
-			// the Service `coredns` in kube-system, verified on CAPA, CAPZ and
-			// CAPVCD clusters. Deliberately no fallback to a second lookup --
-			// a test that quietly falls back to another source of truth is how
+			// Fetched by name, which is the stable contract per provider:
+			// coredns-app names the Service `coredns` in kube-system (verified
+			// on CAPA, CAPZ and CAPVCD clusters), while managed control planes
+			// ship their own DNS add-on under a different name (AKS uses
+			// `kube-dns`). Deliberately no fallback to a second lookup -- a
+			// test that quietly falls back to another source of truth is how
 			// this class of bug hides in the first place. If a provider ever
-			// differs, this should fail loudly and be fixed here.
+			// differs, this should fail loudly and the name be set in its
+			// TestConfig.
 			Eventually(func() error {
 				svc := &corev1.Service{}
 				err := wcClient.Get(state.GetContext(), types.NamespacedName{
-					Name:      "coredns",
+					Name:      cfg.DNSServiceName,
 					Namespace: "kube-system",
 				}, svc)
 				if err != nil {
@@ -121,20 +124,20 @@ func runClusterValues() {
 				}
 
 				if svc.Spec.ClusterIP == "" || svc.Spec.ClusterIP == corev1.ClusterIPNone {
-					return fmt.Errorf("coredns Service in kube-system has no ClusterIP")
+					return fmt.Errorf("%s Service in kube-system has no ClusterIP", cfg.DNSServiceName)
 				}
 
-				coreDNSIP = svc.Spec.ClusterIP
+				clusterDNSServiceIP = svc.Spec.ClusterIP
 				return nil
 			}).
 				WithTimeout(2 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(Succeed())
 
-			logger.Log("cluster-values clusterDNSIP=%s, coredns Service ClusterIP=%s", clusterDNSIP, coreDNSIP)
+			logger.Log("cluster-values clusterDNSIP=%s, %s Service ClusterIP=%s", clusterDNSIP, cfg.DNSServiceName, clusterDNSServiceIP)
 
-			Expect(clusterDNSIP).To(Equal(coreDNSIP),
-				"clusterDNSIP in the cluster-values ConfigMap must equal the coredns Service ClusterIP. "+
+			Expect(clusterDNSIP).To(Equal(clusterDNSServiceIP),
+				fmt.Sprintf("clusterDNSIP in the cluster-values ConfigMap must equal the %s Service ClusterIP. ", cfg.DNSServiceName)+
 					"chart-operator uses it as its only resolver, so a mismatch breaks every chart pull.")
 		})
 

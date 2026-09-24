@@ -18,5 +18,8 @@ var _ = Describe("Common tests", func() {
 	// AKS has a managed control plane with its own Kubernetes API endpoint, so
 	// our DNS controllers don't set up an A record for it.
 	cfg.APIServerDNSRecordSupported = false
+	// AKS ships its own managed DNS add-on, which names the Service `kube-dns`
+	// instead of `coredns`.
+	cfg.DNSServiceName = "kube-dns"
 	common.Run(cfg)
 })

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
+  (`TestConfig.DNSServiceName`, defaulting to `coredns`). AKS ships its own managed DNS add-on,
+  where the Service is named `kube-dns`.
 - Go: Update dependencies.
 
 ## [7.5.4] - 2026-09-02
