@@ -37,9 +37,17 @@ type nodeInfo struct {
 }
 
 const (
-	ControlPlaneTypeKubeadm    = "kubeadm"
-	ControlPlaneTypeAWSManaged = "aws-managed"
+	ControlPlaneTypeKubeadm      = "kubeadm"
+	ControlPlaneTypeAWSManaged   = "aws-managed"
+	ControlPlaneTypeAzureManaged = "azure-managed"
 )
+
+// isManagedControlPlane reports whether the given control plane type is a managed
+// control plane (e.g. EKS or AKS) where the control-plane nodes are not visible in
+// the workload cluster, so control-plane node checks must be skipped.
+func isManagedControlPlane(cpType string) bool {
+	return cpType == ControlPlaneTypeAWSManaged || cpType == ControlPlaneTypeAzureManaged
+}
 
 type TestConfig struct {
 	ControlPlaneNodesTimeout     time.Duration
@@ -90,6 +98,13 @@ func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool)
 			completeStatus:      metav1.ConditionFalse,
 			completeReason:      "updated",
 		}, true
+	case ControlPlaneTypeAzureManaged:
+		// AKS uses AzureASOManagedControlPlane, which does not currently expose a
+		// dedicated "updating" condition we can assert on the way EKS does. We
+		// therefore skip the explicit control-plane rolling-update check for AKS.
+		// Worker-node rolls during the upgrade are still covered by the node-roll
+		// detection logic below.
+		return controlPlaneUpdateSpec{}, false
 	default:
 		return controlPlaneUpdateSpec{}, false
 	}
@@ -141,8 +156,8 @@ func Run(cfg *TestConfig) {
 		})
 
 		It("has all the control-plane nodes running", func() {
-			if cfg.ControlPlaneType == ControlPlaneTypeAWSManaged {
-				Skip("Skipping control plane nodes readiness check for EKS clusters")
+			if isManagedControlPlane(cfg.ControlPlaneType) {
+				Skip(fmt.Sprintf("Skipping control plane nodes readiness check for managed control plane type %q", cfg.ControlPlaneType))
 			}
 
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
