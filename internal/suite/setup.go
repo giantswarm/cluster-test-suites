@@ -49,6 +49,11 @@ type Options struct {
 	// different providers and test configurations are easy to identify in the registry.
 	// Use WithSuiteIdentifier to set this. When empty the tag has no suite suffix.
 	SuiteSlug string
+
+	// TeardownTimeout bounds the AfterSuite cleanup (PV cleanup plus cluster deletion).
+	// Defaults to DefaultTeardownTimeout when unset. Providers whose clusters take longer
+	// to delete (e.g. AKS) can raise it with WithTeardownTimeout.
+	TeardownTimeout time.Duration
 }
 
 // Option mutates Options.
@@ -60,9 +65,18 @@ func WithExtraClusterValues(fn func() (string, error)) Option {
 	return func(o *Options) { o.ExtraClusterValuesFn = fn }
 }
 
+// WithTeardownTimeout overrides how long the AfterSuite cleanup is allowed to take.
+func WithTeardownTimeout(d time.Duration) Option {
+	return func(o *Options) { o.TeardownTimeout = d }
+}
+
 const (
 	CrustGatherRegistry   = "crustgatherci.azurecr.io"
 	CrustGatherRepository = "snapshots"
+
+	// DefaultTeardownTimeout is how long the AfterSuite cleanup may take unless a suite
+	// overrides it with WithTeardownTimeout.
+	DefaultTeardownTimeout = 1 * time.Hour
 )
 
 // hasFailures tracks whether any test spec has failed during the suite run.
@@ -119,6 +133,9 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 	}
 	if o.SuiteSlug == "" {
 		o.SuiteSlug = detectSuiteSlug()
+	}
+	if o.TeardownTimeout == 0 {
+		o.TeardownTimeout = DefaultTeardownTimeout
 	}
 	ReportAfterEach(func(report SpecReport) {
 		if report.Failed() {
@@ -281,7 +298,7 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
-		ctx, _ = context.WithTimeout(ctx, 1*time.Hour) //nolint:govet
+		ctx, _ = context.WithTimeout(ctx, o.TeardownTimeout) //nolint:govet
 		state.SetContext(ctx)
 
 		err := cleanupPVs(ctx)

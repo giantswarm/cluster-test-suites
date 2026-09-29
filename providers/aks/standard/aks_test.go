@@ -4,9 +4,16 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 )
 
 var _ = Describe("Common tests", func() {
+	BeforeEach(func() {
+		// AKS clusters take longer to fully settle after being created.
+		state.SetTestTimeout(timeout.ClusterReadyTimeout, timeout.AKSClusterReady)
+	})
+
 	cfg := common.NewTestConfigWithDefaults()
 	// AKS has a managed control plane, so there are no metrics for the k8s control plane components.
 	cfg.ControlPlaneMetricsSupported = false

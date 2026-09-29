@@ -4,12 +4,22 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
 	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 	"github.com/giantswarm/cluster-test-suites/v7/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
+	BeforeEach(func() {
+		// Upgrading an AKS cluster (managed control plane plus node pool) takes longer than
+		// the shared default allows.
+		state.SetTestTimeout(timeout.ClusterReadyTimeout, timeout.AKSClusterReady)
+	})
+
 	cfg := upgrade.NewTestConfigWithDefaults()
 	cfg.ControlPlaneType = upgrade.ControlPlaneTypeAzureManaged
+	// AKS node pools are slow to roll, so give the worker nodes more time to come back.
+	cfg.WorkerNodesTimeout = timeout.AKSWorkerNodes
 	upgrade.Run(cfg)
 
 	// Finally run the common tests after upgrade is completed
