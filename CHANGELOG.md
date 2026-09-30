@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the extra `User` pool from the cluster builder defaults in `cluster-standup-teardown` v6.0.8. Both
   AKS suites now wait for 1 worker node instead of 2.
 - Go: Update dependencies.
+- Go: Update `cluster-standup-teardown` to v6.0.9.
 
 ## [7.5.4] - 2026-09-02
 
