@@ -3,12 +3,13 @@ package standard
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
 )
 
 var _ = Describe("Common tests", func() {
 	cfg := common.NewTestConfigWithDefaults()
 	// Disabled until wildcard ingress support is added
 	cfg.ExternalDnsSupported = false
+	cfg.GatewayAPISupported = false
 	common.Run(cfg)
 })

@@ -1,16 +1,16 @@
 package common
 
 import (
-	"context"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/teleport"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
+
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/teleport"
 
 	tc "github.com/gravitational/teleport/api/client"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
@@ -31,14 +31,24 @@ func runTeleport(teleportSupported bool) {
 			if teleportIdentityFile == "" {
 				Skip("TELEPORT_IDENTITY_FILE env var not set, skipping teleport test")
 			}
-			var err error
-			teleportClient, err = teleport.New(context.Background(), teleportIdentityFile)
-			Expect(err).To(BeNil())
+			// Building the Teleport client talks to the Teleport proxy, which can
+			// transiently fail; retry so a blip doesn't fail the spec.
+			Eventually(func() error {
+				var err error
+				teleportClient, err = teleport.New(state.GetContext(), teleportIdentityFile)
+				return err
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 		})
 
-		It("cluster is registered", func() {
+		// FlakeAttempts: Teleport registration depends on the external Teleport
+		// control plane observing and registering the cluster, which is
+		// inherently eventually-consistent.
+		It("cluster is registered", FlakeAttempts(3), func() {
 			Eventually(func() (bool, error) {
-				clusters, err := teleportClient.GetKubernetesServers(context.Background())
+				clusters, err := teleportClient.GetKubernetesServers(state.GetContext())
 				if err != nil {
 					return false, err
 				}

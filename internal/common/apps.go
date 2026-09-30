@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"time"
 
-	helm "github.com/fluxcd/helm-controller/api/v2"
+	helmv2 "github.com/fluxcd/helm-controller/api/v2"
 	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
 	"github.com/giantswarm/k8smetadata/pkg/annotation"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	apimeta "k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 )
 
 func RunApps(cfg *TestConfig) {
@@ -30,7 +33,7 @@ func RunApps(cfg *TestConfig) {
 			logger.Log("Waiting for all HelmReleases to be deployed. Timeout: %s", timeout.String())
 
 			// Get all HelmReleases in the cluster organization namespace
-			helmReleaseList := &helm.HelmReleaseList{}
+			helmReleaseList := &helmv2.HelmReleaseList{}
 			err := state.GetFramework().MC().List(state.GetContext(), helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 			Expect(err).NotTo(HaveOccurred())
 
@@ -41,10 +44,10 @@ func RunApps(cfg *TestConfig) {
 
 			helmReleaseNamespacedNames := []types.NamespacedName{}
 			for _, hr := range helmReleaseList.Items {
-				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.Name, Namespace: hr.Namespace})
+				helmReleaseNamespacedNames = append(helmReleaseNamespacedNames, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
 			}
 
-			Eventually(wait.Consistent(areAllHelmReleasesReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
+			Eventually(wait.Consistent(helmrelease.AreAllReady(state.GetContext(), state.GetFramework().MC(), helmReleaseNamespacedNames), 5, 10*time.Second)).
 				WithTimeout(timeout).
 				WithPolling(10*time.Second).
 				Should(
@@ -53,7 +56,6 @@ func RunApps(cfg *TestConfig) {
 						failurehandler.HelmReleasesNotReady(state.GetFramework(), state.GetCluster()),
 						failurehandler.PodsNotReady(state.GetFramework(), state.GetCluster()),
 						reportHelmReleaseOwningTeams(),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate HelmReleases not ready"),
 					),
 				)
 		})
@@ -68,6 +70,10 @@ func RunApps(cfg *TestConfig) {
 			err := state.GetFramework().MC().List(state.GetContext(), appList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()), getDefaultAppsSelector())
 			Expect(err).NotTo(HaveOccurred())
 
+			if len(appList.Items) == 0 {
+				Skip("No default App CRs found in the org namespace; the cluster chart deploys defaults as HelmReleases, which the HelmRelease assertion above already covers.")
+			}
+
 			appNamespacedNames := []types.NamespacedName{}
 			for _, app := range appList.Items {
 				appNamespacedNames = append(appNamespacedNames, types.NamespacedName{Name: app.Name, Namespace: app.Namespace})
@@ -80,7 +86,6 @@ func RunApps(cfg *TestConfig) {
 					BeTrue(),
 					failurehandler.Bundle(
 						failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
-						failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate Apps not ready"),
 						reportOwningTeams(),
 					),
 				)
@@ -97,7 +102,13 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the observability-bundle app to be deployed before we can check the apps it deploys.
 			observabilityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
 
-			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+			if !resourceExists("observability-bundle App CR", func() (bool, error) {
+				return appExists(observabilityAppsAppName, state.GetCluster().GetNamespace())
+			}) {
+				Skip("observability-bundle App CR not found; the cluster chart deploys it as a HelmRelease, which the HelmRelease sibling assertion covers.")
+			}
+
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), observabilityAppsAppName, state.GetCluster().GetNamespace())).
 				WithTimeout(bundleTimeout).
 				WithPolling(5 * time.Second).
@@ -121,6 +132,23 @@ func RunApps(cfg *TestConfig) {
 					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
+
+		It("all observability-bundle HelmReleases are deployed without issues", func() {
+			if !cfg.ObservabilityBundleInstalled {
+				Skip("observability-bundle is not installed")
+			}
+
+			helper.SetResponsibleTeam(helper.TeamAtlas)
+
+			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "observability-bundle")
+			if !resourceExists("observability-bundle HelmRelease", func() (bool, error) {
+				return helmReleaseExists(parent, state.GetCluster().GetNamespace())
+			}) {
+				Skip("observability-bundle HelmRelease not found; the cluster chart deploys it as an App CR, which the App-CR sibling assertion covers.")
+			}
+
+			waitForBundleHelmReleases(parent, 8*time.Minute)
+		})
 	})
 	Context("security-bundle apps", func() {
 		It("all security-bundle apps are deployed without issues", func() {
@@ -133,7 +161,13 @@ func RunApps(cfg *TestConfig) {
 			// We need to wait for the security-bundle app to be deployed before we can check the apps it deploys.
 			securityAppsAppName := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
 
-			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 90*time.Second)
+			if !resourceExists("security-bundle App CR", func() (bool, error) {
+				return appExists(securityAppsAppName, state.GetCluster().GetNamespace())
+			}) {
+				Skip("security-bundle App CR not found; the cluster chart deploys it as a HelmRelease, which the HelmRelease sibling assertion covers.")
+			}
+
+			bundleTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
 			Eventually(wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), securityAppsAppName, state.GetCluster().GetNamespace())).
 				WithTimeout(bundleTimeout).
 				WithPolling(5 * time.Second).
@@ -157,7 +191,113 @@ func RunApps(cfg *TestConfig) {
 					failurehandler.AppIssues(state.GetFramework(), state.GetCluster()),
 				)
 		})
+
+		It("all security-bundle HelmReleases are deployed without issues", func() {
+			if !cfg.SecurityBundleInstalled {
+				Skip("security-bundle is not installed")
+			}
+
+			helper.SetResponsibleTeam(helper.TeamShield)
+
+			parent := fmt.Sprintf("%s-%s", state.GetCluster().Name, "security-bundle")
+			if !resourceExists("security-bundle HelmRelease", func() (bool, error) {
+				return helmReleaseExists(parent, state.GetCluster().GetNamespace())
+			}) {
+				Skip("security-bundle HelmRelease not found; the cluster chart deploys it as an App CR, which the App-CR sibling assertion covers.")
+			}
+
+			waitForBundleHelmReleases(parent, 10*time.Minute)
+		})
 	})
+}
+
+// waitForBundleHelmReleases waits for the named parent bundle HelmRelease to be
+// Ready and then for all its child HelmReleases (selected by the
+// giantswarm.io/managed-by=<parent> label, same convention as the App-CR
+// variant) to be Ready too. childrenTimeout bounds the children's wait; the
+// parent uses the shared BundleApps timeout (default 5m) to match the
+// App-based sibling's behaviour.
+func waitForBundleHelmReleases(parentName string, childrenTimeout time.Duration) {
+	mc := state.GetFramework().MC()
+	org := state.GetCluster().Organization.GetNamespace()
+
+	parentTimeout := state.GetTestTimeout(timeout.BundleApps, 5*time.Minute)
+	Eventually(helmrelease.IsHelmReleaseReady(state.GetContext(), mc, parentName, org)).
+		WithTimeout(parentTimeout).
+		WithPolling(5 * time.Second).
+		Should(BeTrue())
+
+	helmReleaseList := &helmv2.HelmReleaseList{}
+	err := mc.List(state.GetContext(), helmReleaseList, ctrl.InNamespace(org), ctrl.MatchingLabels{"giantswarm.io/managed-by": parentName})
+	Expect(err).NotTo(HaveOccurred())
+
+	children := make([]types.NamespacedName, 0, len(helmReleaseList.Items))
+	for _, hr := range helmReleaseList.Items {
+		children = append(children, types.NamespacedName{Name: hr.GetName(), Namespace: hr.GetNamespace()})
+	}
+
+	Eventually(wait.Consistent(helmrelease.AreAllReady(state.GetContext(), mc, children), 5, 10*time.Second)).
+		WithTimeout(childrenTimeout).
+		WithPolling(10*time.Second).
+		Should(
+			Succeed(),
+			failurehandler.Bundle(
+				failurehandler.HelmReleasesNotReady(state.GetFramework(), state.GetCluster()),
+				reportHelmReleaseOwningTeams(),
+			),
+		)
+}
+
+// resourceExists retries check until it returns without a transient error (or
+// the short timeout elapses), then reports whether the resource exists. A
+// transient API error must not be misread as "absent": doing so would silently
+// Skip the assertion and hide a real failure. On a persistent error this fails
+// the spec loudly instead.
+func resourceExists(desc string, check func() (bool, error)) bool {
+	var exists bool
+	Eventually(func() error {
+		var err error
+		exists, err = check()
+		return err
+	}).
+		WithTimeout(30*time.Second).
+		WithPolling(5*time.Second).
+		Should(Succeed(), "failed to determine whether %s exists", desc)
+	return exists
+}
+
+// appExists reports whether an App CR with the given name exists in the
+// namespace on the management cluster. A NotFound error yields (false, nil); any
+// other error is returned so the caller can retry rather than treat it as
+// absent. Used by bundle assertions to decide whether the cluster chart is in
+// App-CR mode for this bundle.
+func appExists(name, namespace string) (bool, error) {
+	app := &v1alpha1.App{}
+	err := state.GetFramework().MC().Get(state.GetContext(), ctrl.ObjectKey{Name: name, Namespace: namespace}, app)
+	if err == nil {
+		return true, nil
+	}
+	if apierrors.IsNotFound(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// helmReleaseExists reports whether a Flux HelmRelease with the given name
+// exists in the namespace on the management cluster. A NotFound error yields
+// (false, nil); any other error is returned so the caller can retry rather than
+// treat it as absent. Used by bundle assertions to decide whether the cluster
+// chart is in HelmRelease mode for this bundle.
+func helmReleaseExists(name, namespace string) (bool, error) {
+	hr := &helmv2.HelmRelease{}
+	err := state.GetFramework().MC().Get(state.GetContext(), ctrl.ObjectKey{Name: name, Namespace: namespace}, hr)
+	if err == nil {
+		return true, nil
+	}
+	if apierrors.IsNotFound(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 func getDefaultAppsSelector() ctrl.MatchingLabels {
@@ -194,55 +334,6 @@ func reportOwningTeams() failurehandler.FailureHandler {
 	})
 }
 
-// areAllHelmReleasesReady checks if all HelmReleases in the list are ready
-func areAllHelmReleasesReady(ctx context.Context, client ctrl.Client, helmReleases []types.NamespacedName) func() error {
-	return func() error {
-		allReady := true
-		for _, hr := range helmReleases {
-			helmRelease := &helm.HelmRelease{}
-			err := client.Get(ctx, hr, helmRelease)
-			if err != nil {
-				logger.Log("HelmRelease status for '%s' failed to retrieve: %v", hr.Name, err)
-				allReady = false
-				continue
-			}
-
-			ready := false
-			readyCondition := ""
-			readyReason := ""
-			readyMessage := ""
-
-			for _, condition := range helmRelease.Status.Conditions {
-				if condition.Type == "Ready" {
-					if condition.Status == metav1.ConditionTrue {
-						ready = true
-					}
-					readyCondition = string(condition.Status)
-					readyReason = condition.Reason
-					readyMessage = condition.Message
-					break
-				}
-			}
-
-			if ready {
-				logger.Log("HelmRelease status for '%s' is as expected: expectedStatus='Ready' actualStatus='Ready'", hr.Name)
-			} else {
-				if readyCondition == "" {
-					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='Unknown' (reason: 'No Ready condition found')", hr.Name)
-				} else {
-					logger.Log("HelmRelease status for '%s' is not yet as expected: expectedStatus='Ready' actualStatus='%s' (reason: '%s - %s')", hr.Name, readyCondition, readyReason, readyMessage)
-				}
-				allReady = false
-			}
-		}
-
-		if !allReady {
-			return fmt.Errorf("not all HelmReleases are ready")
-		}
-		return nil
-	}
-}
-
 // reportHelmReleaseOwningTeams reports the teams responsible for failing HelmReleases
 func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 	return failurehandler.Wrap(func() {
@@ -251,7 +342,7 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 
 		logger.Log("Attempting to get responsible teams for any failing HelmReleases")
 
-		helmReleaseList := &helm.HelmReleaseList{}
+		helmReleaseList := &helmv2.HelmReleaseList{}
 		err := state.GetFramework().MC().List(ctx, helmReleaseList, ctrl.InNamespace(state.GetCluster().Organization.GetNamespace()))
 		if err != nil {
 			logger.Log("Failed to get HelmReleases - %v", err)
@@ -259,21 +350,10 @@ func reportHelmReleaseOwningTeams() failurehandler.FailureHandler {
 		}
 
 		for _, hr := range helmReleaseList.Items {
-			ready := false
-			for _, condition := range hr.Status.Conditions {
-				if condition.Type == "Ready" && condition.Status == metav1.ConditionTrue {
-					ready = true
-					break
-				}
-			}
-
-			if !ready {
-				// Get team label from labels
-				labels := hr.GetLabels()
-				if labels != nil {
-					if teamLabel, ok := labels["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
-						logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.GetName(), teamLabel)
-					}
+			condition := apimeta.FindStatusCondition(hr.Status.Conditions, "Ready")
+			if condition == nil || condition.Status != metav1.ConditionTrue {
+				if teamLabel, ok := hr.GetLabels()["application.giantswarm.io/team"]; ok && !helper.SetResponsibleTeamFromLabel(teamLabel) {
+					logger.Log("Unknown owner team - HelmRelease='%s', TeamLabel='%s'", hr.GetName(), teamLabel)
 				}
 			}
 		}

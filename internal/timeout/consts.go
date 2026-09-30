@@ -13,4 +13,8 @@ const (
 	CertManager TestKey = "certManagerTimeout"
 	// BundleApps is used by observability-bundle and security-bundle app detection
 	BundleApps TestKey = "bundleAppsTimeout"
+	// ClusterConnection is used by "should be able to connect to the management/workload cluster"
+	ClusterConnection TestKey = "clusterConnectionTimeout"
+	// GatewayAppReady is used by the hello-world gateway app readiness checks
+	GatewayAppReady TestKey = "gatewayAppReadyTimeout"
 )

@@ -1,5 +1,5 @@
-clusterName: {{ .ClusterName }}
-organization: {{ .Organization }}
+ingress:
+  enabled: false
 autoscaling:
   enabled: false
 replicaCount: {{ index .ExtraValues "ReplicaCount" }}

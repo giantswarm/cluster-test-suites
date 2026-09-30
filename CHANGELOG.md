@@ -11,6 +11,154 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enable autoscaling tests for CAPZ (Azure) provider.
 
+### Changed
+
+- The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
+  (`TestConfig.DNSServiceName`, defaulting to `coredns`). AKS ships its own managed DNS add-on,
+  where the Service is named `kube-dns`.
+- aks: Raise the timeouts for cluster creation and deletion — node readiness during standup
+  (40m), the `Cluster Available` condition (40m), the post-upgrade worker node check (30m) and
+  the `AfterSuite` teardown (90m).
+- Suites can now override the `AfterSuite` teardown timeout via `suite.WithTeardownTimeout`
+  (default remains 1h).
+- aks: The AKS test cluster now comes up with a single `System` node pool, following the removal of
+  the extra `User` pool from the cluster builder defaults in `cluster-standup-teardown` v6.0.8. Both
+  AKS suites now wait for 1 worker node instead of 2.
+- Go: Update dependencies.
+
+## [7.5.4] - 2026-09-02
+
+### Added
+
+- Add a `cluster values` spec asserting that the `clusterDNSIP` emitted into `<cluster>-cluster-values`
+  matches the live `coredns` Service `ClusterIP` and `chart-operator`'s `dnsConfig.nameservers[0]`.
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.5.3] - 2026-08-27
+
+### Changed
+
+- capa/china: disable hello world gateway API tests.
+
+## [7.5.2] - 2026-08-22
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.5.1] - 2026-08-21
+
+### Changed
+
+- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing. 
+- Bump crust-gather to v0.17.0.
+- Go: Update dependencies.
+
+## [7.5.0] - 2026-08-06
+
+### Changed
+
+- Go: bump cluster-standup-teardown to v6.0.3.
+
+## [7.4.0] - 2026-07-26
+
+### Added
+
+- Add support for the `aks` (Azure managed clusters) cluster provider, with `standard` and `upgrade` test suites.
+- Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
+
+### Changed
+
+- Improve test resilience: retry transient API calls in setup (`BeforeEach`) blocks instead of failing on a single blip, and add targeted `FlakeAttempts` to specs that depend on inherently-external systems (DNS, HTTPS, Teleport, Mimir).
+- Right-size the tightest timeouts (bundle-app checks 90s → 5m, cluster connection 1m → 3m, gateway app readiness 3m → 5m), all overridable via the `timeout` package.
+- Go: Update dependencies.
+
+### Fixed
+
+- Stop hiding real failures behind false `Skip`s: bundle app/HelmRelease existence checks no longer treat a transient API error as "absent", and the control-plane rolling-update check no longer skips when a fast controller completes the roll before the in-progress condition is observed.
+
+## [7.3.0] - 2026-07-02
+
+### Changed
+
+- Hello Gateway: Support cert-manager and ExternalDNS to be HelmReleases.
+
+## [7.2.2] - 2026-06-18
+
+### Changed
+
+- CAPA/Upgrade: Do not pass cluster name and organization to Hello World.
+
+## [7.2.1] - 2026-06-18
+
+### Changed
+
+- CAPA/Upgrade: Pass organization as extra value.
+
+## [7.2.0] - 2026-06-16
+
+### Added
+
+- `suite.SetupWithOptions` plus a `suite.WithExtraClusterValues(fn)` functional option, so a suite can append extra cluster-values YAML on top of `./test_data/cluster_values.yaml` based on runtime conditions (e.g. release version). The existing `suite.Setup` signature is unchanged.
+- CAPA standard suite: add an ASG-based ARM/Graviton node pool (`np-arm64`, `m7g.xlarge`) alongside the existing amd64 pools. It is tainted `kubernetes.io/arch=arm64:NoSchedule` so amd64-only workloads stay on the amd64 pools.
+- Add a temporary `ARMNodePoolEnabled` suite config flag. When set, the basic pod health checks ("Running state" and "restarting pods") exclude `net-exporter` and `cert-exporter-daemonset`, whose released app versions aren't multi-arch yet and crashloop on arm64 nodes. Enabled for the CAPA standard suite; to be removed once release v35 ships the multi-arch versions.
+
+### Changed
+
+- Explicitly request the `latest` provider cluster chart when building a cluster, unless the cluster app version is pinned via `E2E_OVERRIDE_VERSIONS`. This keeps daily Cluster Test Suites running against the latest chart after clustertest stopped bumping the release's pinned cluster app version by default (giantswarm/clustertest#730).
+- CAPA standard suite: gate the ARM/Graviton node pool (and the `ARMNodePoolEnabled` exporter exclusions) on `E2E_RELEASE_VERSION >= v35.0.0`. The `architecture` / `instanceType` fields require cluster-aws 8.5.0+, but `/run release-test-suites` always pulls the latest cluster-test-suites — so without a gate, release PRs on older lines (v33.x, v34.x) failed (example: giantswarm/releases#2315). Conservative default: empty / unparseable `E2E_RELEASE_VERSION` skips ARM. Moved the arm-specific values into `test_data/cluster_values_arm.yaml`, loaded conditionally via the new `suite.WithExtraClusterValues` option.
+- Dockerfile: cross-compile instead of emulating for multi-arch builds.
+- Gateway e2e: verify child apps (`gateway-api-crds`, `envoy-gateway`, `gateway-api-config`) are ready after the bundle HelmRelease deploys.
+- Gateway e2e: attach `CertificatesNotReady` and `ExternalDNSIssues` failure handlers to certificate and DNS steps for better failure diagnostics.
+
+### Removed
+
+- Remove the ingress-nginx hello-world test (`runHelloWorld`) and `IngressNginxSupported` config flag; permanently disabled and never enabled by any provider.
+
+## [7.1.0] - 2026-05-21
+
+### Changed
+
+- Basic connectivity tests now use `Eventually` with a 1-minute timeout and 5-second polling instead of `FlakeAttempts`. `FlakeAttempts` retries with no delay, so on transient DNS/connection failures all attempts would burn through in milliseconds before the underlying condition had a chance to clear.
+
+### Fixed
+
+- Pin `nginx-unprivileged` image tag to `1.31-alpine` in PVC storage test. The image had no `:latest` tag in `gsoci.azurecr.io`, causing the pod to fail with `ErrImagePull` and the test to time out across all providers.
+
+## [7.0.1] - 2026-05-08
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.0.0] - 2026-05-05
+
+### Changed
+
+- Go: Update `clustertest` to v5.0.0 & `cluster-standup-teardown` to v6.0.0.
+
+## [6.4.0] - 2026-05-04
+
+### Changed
+
+- Go: Update dependencies.
+
+## [6.3.0] - 2026-04-16
+
+### Added
+
+- Add support for `capmox` provider tests (disabled by default).
+- Support both App-CR and HelmRelease-based default apps in e2e assertions. Detection is presence-based (no hardcoded version constant): each App-CR assertion block checks whether the relevant resource exists on the MC and `Skip()`s with a clear message if it doesn't, deferring to the HelmRelease sibling. Likewise, each HelmRelease-bundle assertion skips when the HelmRelease doesn't exist, deferring to the App-CR sibling. `hello.go`'s cert-manager / external-dns preconditions use a new `WaitAppOrHelmReleaseReady` helper that polls both kinds and succeeds as soon as either is Ready.
+
+## [6.2.0] - 2026-04-01
+
+### Changed
+
+- Switch hello-world and scale-hello-world tests from App CR to HelmRelease to avoid values-schema-violation errors caused by chart-operator injecting additional properties.
+
 ## [6.1.0] - 2026-03-19
 
 ### Changed
@@ -1375,7 +1523,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
+[7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
+[7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
+[7.5.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.0...v7.5.1
+[7.5.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.4.0...v7.5.0
+[7.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.3.0...v7.4.0
+[7.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.2...v7.3.0
+[7.2.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.1...v7.2.2
+[7.2.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.2.0...v7.2.1
+[7.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.1.0...v7.2.0
+[7.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.1...v7.1.0
+[7.0.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.0.0...v7.0.1
+[7.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.4.0...v7.0.0
+[6.4.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.3.0...v6.4.0
+[6.3.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.2.0...v6.3.0
+[6.2.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/giantswarm/cluster-test-suites/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/giantswarm/cluster-test-suites/compare/v4.1.0...v5.0.0

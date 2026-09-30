@@ -9,6 +9,11 @@ global:
   # testing both node provisioning models in a single run — which also reflects how customers
   # run in production (mixed ASG + Karpenter pools).
   # See: https://github.com/giantswarm/roadmap/issues/4249
+  #
+  # ARM/Graviton testing is layered in via test_data/cluster_values_arm.yaml when the
+  # release under test supports it (E2E_RELEASE_VERSION >= v35.0.0). Keep this file
+  # schema-compatible with older cluster-aws versions so release-test-suites runs on
+  # older releases (e.g. v33.x, v34.x) don't break.
   nodePools:
     nodepool-0:
       minSize: 1

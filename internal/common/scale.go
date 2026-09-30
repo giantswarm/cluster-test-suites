@@ -1,33 +1,30 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"time"
 
-	"github.com/giantswarm/apiextensions-application/api/v1alpha1"
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	helmv2 "github.com/fluxcd/helm-controller/api/v2"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/helmrelease"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
 func runScale(autoScalingSupported bool) {
 	Context("scale", func() {
 		var (
-			helloApp       *application.Application
-			wcClient       *client.Client
-			helloAppValues map[string]string
+			helmRelease  *helmv2.HelmRelease
+			ociRepoName  string
+			wcClient     *client.Client
+			replicaCount int
 		)
 
 		BeforeEach(func() {
@@ -39,50 +36,61 @@ func runScale(autoScalingSupported bool) {
 
 			var err error
 
-			wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
-			if err != nil {
-				Fail(err.Error())
-			}
+			ctx := state.GetContext()
 
-			ctx := context.Background()
-			org := state.GetCluster().Organization
-
-			// Get the current number of worker nodes and set the replicas to one more to force scale up
-			nodes := corev1.NodeList{}
-			err = wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
-			Expect(err).To(BeNil())
-
-			helloAppValues = map[string]string{
-				"ReplicaCount": fmt.Sprintf("%d", len(nodes.Items)+1),
-			}
-
-			helloApp = application.New(fmt.Sprintf("%s-scale-hello-world", state.GetCluster().Name), "hello-world").
-				WithCatalog("giantswarm").
-				WithOrganization(*org).
-				WithVersion("latest").
-				WithClusterName(state.GetCluster().Name).
-				WithInCluster(false).
-				WithInstallNamespace("giantswarm").
-				MustWithValuesFile("./test_data/scale_helloworld_values.yaml", &application.TemplateValues{
-					ClusterName:  state.GetCluster().Name,
-					Organization: state.GetCluster().Organization.Name,
-					ExtraValues:  helloAppValues,
-				})
-
-			err = state.GetFramework().MC().DeployApp(ctx, *helloApp)
-			Expect(err).To(BeNil())
-
-			Eventually(func() (bool, error) {
-				managementClusterKubeClient := state.GetFramework().MC()
-
-				helloApplication := &v1alpha1.App{}
-				err := managementClusterKubeClient.Get(ctx, types.NamespacedName{Name: helloApp.InstallName, Namespace: helloApp.GetNamespace()}, helloApplication)
-				if err != nil {
-					return false, err
-				}
-
-				return wait.IsAppDeployed(state.GetContext(), state.GetFramework().MC(), helloApp.InstallName, helloApp.GetNamespace())()
+			// Building the WC client can transiently fail; retry so a blip
+			// doesn't fail the spec.
+			Eventually(func() error {
+				wcClient, err = state.GetFramework().WC(state.GetCluster().Name)
+				return err
 			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
+
+			org := state.GetCluster().Organization
+			clusterName := state.GetCluster().Name
+			namespace := org.GetNamespace()
+
+			// Get the current number of worker nodes and set the replicas to one more to force scale up.
+			// The List call can transiently fail against a busy MC; retry it.
+			nodes := corev1.NodeList{}
+			Eventually(func() error {
+				return wcClient.List(ctx, &nodes, client.DoesNotHaveLabels{"node-role.kubernetes.io/control-plane"})
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
+
+			replicaCount = len(nodes.Items) + 1
+
+			ociRepoName = fmt.Sprintf("%s-hello-world-chart", clusterName)
+			err = helmrelease.EnsureOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, namespace, "hello-world")
+			Expect(err).To(BeNil())
+
+			hrBuilder, err := helmrelease.New(
+				fmt.Sprintf("%s-scale-hello-world", clusterName),
+				"hello-world",
+			).
+				WithNamespace(namespace).
+				WithReleaseName("scale-hello-world").
+				WithTargetNamespace("giantswarm").
+				WithOCIRepoName(ociRepoName).
+				WithClusterName(clusterName).
+				WithValuesFile("./test_data/scale_helloworld_values.yaml", &helmrelease.TemplateValues{
+					ClusterName: clusterName,
+					ExtraValues: map[string]string{
+						"ReplicaCount": fmt.Sprintf("%d", replicaCount),
+					},
+				})
+			Expect(err).To(BeNil())
+			helmRelease, err = hrBuilder.Build()
+			Expect(err).To(BeNil())
+
+			err = state.GetFramework().MC().Create(ctx, helmRelease)
+			Expect(err).To(BeNil())
+
+			Eventually(helmrelease.IsHelmReleaseReady(ctx, state.GetFramework().MC(), helmRelease.GetName(), helmRelease.GetNamespace())).
 				WithTimeout(5 * time.Minute).
 				WithPolling(5 * time.Second).
 				Should(BeTrue())
@@ -93,9 +101,9 @@ func runScale(autoScalingSupported bool) {
 				Skip("autoscaling is not supported")
 			}
 
-			ctx := context.Background()
+			ctx := state.GetContext()
 
-			expectedReplicas := helloAppValues["ReplicaCount"]
+			expectedReplicas := fmt.Sprintf("%d", replicaCount)
 			Eventually(func() (bool, error) {
 				deploymentName := "scale-hello-world"
 				helloDeployment := &v1.Deployment{}
@@ -103,7 +111,7 @@ func runScale(autoScalingSupported bool) {
 				err := wcClient.Get(ctx,
 					cr.ObjectKey{
 						Name:      deploymentName,
-						Namespace: helloApp.InstallNamespace,
+						Namespace: "giantswarm",
 					},
 					helloDeployment,
 				)
@@ -147,7 +155,10 @@ func runScale(autoScalingSupported bool) {
 				}
 
 				return false, nil
-			}, "15m", "10s").Should(BeTrue(), failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate 'hello-world' deployment has not scaled up properly"))
+			}).
+				WithTimeout(15 * time.Minute).
+				WithPolling(10 * time.Second).
+				Should(BeTrue())
 		})
 
 		AfterEach(func() {
@@ -155,7 +166,11 @@ func runScale(autoScalingSupported bool) {
 				Skip("autoscaling is not supported")
 			}
 
-			err := state.GetFramework().MC().DeleteApp(state.GetContext(), *helloApp)
+			ctx := state.GetContext()
+			err := state.GetFramework().MC().Delete(ctx, helmRelease)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			err = helmrelease.DeleteOCIRepository(ctx, state.GetFramework().MC(), ociRepoName, helmRelease.GetNamespace())
 			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})

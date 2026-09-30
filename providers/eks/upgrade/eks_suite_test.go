@@ -7,12 +7,12 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder/providers/capa"
-	clustertestclient "github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder/providers/capa"
+	clustertestclient "github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/suite"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/suite"
 )
 
 func TestEKSUpgrade(t *testing.T) {

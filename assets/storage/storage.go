@@ -33,7 +33,7 @@ spec:
     runAsUser: 1001
   containers:
     - name: pvc-test-container
-      image: gsoci.azurecr.io/giantswarm/nginx-unprivileged
+      image: gsoci.azurecr.io/giantswarm/nginx-unprivileged:1.31-alpine
       volumeMounts:
         - name: test-volume
           mountPath: /data

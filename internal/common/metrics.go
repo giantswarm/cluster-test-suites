@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	corev1 "k8s.io/api/core/v1"
@@ -16,9 +16,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client2 "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 )
 
 const mimirUrl = "mimir-gateway.mimir.svc:80/prometheus"
@@ -99,7 +99,10 @@ func runMetrics(cfg *TestConfig) {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("ensure key metrics are available on mimir", func() {
+		// FlakeAttempts: querying Mimir depends on the full observability
+		// pipeline (scrape → ingest → query) and an ExecInPod round-trip, both
+		// inherently eventually-consistent.
+		It("ensure key metrics are available on mimir", FlakeAttempts(3), func() {
 			if !cfg.ObservabilityBundleInstalled {
 				Skip("Observability bundle is not installed in this cluster configuration")
 			}

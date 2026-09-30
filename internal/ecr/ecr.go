@@ -8,16 +8,16 @@ import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/failurehandler"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	appsv1 "k8s.io/api/apps/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
 func Run() {

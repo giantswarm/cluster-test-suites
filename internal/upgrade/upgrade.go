@@ -15,15 +15,15 @@ import (
 	capiconditions "sigs.k8s.io/cluster-api/util/conditions"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/helper"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
@@ -37,9 +37,17 @@ type nodeInfo struct {
 }
 
 const (
-	ControlPlaneTypeKubeadm    = "kubeadm"
-	ControlPlaneTypeAWSManaged = "aws-managed"
+	ControlPlaneTypeKubeadm      = "kubeadm"
+	ControlPlaneTypeAWSManaged   = "aws-managed"
+	ControlPlaneTypeAzureManaged = "azure-managed"
 )
+
+// isManagedControlPlane reports whether the given control plane type is a managed
+// control plane (e.g. EKS or AKS) where the control-plane nodes are not visible in
+// the workload cluster, so control-plane node checks must be skipped.
+func isManagedControlPlane(cpType string) bool {
+	return cpType == ControlPlaneTypeAWSManaged || cpType == ControlPlaneTypeAzureManaged
+}
 
 type TestConfig struct {
 	ControlPlaneNodesTimeout     time.Duration
@@ -90,6 +98,13 @@ func controlPlaneUpdateSpecForType(cpType string) (controlPlaneUpdateSpec, bool)
 			completeStatus:      metav1.ConditionFalse,
 			completeReason:      "updated",
 		}, true
+	case ControlPlaneTypeAzureManaged:
+		// AKS uses AzureASOManagedControlPlane, which does not currently expose a
+		// dedicated "updating" condition we can assert on the way EKS does. We
+		// therefore skip the explicit control-plane rolling-update check for AKS.
+		// Worker-node rolls during the upgrade are still covered by the node-roll
+		// detection logic below.
+		return controlPlaneUpdateSpec{}, false
 	default:
 		return controlPlaneUpdateSpec{}, false
 	}
@@ -141,8 +156,8 @@ func Run(cfg *TestConfig) {
 		})
 
 		It("has all the control-plane nodes running", func() {
-			if cfg.ControlPlaneType == ControlPlaneTypeAWSManaged {
-				Skip("Skipping control plane nodes readiness check for EKS clusters")
+			if isManagedControlPlane(cfg.ControlPlaneType) {
+				Skip(fmt.Sprintf("Skipping control plane nodes readiness check for managed control plane type %q", cfg.ControlPlaneType))
 			}
 
 			replicas, err := state.GetFramework().GetExpectedControlPlaneReplicas(state.GetContext(), state.GetCluster().Name, state.GetCluster().GetNamespace())
@@ -301,6 +316,17 @@ func Run(cfg *TestConfig) {
 					Skip("Control plane resource generation did not change, skipping rolling update test")
 				}
 
+				// The generation changed, so a roll is expected. A fast controller can complete the
+				// roll before we ever observe the in-progress condition. Treat an already-satisfied
+				// complete condition as evidence the roll happened, so we verify completion below
+				// instead of falsely skipping.
+				if completeCond, completeErr := capiconditions.UnstructuredGet(controlPlane, spec.completeCondition); completeErr == nil && completeCond != nil &&
+					completeCond.Status == spec.completeStatus && (spec.completeReason == "" || completeCond.Reason == spec.completeReason) {
+					logger.Log("Control plane roll already completed (condition %s Status='%s' Reason='%s') before the in-progress condition was observed", spec.completeCondition, completeCond.Status, completeCond.Reason)
+					controlPlaneUpdateStarted = true
+					break
+				}
+
 				cond, condErr := capiconditions.UnstructuredGet(controlPlane, spec.inProgressCondition)
 				if condErr != nil || cond == nil {
 					logger.Log("Control plane condition %s is not set, expected Status='%s'", spec.inProgressCondition, spec.inProgressStatus)
@@ -315,7 +341,10 @@ func Run(cfg *TestConfig) {
 			}
 
 			if !controlPlaneUpdateStarted {
-				Skip("Control plane update is not happening")
+				// The generation changed but we never observed the roll starting or completing.
+				// Fail loudly rather than skip: a silent skip here would hide a real upgrade that
+				// never progressed.
+				Fail("Control plane resource generation changed but the rolling update was never observed to start or complete")
 			}
 
 			mcClient := state.GetFramework().MC()

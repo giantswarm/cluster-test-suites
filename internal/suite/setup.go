@@ -3,42 +3,146 @@ package suite
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/giantswarm/clustertest/v4/pkg/failurehandler"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
-	cb "github.com/giantswarm/cluster-standup-teardown/v5/pkg/clusterbuilder"
-	"github.com/giantswarm/cluster-standup-teardown/v5/pkg/standup"
-	"github.com/giantswarm/clustertest/v4"
-	"github.com/giantswarm/clustertest/v4/pkg/client"
-	"github.com/giantswarm/clustertest/v4/pkg/env"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	"github.com/giantswarm/clustertest/v4/pkg/utils"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	cb "github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/standup"
+	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/values"
+	"github.com/giantswarm/clustertest/v5"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/client"
+	"github.com/giantswarm/clustertest/v5/pkg/env"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	"github.com/giantswarm/clustertest/v5/pkg/utils"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	corev1 "k8s.io/api/core/v1"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
+// Options controls optional Setup behavior.
+type Options struct {
+	// ExtraClusterValuesFn, if set, returns an additional YAML values string to merge
+	// on top of ./test_data/cluster_values.yaml. Returning "" skips the overlay. Used
+	// by suites that need to apply overrides conditionally (e.g. release-version-gated
+	// schema fields).
+	ExtraClusterValuesFn func() (string, error)
+
+	// SuiteSlug, if set, is appended to crust-gather snapshot tags so snapshots from
+	// different providers and test configurations are easy to identify in the registry.
+	// Use WithSuiteIdentifier to set this. When empty the tag has no suite suffix.
+	SuiteSlug string
+
+	// TeardownTimeout bounds the AfterSuite cleanup (PV cleanup plus cluster deletion).
+	// Defaults to DefaultTeardownTimeout when unset. Providers whose clusters take longer
+	// to delete (e.g. AKS) can raise it with WithTeardownTimeout.
+	TeardownTimeout time.Duration
+}
+
+// Option mutates Options.
+type Option func(*Options)
+
+// WithExtraClusterValues registers a callback that may return extra cluster-values YAML
+// to merge on top of ./test_data/cluster_values.yaml.
+func WithExtraClusterValues(fn func() (string, error)) Option {
+	return func(o *Options) { o.ExtraClusterValuesFn = fn }
+}
+
+// WithTeardownTimeout overrides how long the AfterSuite cleanup is allowed to take.
+func WithTeardownTimeout(d time.Duration) Option {
+	return func(o *Options) { o.TeardownTimeout = d }
+}
+
 const (
-	OpenAIAPIKeySecretNamespace = "giantswarm"
-	OpenAIAPIKeySecretName      = "openai-api-key"
+	CrustGatherRegistry   = "crustgatherci.azurecr.io"
+	CrustGatherRepository = "snapshots"
+
+	// DefaultTeardownTimeout is how long the AfterSuite cleanup may take unless a suite
+	// overrides it with WithTeardownTimeout.
+	DefaultTeardownTimeout = 1 * time.Hour
 )
+
+// hasFailures tracks whether any test spec has failed during the suite run.
+// Set by ReportAfterEach, checked in AfterSuite to trigger crust-gather collection.
+var hasFailures bool
+
+// beforeSuiteFailed tracks whether BeforeSuite failed (e.g. cluster standup or app install
+// timed out). ReportAfterEach only fires for specs, so BeforeSuite failures would otherwise
+// be invisible to the hasFailures check. Set by the BeforeSuite defer alongside the existing
+// debug-logging path.
+var beforeSuiteFailed bool
 
 // Setup handles the creation of the BeforeSuite and AfterSuite handlers. This covers the creations and cleanup of the test cluster.
 // `clusterReadyFns` can be provided if the cluster requires custom checks for cluster-ready status. If not provided the cluster will
 // be checked for at least a single control plane node being marked as ready.
 func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...func(client *client.Client)) {
+	SetupWithOptions(isUpgrade, clusterBuilder, nil, clusterReadyFns...)
+}
+
+// detectSuiteSlug derives a provider/suite slug from the path of the running test
+// binary. The Tekton pipeline invokes each suite as e.g.
+// /app/providers/capa/standard/capa.test, so the path already encodes the two
+// directory levels we need. Returns "capa-standard" for that input, or "" if the
+// executable path doesn't contain a recognisable providers/ segment — in which case
+// no suite suffix is added to the snapshot tag.
+func detectSuiteSlug() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	const marker = "providers/"
+	idx := strings.Index(exe, marker)
+	if idx < 0 {
+		return ""
+	}
+	// Strip the binary filename, keeping only the provider/suite path segments.
+	// e.g. "capa/standard/capa.test" → "capa/standard"
+	path := exe[idx+len(marker):]
+	if i := strings.LastIndex(path, "/"); i >= 0 {
+		path = path[:i]
+	}
+	path = strings.Trim(path, "/")
+	if path == "" {
+		return ""
+	}
+	return strings.ToLower(strings.ReplaceAll(path, "/", "-"))
+}
+
+// SetupWithOptions is like Setup but accepts functional options.
+func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []Option, clusterReadyFns ...func(client *client.Client)) {
+	o := &Options{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	if o.SuiteSlug == "" {
+		o.SuiteSlug = detectSuiteSlug()
+	}
+	if o.TeardownTimeout == 0 {
+		o.TeardownTimeout = DefaultTeardownTimeout
+	}
+	ReportAfterEach(func(report SpecReport) {
+		if report.Failed() {
+			hasFailures = true
+		}
+	})
+
 	BeforeSuite(func() {
 		logger.LogWriter = GinkgoWriter
 		state.SetContext(context.Background())
@@ -89,13 +193,14 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 		Expect(err).NotTo(HaveOccurred())
 		state.SetFramework(framework)
 
-		cluster := cb.LoadOrBuildCluster(framework, clusterBuilder)
+		cluster := loadOrBuildCluster(framework, clusterBuilder, o)
 		state.SetCluster(cluster)
 
 		// We'll use this to track if the BeforeSuite failed and if we should do extra debug logging
 		setupComplete := false
 		defer (func() {
 			if !setupComplete {
+				beforeSuiteFailed = true
 				// If we fail to standup the cluster, let's grab the status of the cluster App to see if there's an error
 				ctx := context.Background()
 				ctx, cancel := context.WithTimeout(ctx, 1*time.Minute)
@@ -163,14 +268,6 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 							logger.Log("Cluster condition with type '%s' and status '%s' - Message='%s', Reason='%s', Last Occurred='%v'", condition.Type, condition.Status, condition.Message, condition.Reason, condition.LastTransitionTime)
 						}
 
-						// Trigger LLM investigation for cluster setup failure
-						logger.Log("Triggering LLM investigation for cluster setup failure")
-						handler := failurehandler.LLMPrompt(state.GetFramework(), state.GetCluster(), "Investigate cluster setup failure in BeforeSuite")
-						if handlerFunc, ok := handler.(func() string); ok {
-							logger.Log("LLM investigation failure message: %s", handlerFunc())
-						} else {
-							logger.Log("Failed to cast failure handler to expected type")
-						}
 					}
 				}
 			}
@@ -192,9 +289,16 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 			return
 		}
 
+		// Only collect crust-gather snapshots when there is a failure — either a spec
+		// failed or BeforeSuite failed (e.g. cluster standup or app install timed out).
+		// Snapshots are large and expensive to push, so we skip them on green runs.
+		if hasFailures || beforeSuiteFailed {
+			collectCrustGatherSnapshots(o.SuiteSlug)
+		}
+
 		// Ensure we reset the context timeout to make sure we allow plenty of time to clean up
 		ctx := state.GetContext()
-		ctx, _ = context.WithTimeout(ctx, 1*time.Hour) //nolint:govet
+		ctx, _ = context.WithTimeout(ctx, o.TeardownTimeout) //nolint:govet
 		state.SetContext(ctx)
 
 		err := cleanupPVs(ctx)
@@ -204,6 +308,56 @@ func Setup(isUpgrade bool, clusterBuilder cb.ClusterBuilder, clusterReadyFns ...
 
 		Expect(state.GetFramework().DeleteCluster(state.GetContext(), state.GetCluster())).To(Succeed())
 	})
+}
+
+// loadOrBuildCluster mirrors cb.LoadOrBuildCluster but allows appending an extra YAML
+// overlay (via Options.ExtraClusterValuesFn) to the cluster values. Used by suites that
+// need to apply overrides conditionally — e.g. release-version-gated nodepool fields
+// that only exist in newer schemas.
+func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.ClusterBuilder, o *Options) *application.Cluster {
+	cluster, err := framework.LoadCluster()
+	Expect(err).NotTo(HaveOccurred())
+	if cluster != nil {
+		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.GetNamespace())
+		return cluster
+	}
+
+	overrides := []string{values.MustLoadValuesFile("./test_data/cluster_values.yaml")}
+	if o != nil && o.ExtraClusterValuesFn != nil {
+		extra, err := o.ExtraClusterValuesFn()
+		Expect(err).NotTo(HaveOccurred())
+		if extra != "" {
+			overrides = append(overrides, extra)
+		}
+	}
+
+	cluster = clusterBuilder.NewClusterApp("", "", overrides)
+	cluster = cb.ApplyAppOverridesFromEnv(cluster)
+
+	// Cluster Test Suites intentionally test against the latest provider cluster chart to
+	// surface chart issues as early as possible. clustertest only keeps the release's pinned
+	// cluster app version when no version is explicitly requested, so we opt into "latest" here.
+	//
+	// We must not do this when the cluster app version is pinned via E2E_OVERRIDE_VERSIONS
+	// (e.g. when testing a provider cluster chart PR), otherwise the version under test would be
+	// replaced by the latest released version.
+	if !clusterAppOverriddenFromEnv(cluster.ClusterApp.AppName) {
+		cluster = cluster.WithAppVersions("latest")
+	}
+
+	return cluster
+}
+
+// clusterAppOverriddenFromEnv reports whether the given cluster app (e.g. "cluster-aws") has an
+// explicit version override set via the E2E_OVERRIDE_VERSIONS environment variable.
+func clusterAppOverriddenFromEnv(clusterAppName string) bool {
+	for _, pair := range strings.Split(os.Getenv(env.OverrideVersions), ",") {
+		name := strings.TrimSpace(strings.SplitN(pair, "=", 2)[0])
+		if strings.EqualFold(name, clusterAppName) {
+			return true
+		}
+	}
+	return false
 }
 
 func getProviderFromBuilder(clusterBuilder cb.ClusterBuilder) (string, error) {
@@ -228,6 +382,12 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 			return "eks", nil
 		}
 
+		// The AKS test suite uses the CAPZ managed cluster builder, but is considered the "aks" provider.
+		// We can detect this by checking for the unique builder struct name and that it comes from the capz provider.
+		if structName == "ManagedClusterBuilder" && provider == "capz" {
+			return "aks", nil
+		}
+
 		// The CAPZ test suite has a different provider name.
 		if provider == "capz" {
 			return "azure", nil
@@ -240,10 +400,316 @@ func getProviderFromBuilderLogic(pkgPath, structName string) (string, error) {
 		if provider == "capvcd" {
 			return "cloud-director", nil
 		}
+		// The CAPMOX test suite has a different provider name.
+		if provider == "capmox" {
+			return "proxmox", nil
+		}
 		return provider, nil
 	}
 
 	return "", fmt.Errorf("could not determine provider from package path: %s", pkgPath)
+}
+
+// collectCrustGatherSnapshots collects cluster state from both the workload cluster
+// and the management cluster using crust-gather, and pushes the snapshots to an OCI registry.
+// This is best-effort: failures are logged but do not block cluster cleanup.
+func collectCrustGatherSnapshots(suiteSlug string) {
+	if _, err := exec.LookPath("crust-gather"); err != nil {
+		logger.Log("crust-gather binary not found, skipping snapshot collection")
+		return
+	}
+
+	cluster := state.GetCluster()
+	clusterName := cluster.Name
+	clusterNamespace := cluster.GetNamespace()
+	username := os.Getenv("CRUST_GATHER_REGISTRY_USERNAME")
+	password := os.Getenv("CRUST_GATHER_REGISTRY_PASSWORD")
+
+	// Build the tag suffix: "<clusterName>[-<suiteSlug>]-{wc,mc}".
+	// suiteSlug is set via WithSuiteIdentifier; empty means no suite suffix (backwards-compatible).
+	tagPrefix := clusterName
+	if suiteSlug != "" {
+		tagPrefix = clusterName + "-" + suiteSlug
+	}
+
+	// wcResult and mcResult stay "failed" if writeCAPIKubeconfig fails below and
+	// runCrustGather is never called for that side.
+	wcResult, mcResult := "failed", "failed"
+
+	// Collect workload cluster snapshot (full cluster).
+	// Read the CAPI kubeconfig secret directly (not Teleport) to avoid proxy/auth
+	// issues that crust-gather can't handle.
+	// Each cluster gets its own context for the kubeconfig read, since the MC client
+	// may be rate-limited after the test suite and a shared context could starve the second read.
+	wcReference := fmt.Sprintf("%s/%s:%s-wc", CrustGatherRegistry, CrustGatherRepository, tagPrefix)
+	wcCtx, wcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer wcCancel()
+	if wcKubeconfigPath, wcPrivate, err := writeCAPIKubeconfig(wcCtx, clusterName, clusterNamespace); err != nil {
+		logger.Log("crust-gather: failed to get WC kubeconfig: %v", err)
+	} else {
+		defer os.Remove(wcKubeconfigPath)
+		applyCrustGatherPolicyException(wcCtx, clusterName)
+		wcResult = runCrustGather("WC", wcKubeconfigPath, wcReference, username, password, !wcPrivate,
+			"--exclude-kind", "Lease",
+			"--exclude-kind", "EndpointSlice",
+			"--exclude-kind", "ControllerRevision")
+	}
+
+	// Collect management cluster snapshot (scoped to the test cluster's namespace).
+	// The MC manages itself, so its CAPI kubeconfig secret is available on the MC too.
+	// GetClusterName() may return the Teleport context name (e.g., "teleport.giantswarm.io-grizzly"),
+	// so we strip the prefix to get the actual cluster name for the CAPI secret lookup.
+	mcName := state.GetFramework().MC().GetClusterName()
+	mcName = strings.TrimPrefix(mcName, "teleport.giantswarm.io-")
+	mcReference := fmt.Sprintf("%s/%s:%s-mc", CrustGatherRegistry, CrustGatherRepository, tagPrefix)
+	mcCtx, mcCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer mcCancel()
+	if mcKubeconfigPath, mcPrivate, err := writeCAPIKubeconfig(mcCtx, mcName, "org-giantswarm"); err != nil {
+		logger.Log("crust-gather: failed to get MC kubeconfig: %v", err)
+	} else {
+		defer os.Remove(mcKubeconfigPath)
+		// For the MC, we exclude Node resources because --include-namespace doesn't
+		// filter out cluster-scoped resources. Without this, crust-gather would try
+		// to create debug pods on the MC (blocked by Kyverno), and we don't want to
+		// maintain a permanent PolicyException on the long-lived MC.
+		mcResult = runCrustGather("MC", mcKubeconfigPath, mcReference, username, password, !mcPrivate,
+			"--include-namespace", clusterNamespace,
+			"--exclude-kind", "Node")
+	}
+
+	logger.Log("crust-gather: SUMMARY wc=%s mc=%s", wcResult, mcResult)
+}
+
+// writeCAPIKubeconfig reads the CAPI kubeconfig secret for the given cluster from the MC
+// and writes it to a temp file. Returns the file path, whether the API server endpoint is
+// private (RFC1918 or private DNS), and any error. Caller is responsible for cleanup.
+func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (string, bool, error) {
+	var secret corev1.Secret
+	err := state.GetFramework().MC().Get(ctx, cr.ObjectKeyFromObject(&corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-kubeconfig", clusterName),
+			Namespace: namespace,
+		},
+	}), &secret)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to get CAPI kubeconfig secret: %w", err)
+	}
+
+	kubeconfig := secret.Data["value"]
+	if len(kubeconfig) == 0 {
+		return "", false, fmt.Errorf("CAPI kubeconfig secret %s/%s-kubeconfig has empty 'value' key", namespace, clusterName)
+	}
+
+	f, err := os.CreateTemp("", fmt.Sprintf("crust-gather-%s-kubeconfig-*", clusterName))
+	if err != nil {
+		return "", false, fmt.Errorf("failed to create temp file: %w", err)
+	}
+
+	if _, err := f.Write(kubeconfig); err != nil {
+		os.Remove(f.Name())
+		return "", false, fmt.Errorf("failed to write kubeconfig: %w", err)
+	}
+	f.Close()
+
+	return f.Name(), hasPrivateEndpoint(kubeconfig), nil
+}
+
+// applyCrustGatherPolicyException creates a Kyverno PolicyException on the workload cluster
+// so that crust-gather's privileged debug pods (used for node log collection) are allowed
+// despite the cluster's pod security policies. This is best-effort: if Kyverno isn't
+// installed or the apply fails, we log and continue. Without the exception, debug pod
+// creation fails but the rest of the resource collection still works.
+func applyCrustGatherPolicyException(ctx context.Context, wcClusterName string) {
+	wcClient, err := state.GetFramework().WC(wcClusterName)
+	if err != nil {
+		logger.Log("crust-gather: failed to get WC client for policy exception: %v", err)
+		return
+	}
+
+	policyException := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "kyverno.io/v2",
+			"kind":       "PolicyException",
+			"metadata": map[string]interface{}{
+				"name":      "crust-gather-debug-pods",
+				"namespace": "policy-exceptions",
+			},
+			"spec": map[string]interface{}{
+				"exceptions": []interface{}{
+					map[string]interface{}{"policyName": "disallow-capabilities-strict", "ruleNames": []interface{}{"require-drop-all"}},
+					map[string]interface{}{"policyName": "disallow-host-namespaces", "ruleNames": []interface{}{"host-namespaces"}},
+					map[string]interface{}{"policyName": "disallow-host-path", "ruleNames": []interface{}{"host-path"}},
+					map[string]interface{}{"policyName": "disallow-privilege-escalation", "ruleNames": []interface{}{"privilege-escalation"}},
+					map[string]interface{}{"policyName": "require-run-as-nonroot", "ruleNames": []interface{}{"run-as-non-root"}},
+					map[string]interface{}{"policyName": "restrict-seccomp-strict", "ruleNames": []interface{}{"check-seccomp-strict"}},
+					map[string]interface{}{"policyName": "restrict-volume-types", "ruleNames": []interface{}{"restricted-volumes"}},
+				},
+				"match": map[string]interface{}{
+					"any": []interface{}{
+						map[string]interface{}{
+							"resources": map[string]interface{}{
+								"kinds":      []interface{}{"Pod"},
+								"namespaces": []interface{}{"default"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	policyException.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "kyverno.io",
+		Version: "v2",
+		Kind:    "PolicyException",
+	})
+
+	if err := wcClient.Create(ctx, policyException); err != nil && !apierror.IsAlreadyExists(err) {
+		logger.Log("crust-gather: failed to create Kyverno PolicyException (debug pod collection may be blocked): %v", err)
+		return
+	}
+	logger.Log("crust-gather: applied Kyverno PolicyException for debug pods on WC")
+}
+
+// crustGatherFullAttempts bounds the full-fidelity retry cascade in runCrustGather.
+// crust-gather's own retry policy for individual resource fetches is unbounded (only the
+// outer --duration stops a stuck fetch), and when --duration fires the archive is never
+// finalized -- so a single stuck resource discards everything collected so far, not just
+// that resource.
+const crustGatherFullAttempts = 3
+
+// runCrustGather executes crust-gather collect and pushes the snapshot to the OCI registry,
+// retrying up to crustGatherFullAttempts times. If every full-fidelity attempt fails, it makes
+// one last attempt without pod logs so a persistently unreachable node yields a resource/events
+// archive instead of nothing. Errors are logged but do not cause the test suite to fail.
+// Returns "ok" (full archive), "degraded" (archive without pod logs), or "failed" (no archive).
+func runCrustGather(label, kubeconfig, reference, username, password string, stripProxy bool, extraArgs ...string) string {
+	logger.Log("crust-gather: collecting %s snapshot -> %s", label, reference)
+
+	var lastErr error
+	for attempt := 1; attempt <= crustGatherFullAttempts; attempt++ {
+		logger.Log("crust-gather: %s attempt %d/%d", label, attempt, crustGatherFullAttempts)
+		if err := attemptCrustGather(label, attempt, kubeconfig, reference, username, password, stripProxy, extraArgs); err != nil {
+			lastErr = err
+			logger.Log("crust-gather: %s attempt %d/%d failed: %v", label, attempt, crustGatherFullAttempts, err)
+			continue
+		}
+		logger.Log("crust-gather: %s snapshot pushed to %s (attempt %d/%d)", label, reference, attempt, crustGatherFullAttempts)
+		return "ok"
+	}
+
+	logger.Log("crust-gather: %s all %d attempts failed (%v), retrying once without pod logs", label, crustGatherFullAttempts, lastErr)
+	fallbackArgs := append(append([]string{}, extraArgs...), "--skip-logs-collection")
+	if err := attemptCrustGather(label, crustGatherFullAttempts+1, kubeconfig, reference, username, password, stripProxy, fallbackArgs); err != nil {
+		logger.Log("crust-gather: %s logs-skip fallback also failed, giving up: %v", label, err)
+		return "failed"
+	}
+	logger.Log("crust-gather: %s snapshot pushed to %s (no pod logs)", label, reference)
+	return "degraded"
+}
+
+// attemptCrustGather runs a single crust-gather collect invocation in its own working
+// directory. attemptNum is used only to keep each attempt's tmpDir unique.
+func attemptCrustGather(label string, attemptNum int, kubeconfig, reference, username, password string, stripProxy bool, extraArgs []string) error {
+	// The command timeout must be larger than the collection duration (5m)
+	// to allow time for the OCI push after collection finishes.
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+
+	// crust-gather writes collected resources to a local directory before pushing to OCI.
+	// We set cmd.Dir to a unique tmpdir so crust-gather has a writable working directory
+	// (the container's /app cwd is read-only) and it is cleaned up after the run.
+	// We do not pass -f: crust-gather serve does not support that flag, so layers must
+	// use the default "crust-gather/" prefix for serve --reference to read them.
+	tmpDir, err := os.MkdirTemp("", fmt.Sprintf("crust-gather-%s-%d-", strings.ToLower(label), attemptNum))
+	if err != nil {
+		return fmt.Errorf("failed to create temp dir: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	args := []string{
+		"collect",
+		"--kubeconfig", kubeconfig,
+		"--reference", reference,
+		"--duration", "5m",
+		// Reduce noise: crust-gather's default INFO level emits thousands of
+		// "Pushing layer" messages that drown the test logs. We still surface
+		// genuine warnings and errors via WARN.
+		"--verbosity", "WARN",
+		// Limit concurrent OCI layer uploads to avoid hitting the ACR Basic tier
+		// rate limit. 16 is half the default (32), balancing push speed against
+		// rate limit risk.
+		"--buffer-size", "16",
+	}
+
+	if username != "" && password != "" {
+		args = append(args, "--username", username, "--password", password)
+	}
+
+	args = append(args, extraArgs...)
+
+	cmd := exec.CommandContext(ctx, "crust-gather", args...)
+	cmd.Dir = tmpDir
+	cmd.Stdout = GinkgoWriter
+	cmd.Stderr = GinkgoWriter
+	// For public endpoints, strip proxy env vars: a proxy in the environment triggers
+	// the disabled kube/http-proxy feature gate in crust-gather. For private endpoints
+	// the proxy is needed to route traffic through the VPN to the cluster API server.
+	if stripProxy {
+		cmd.Env = removeProxyEnv(os.Environ())
+	}
+
+	return cmd.Run()
+}
+
+// hasPrivateEndpoint reports whether the kubeconfig's API server resolves to a
+// private (non-routable) address: an RFC1918 IP or a private DNS name such as
+// AWS internal load balancers ("internal-*"), ".internal", or ".local" hostnames.
+// Private clusters require the VPN proxy to be kept in the subprocess environment.
+func hasPrivateEndpoint(kubeconfigData []byte) bool {
+	cfg, err := clientcmd.Load(kubeconfigData)
+	if err != nil {
+		return false
+	}
+	privateRanges := []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}
+	for _, cluster := range cfg.Clusters {
+		u, err := url.Parse(cluster.Server)
+		if err != nil {
+			continue
+		}
+		host := u.Hostname()
+		if ip := net.ParseIP(host); ip != nil {
+			for _, cidr := range privateRanges {
+				_, network, _ := net.ParseCIDR(cidr)
+				if network.Contains(ip) {
+					return true
+				}
+			}
+		} else {
+			lower := strings.ToLower(host)
+			if strings.HasPrefix(lower, "internal-") ||
+				strings.HasSuffix(lower, ".internal") ||
+				strings.HasSuffix(lower, ".local") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func removeProxyEnv(env []string) []string {
+	proxyKeys := map[string]bool{
+		"HTTP_PROXY": true, "http_proxy": true,
+		"HTTPS_PROXY": true, "https_proxy": true,
+		"NO_PROXY": true, "no_proxy": true,
+	}
+	result := make([]string, 0, len(env))
+	for _, e := range env {
+		key := strings.SplitN(e, "=", 2)[0]
+		if !proxyKeys[key] {
+			result = append(result, e)
+		}
+	}
+	return result
 }
 
 func cleanupPVs(ctx context.Context) error {

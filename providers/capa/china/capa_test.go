@@ -5,9 +5,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/timeout"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/timeout"
 )
 
 var _ = Describe("Common tests", func() {
@@ -16,5 +16,7 @@ var _ = Describe("Common tests", func() {
 		state.SetTestTimeout(timeout.DeployApps, time.Minute*25)
 	})
 
-	common.Run(common.NewTestConfigWithDefaults())
+	cfg := common.NewTestConfigWithDefaults()
+	cfg.GatewayAPISupported = false
+	common.Run(cfg)
 })

@@ -6,17 +6,17 @@ import (
 	"net"
 	"time"
 
-	"github.com/giantswarm/clustertest/v4/pkg/application"
-	"github.com/giantswarm/clustertest/v4/pkg/logger"
-	clustertestnet "github.com/giantswarm/clustertest/v4/pkg/net"
-	"github.com/giantswarm/clustertest/v4/pkg/wait"
+	"github.com/giantswarm/clustertest/v5/pkg/application"
+	"github.com/giantswarm/clustertest/v5/pkg/logger"
+	clustertestnet "github.com/giantswarm/clustertest/v5/pkg/net"
+	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/state"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
-func runDNS(bastionSuppoted bool) {
+func runDNS(cfg *TestConfig) {
 	Context("dns", func() {
 		var (
 			resolver *net.Resolver
@@ -35,13 +35,25 @@ func runDNS(bastionSuppoted bool) {
 
 		BeforeEach(func() {
 			values = &application.ClusterValues{}
-			err := state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
-			Expect(err).NotTo(HaveOccurred())
+			// Reading the cluster Helm values hits the MC API and can transiently
+			// fail; retry so a blip doesn't fail the spec.
+			Eventually(func() error {
+				return state.GetFramework().MC().GetHelmValues(state.GetCluster().Name, state.GetCluster().GetNamespace(), values)
+			}).
+				WithTimeout(1 * time.Minute).
+				WithPolling(5 * time.Second).
+				Should(Succeed())
 
 			resolver = clustertestnet.NewResolver()
 		})
 
-		It("sets up the api DNS records", func() {
+		// FlakeAttempts: DNS resolution depends on external/split-horizon DNS
+		// propagation that is inherently transient, so retry the spec a few
+		// times before failing.
+		It("sets up the api DNS records", FlakeAttempts(3), func() {
+			if !cfg.APIServerDNSRecordSupported {
+				Skip("The Kubernetes API endpoint is managed by the cloud provider, so no DNS record is set up by our controllers.")
+			}
 			apiDomain := fmt.Sprintf("api.%s.%s", state.GetCluster().Name, values.BaseDomain)
 			var records []net.IP
 			Eventually(func() error {
@@ -55,8 +67,8 @@ func runDNS(bastionSuppoted bool) {
 			Expect(records).ToNot(BeEmpty())
 		})
 
-		It("sets up the bastion DNS records", func() {
-			if !bastionSuppoted {
+		It("sets up the bastion DNS records", FlakeAttempts(3), func() {
+			if !cfg.BastionSupported {
 				Skip("Bastion is not supported.")
 			}
 			bastionDomain := fmt.Sprintf("bastion1.%s.%s", state.GetCluster().Name, values.BaseDomain)

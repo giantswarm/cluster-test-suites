@@ -3,8 +3,8 @@ package upgrade
 import (
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 
-	"github.com/giantswarm/cluster-test-suites/v6/internal/common"
-	"github.com/giantswarm/cluster-test-suites/v6/internal/upgrade"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/common"
+	"github.com/giantswarm/cluster-test-suites/v7/internal/upgrade"
 )
 
 var _ = Describe("Basic upgrade test", Ordered, func() {
@@ -16,5 +16,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	cfg.AutoScalingSupported = false
 	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
 	cfg.ExternalDnsSupported = false
+	cfg.GatewayAPISupported = false
 	common.Run(cfg)
 })

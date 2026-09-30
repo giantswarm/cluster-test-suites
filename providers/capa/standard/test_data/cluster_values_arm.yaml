@@ -1,0 +1,20 @@
+# ARM/Graviton overlay merged on top of cluster_values.yaml only when the release under
+# test supports it (E2E_RELEASE_VERSION >= v35.0.0, where cluster-aws 8.5.0+ adds the
+# `architecture` and `instanceType` schema fields on ASG nodepools, and where the
+# multi-arch net-exporter / cert-exporter app versions ship).
+#
+# TODO(arm64): once v35.0.0 is the minimum release across CI, fold these values back
+# into cluster_values.yaml and remove the release-version gate (+ the
+# ARMNodePoolEnabled flag in internal/common).
+# https://github.com/giantswarm/roadmap/issues/4302
+global:
+  nodePools:
+    np-arm64:
+      architecture: arm64
+      instanceType: m7g.xlarge
+      minSize: 1
+      maxSize: 1
+      customNodeTaints:
+        - effect: NoSchedule
+          key: kubernetes.io/arch
+          value: arm64
