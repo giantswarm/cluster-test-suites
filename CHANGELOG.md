@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.6.0] - 2026-09-30
+
 ### Changed
 
 - The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
@@ -1520,7 +1522,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.0...HEAD
+[7.6.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...v7.6.0
 [7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
 [7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
 [7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
