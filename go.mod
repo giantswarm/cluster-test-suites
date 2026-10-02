@@ -219,5 +219,3 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
 )
-
-replace github.com/giantswarm/cluster-standup-teardown/v5 => github.com/giantswarm/cluster-standup-teardown/v5 v5.0.2-0.20260331132858-64e14ee98160
