@@ -20,16 +20,19 @@ global:
       maxSize: 1
     np-karpntr:
       type: karpenter
-      rootVolumeSizeGB: 15
-      libVolumeSizeGB: 30
-      logVolumeSizeGB: 10
       requirements:
-        - key: karpenter.k8s.aws/instance-family
-          operator: NotIn
+        - key: karpenter.k8s.aws/instance-hypervisor
+          operator: In
           values:
-            - t3
-            - t3a
-            - t2
+            - nitro
+        - key: kubernetes.io/os
+          operator: In
+          values:
+            - linux
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+            - amd64
         - key: karpenter.k8s.aws/instance-cpu
           operator: In
           values:
@@ -37,20 +40,8 @@ global:
             - "8"
             - "16"
             - "32"
-        - key: karpenter.k8s.aws/instance-hypervisor
-          operator: In
-          values:
-            - nitro
-        - key: kubernetes.io/arch
-          operator: In
-          values:
-            - amd64
         - key: karpenter.sh/capacity-type
           operator: In
           values:
-            - spot
             - on-demand
-        - key: kubernetes.io/os
-          operator: In
-          values:
-            - linux
+            - spot

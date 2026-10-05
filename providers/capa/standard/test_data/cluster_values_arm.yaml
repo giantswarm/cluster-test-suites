@@ -10,11 +10,11 @@
 global:
   nodePools:
     np-arm64:
+      instanceType: t4g.xlarge
       architecture: arm64
-      instanceType: m7g.xlarge
       minSize: 1
       maxSize: 1
       customNodeTaints:
-        - effect: NoSchedule
-          key: kubernetes.io/arch
+        - key: kubernetes.io/arch
           value: arm64
+          effect: NoSchedule
