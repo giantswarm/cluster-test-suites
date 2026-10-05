@@ -15,9 +15,6 @@ global:
   # schema-compatible with older cluster-aws versions so release-test-suites runs on
   # older releases (e.g. v33.x, v34.x) don't break.
   nodePools:
-    nodepool-0:
-      minSize: 1
-      maxSize: 1
     np-karpntr:
       type: karpenter
       rootVolumeSizeGB: 15

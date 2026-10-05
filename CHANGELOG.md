@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Cluster Builder: Rework instance sizing.
+
 ## [7.6.1] - 2026-10-01
 
 ### Changed
