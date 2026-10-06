@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release older than v35.0.0.
+
 ## [7.6.1] - 2026-10-01
 
 ### Changed
