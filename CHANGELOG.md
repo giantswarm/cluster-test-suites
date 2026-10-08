@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.6.1] - 2026-10-01
+
 ### Changed
 
 - Go: Update dependencies.
+
+## [7.6.0] - 2026-09-30
+
+### Changed
+
+- The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
+  (`TestConfig.DNSServiceName`, defaulting to `coredns`). AKS ships its own managed DNS add-on,
+  where the Service is named `kube-dns`.
+- aks: Raise the timeouts for cluster creation and deletion — node readiness during standup
+  (40m), the `Cluster Available` condition (40m), the post-upgrade worker node check (30m) and
+  the `AfterSuite` teardown (90m).
+- Suites can now override the `AfterSuite` teardown timeout via `suite.WithTeardownTimeout`
+  (default remains 1h).
+- aks: The AKS test cluster now comes up with a single `System` node pool, following the removal of
+  the extra `User` pool from the cluster builder defaults in `cluster-standup-teardown` v6.0.8. Both
+  AKS suites now wait for 1 worker node instead of 2.
+- Go: Update dependencies.
+- Go: Update `cluster-standup-teardown` to v6.0.9.
 
 ## [7.5.4] - 2026-09-02
 
@@ -52,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add support for the `aks` (Azure managed clusters) cluster provider, with `standard` and `upgrade` test suites.
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
 
 ### Changed
@@ -1508,7 +1529,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.1...HEAD
+[7.6.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.0...v7.6.1
+[7.6.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...v7.6.0
 [7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
 [7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
 [7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2
