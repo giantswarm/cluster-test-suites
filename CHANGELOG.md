@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Docs: Update links.
+- Allow ignoring restarted pods by label selector.
+- Ignore restarts of Azure Workload Identity webhook.
 
 ## [7.7.0] - 2026-10-13
 
