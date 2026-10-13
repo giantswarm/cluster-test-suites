@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPZ: Enable autoscaling tests for releases v35.0.0 and newer.
 
+## [7.7.0] - 2026-10-13
+
 ### Changed
 
 - Cluster Builder: Rework instance sizing.
@@ -1546,7 +1548,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.2...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.0...HEAD
+[7.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.2...v7.7.0
 [7.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.1...v7.6.2
 [7.6.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.0...v7.6.1
 [7.6.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...v7.6.0
