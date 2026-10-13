@@ -547,6 +547,6 @@ controlPlane:
 ## Resources
 
 * [`clustertest` documentation](https://pkg.go.dev/github.com/giantswarm/clustertest)
-* [standup](./cmd/standup/) & [teardown](./cmd/teardown/) CLIs
+* [standup](https://github.com/giantswarm/cluster-standup-teardown/tree/main/cmd/standup) & [teardown](https://github.com/giantswarm/cluster-standup-teardown/tree/main/cmd/teardown) CLIs
 * [CI Tekton Pipeline](https://github.com/giantswarm/tekton-resources/blob/main/tekton-resources/tekton-pipelines/pipelines/cluster-test-suites.yaml)
 * [Ginkgo docs](https://onsi.github.io/ginkgo/)
