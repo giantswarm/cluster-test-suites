@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Docs: Update links.
+- Allow ignoring restarted pods by label selector.
+- Ignore restarts of Azure Workload Identity webhook.
 - Fail `entrypoint.sh` when the given path contains no test suite, instead of running every provider's suites.
 - Remove the leftover `providers/capa/karpenter` test data. The suite was merged into `capa/standard`.
 
