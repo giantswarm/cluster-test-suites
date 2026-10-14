@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Gateway e2e: Check the `gateway-api-bundle` v2 child HelmReleases instead of Apps.
+
 ## [7.7.1] - 2026-10-14
 
 ### Changed
