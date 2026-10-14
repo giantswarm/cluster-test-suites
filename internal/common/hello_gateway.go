@@ -143,15 +143,18 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				WithPolling(10 * time.Second).
 				Should(BeTrue())
 
-			childApps := []types.NamespacedName{
+			childHelmReleases := []types.NamespacedName{
 				{Name: fmt.Sprintf("%s-gateway-api-crds", clusterName), Namespace: namespace},
 				{Name: fmt.Sprintf("%s-envoy-gateway", clusterName), Namespace: namespace},
 				{Name: fmt.Sprintf("%s-gateway-api-config", clusterName), Namespace: namespace},
 			}
-			Eventually(wait.IsAllAppDeployed(state.GetContext(), state.GetFramework().MC(), childApps)).
-				WithTimeout(10 * time.Minute).
-				WithPolling(10 * time.Second).
-				Should(BeTrue())
+			Eventually(helmrelease.AreAllReady(state.GetContext(), state.GetFramework().MC(), childHelmReleases)).
+				WithTimeout(10*time.Minute).
+				WithPolling(10*time.Second).
+				Should(
+					Succeed(),
+					failurehandler.HelmReleasesNotReady(state.GetFramework(), state.GetCluster()),
+				)
 		})
 
 		It("gateway giantswarm-default should be programmed", func() {
