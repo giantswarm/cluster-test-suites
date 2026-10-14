@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docs: Update links.
 - Allow ignoring restarted pods by label selector.
 - Ignore restarts of Azure Workload Identity webhook.
+- Fail `entrypoint.sh` when the given path contains no test suite, instead of running every provider's suites.
+- Remove the leftover `providers/capa/karpenter` test data. The suite was merged into `capa/standard`.
 
 ## [7.7.0] - 2026-10-13
 
@@ -76,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing. 
+- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing.
 - Bump crust-gather to v0.17.0.
 - Go: Update dependencies.
 
@@ -365,7 +367,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use api version `v2` when querying Helm custom resources. 
+- Use api version `v2` when querying Helm custom resources.
 
 ## [1.99.0] - 2025-10-02
 
@@ -391,7 +393,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.97.0] - 2025-08-30
 
-### Changed 
+### Changed
 
 - Added logging for automatic node roll detection.
 
