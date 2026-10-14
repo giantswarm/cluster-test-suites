@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.7.2] - 2026-10-14
+
 ### Changed
 
 - Gateway e2e: Check the `gateway-api-bundle` v2 child HelmReleases instead of Apps.
@@ -1554,7 +1556,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.2...HEAD
+[7.7.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...v7.7.2
 [7.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.0...v7.7.1
 [7.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.2...v7.7.0
 [7.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.1...v7.6.2
