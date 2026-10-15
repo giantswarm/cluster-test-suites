@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AKS: Add `byo-cni` suite for clusters that run Giant Swarm's Cilium with AKS BYO CNI.
 - AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
 - Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
+- capa/standard: Enable trivy and trivy-operator with cluster compliance scanning in the test cluster values so the compliance spec gets findings to report. The vulnerability scanner stays disabled and the compliance cron is tightened to every 5 minutes so reports are available within the test window.
 
 ### Removed
 
