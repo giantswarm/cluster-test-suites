@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
+
 ## [7.7.2] - 2026-10-14
 
 ### Changed
