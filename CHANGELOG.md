@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.7.3] - 2026-10-16
 
+### Changed
+
+- Go: Update `cluster-standup-teardown` to v6.1.1.
+
 ## [7.7.2] - 2026-10-14
 
 ### Changed
