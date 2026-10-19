@@ -24,6 +24,9 @@ var _ = Describe("Common tests", func() {
 	// TODO(arm64): drop this gate once v35.0.0 is the minimum release across CI.
 	// https://github.com/giantswarm/roadmap/issues/4302
 	cfg.ARMNodePoolEnabled = armSupported()
+	cfg.IgnoredRestartedPodsLabelFilters = common.LabelFilter{
+		"app.kubernetes.io/name": []string{"cluster-autoscaler-app", "karpenter"},
+	}
 	common.Run(cfg)
 
 	// ECR Credential Provider specific tests
