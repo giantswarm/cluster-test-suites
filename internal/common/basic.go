@@ -177,7 +177,7 @@ func runBasic(cfg *TestConfig) {
 
 		It("doesn't have restarting pods", func() {
 			filterLabels := make([]string, 0)
-			for label, values := range cfg.IgnoredRestartedPodsLabelFilters {
+			for label, values := range cfg.IgnoredRestartedPods {
 				filterLabels = append(filterLabels, fmt.Sprintf("%s notin (%s)", label, strings.Join(values, ",")))
 			}
 

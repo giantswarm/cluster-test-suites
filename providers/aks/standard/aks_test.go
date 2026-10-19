@@ -28,7 +28,7 @@ var _ = Describe("Common tests", func() {
 	// AKS ships its own managed DNS add-on, which names the Service `kube-dns`
 	// instead of `coredns`.
 	cfg.DNSServiceName = "kube-dns"
-	cfg.IgnoredRestartedPodsLabelFilters = common.LabelFilter{
+	cfg.IgnoredRestartedPods = common.LabelFilter{
 		// AKS manages the Azure Workload Identity webhook, and we have no control over when it gets deployed.
 		// It will crash loop for a while until our network policies get deployed.
 		"azure-workload-identity.io/system": []string{"true"},
