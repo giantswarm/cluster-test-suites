@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- eks: Add a Karpenter node pool to the standard suite and enable the scale test, with a fixed-size managed node group so that only Karpenter can add nodes.
+
+### Changed
+
+- Skip Karpenter-backed MachinePools in the "all machine pools ready and running" check, since they have zero replicas while no pods are pending.
+
 ## [7.7.3] - 2026-10-16
 
 ### Changed
