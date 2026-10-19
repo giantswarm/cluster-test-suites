@@ -10,7 +10,7 @@
 global:
   nodePools:
     np-arm64:
-      instanceType: t4g.xlarge
+      instanceType: m7g.xlarge
       architecture: arm64
       minSize: 1
       maxSize: 1
