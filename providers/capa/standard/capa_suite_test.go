@@ -34,19 +34,7 @@ var armMinRelease = semver.MustParse("v35.0.0")
 // the time an RC is being tested, the schema is finalized. We compare core MAJOR.MINOR.PATCH
 // and ignore prerelease/build metadata.
 func armSupported() bool {
-	rv := os.Getenv(env.ReleaseVersion)
-	if rv == "" {
-		return false
-	}
-	v, err := semver.NewVersion(rv)
-	if err != nil {
-		return false
-	}
-	core, err := semver.NewVersion(fmt.Sprintf("v%d.%d.%d", v.Major(), v.Minor(), v.Patch()))
-	if err != nil {
-		return false
-	}
-	return !core.LessThan(armMinRelease)
+	return true
 }
 
 func TestCAPAStandard(t *testing.T) {
