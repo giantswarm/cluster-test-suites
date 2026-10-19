@@ -176,9 +176,6 @@ func runBasic(cfg *TestConfig) {
 		})
 
 		It("doesn't have restarting pods", func() {
-			// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
-			// Excluding karpenter because it's deployed using a HelmRelease and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process.
-			// Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
 			filterLabels := make([]string, 0)
 			for label, values := range cfg.IgnoredRestartedPodsLabelFilters {
 				filterLabels = append(filterLabels, fmt.Sprintf("%s notin (%s)", label, strings.Join(values, ",")))
