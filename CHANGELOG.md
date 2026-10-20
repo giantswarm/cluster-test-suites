@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Go: Update dependencies.
+- CAPA: Use `c6g.xlarge` to mitigate [flatcar/Flatcar#2446](https://github.com/flatcar/Flatcar/issues/2446).
+
 ## [7.7.3] - 2026-10-16
 
 ### Changed
