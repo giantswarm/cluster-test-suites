@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- CAPZ: Enable autoscaling tests for releases v35.0.0 and newer.
+- CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
+
+### Fixed
+
+- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 
 ## [7.7.1] - 2026-10-14
 
@@ -26,10 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Cluster Builder: Rework instance sizing.
-
-### Fixed
-
-- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release older than v35.0.0.
 
 ## [7.6.2] - 2026-10-12
 

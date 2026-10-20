@@ -18,12 +18,15 @@ func TestWithLegacyNodePoolReplicas(t *testing.T) {
 	}{
 		{name: "no release", want: ""},
 		{name: "v34", release: "v34.2.0", want: legacyNodePoolValues},
-		{name: "v35", release: "v35.0.0", want: ""},
-		{name: "v35 rc", release: "v35.0.0-rc.1", want: ""},
+		{name: "v35 unsupported", release: "v35.2.0", want: legacyNodePoolValues},
+		{name: "v35 supported", release: "v35.2.1", want: ""},
+		{name: "v36 unsupported", release: "v36.1.0", want: legacyNodePoolValues},
+		{name: "v36 supported rc", release: "v36.1.1-rc.1", want: ""},
 		{name: "unparseable", release: "latest", want: ""},
 		{name: "upgrade from v34", isUpgrade: true, release: "v35.0.0", preUpgrade: "v34.2.0", want: legacyNodePoolValues},
-		{name: "upgrade from v35", isUpgrade: true, release: "v35.1.0", preUpgrade: "v35.0.0", want: ""},
-		{name: "non-upgrade ignores pre-upgrade", release: "v35.0.0", preUpgrade: "v34.2.0", want: ""},
+		{name: "upgrade from v35 unsupported", isUpgrade: true, release: "v36.1.1", preUpgrade: "v35.2.0", want: legacyNodePoolValues},
+		{name: "upgrade from v35 supported", isUpgrade: true, release: "v36.1.1", preUpgrade: "v35.2.1", want: ""},
+		{name: "non-upgrade ignores pre-upgrade", release: "v35.2.1", preUpgrade: "v34.2.0", want: ""},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -50,10 +53,18 @@ func TestAutoScalingSupported(t *testing.T) {
 	}{
 		{release: "", want: true},
 		{release: "latest", want: true},
+		{release: "34.2.0", want: false},
 		{release: "v34.2.0", want: false},
-		{release: "v35.0.0-rc.1", want: true},
-		{release: "v35.0.0", want: true},
-		{release: "v36.1.0", want: true},
+		{release: "v35.0.0", want: false},
+		{release: "v35.2.0", want: false},
+		{release: "v35.2.1-rc.1", want: true},
+		{release: "v35.2.1", want: true},
+		{release: "35.3.0", want: true},
+		{release: "v36.0.0", want: false},
+		{release: "v36.1.0", want: false},
+		{release: "v36.1.1", want: true},
+		{release: "v36.2.0", want: true},
+		{release: "v37.0.0", want: true},
 	}
 	for _, tc := range tests {
 		t.Run(tc.release, func(t *testing.T) {

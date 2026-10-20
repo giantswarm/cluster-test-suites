@@ -10,13 +10,17 @@ import (
 	"github.com/giantswarm/cluster-test-suites/v7/internal/suite"
 )
 
-// autoscalingMinRelease is the first release whose cluster-azure understands the
-// `minSize` / `maxSize` node pool fields and deploys cluster-autoscaler. Older releases
-// ignore those fields and default the node pool to `replicas: 1`, while the tests expect
-// at least `minSize` (2) worker nodes.
+// autoscalingMinReleases maps each release major to the first release of that major whose
+// cluster-azure supports node pool autoscaling (`minSize` / `maxSize` and
+// cluster-autoscaler). Releases without support ignore those fields and default the node
+// pool to `replicas: 1`, while the tests expect at least `minSize` (2) worker nodes.
+// Majors below the lowest key are unsupported, majors above the highest key are supported.
 //
-// TODO: remove this gate once v35.0.0 is the minimum release across CI.
-var autoscalingMinRelease = semver.MustParse("v35.0.0")
+// TODO: remove this gate once all releases tested in CI support autoscaling.
+var autoscalingMinReleases = map[uint64]*semver.Version{
+	35: semver.MustParse("v35.2.1"),
+	36: semver.MustParse("v36.1.1"),
+}
 
 // legacyNodePoolValues pins the node pool size for releases that don't support autoscaling.
 const legacyNodePoolValues = `global:
@@ -27,15 +31,26 @@ const legacyNodePoolValues = `global:
 
 // releaseSupportsAutoscaling reports whether the given release version supports node pool
 // autoscaling. An empty or unparseable version (e.g. PRs to this repo, where the latest
-// cluster chart is used) is treated as supported. Release candidates of
-// autoscalingMinRelease count as supported, as only MAJOR.MINOR.PATCH is compared.
+// cluster chart is used) is treated as supported. Release candidates count as their final
+// release, as only MAJOR.MINOR.PATCH is compared.
 func releaseSupportsAutoscaling(release string) bool {
 	v, err := semver.NewVersion(strings.TrimSpace(release))
 	if err != nil {
 		return true
 	}
 	core := semver.New(v.Major(), v.Minor(), v.Patch(), "", "")
-	return !core.LessThan(autoscalingMinRelease)
+
+	if minRelease, ok := autoscalingMinReleases[core.Major()]; ok {
+		return !core.LessThan(minRelease)
+	}
+
+	// Majors outside the table: supported if newer than every listed major.
+	for major := range autoscalingMinReleases {
+		if core.Major() < major {
+			return false
+		}
+	}
+	return true
 }
 
 // AutoScalingSupported reports whether the release under test (E2E_RELEASE_VERSION)
