@@ -15,6 +15,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 
+## [7.7.4] - 2026-10-20
+
+### Changed
+
+- Go: Update dependencies.
+- CAPA: Use `c6g.xlarge` to mitigate [flatcar/Flatcar#2446](https://github.com/flatcar/Flatcar/issues/2446).
+
+## [7.7.3] - 2026-10-16
+
+### Changed
+
+- Go: Update `cluster-standup-teardown` to v6.1.1.
+
+## [7.7.2] - 2026-10-14
+
+### Changed
+
+- Gateway e2e: Check the `gateway-api-bundle` v2 child HelmReleases instead of Apps.
+
 ## [7.7.1] - 2026-10-14
 
 ### Changed
@@ -1558,7 +1577,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.4...HEAD
+[7.7.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.3...v7.7.4
+[7.7.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.2...v7.7.3
+[7.7.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...v7.7.2
 [7.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.0...v7.7.1
 [7.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.2...v7.7.0
 [7.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.1...v7.6.2
