@@ -2,3 +2,33 @@
 global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e-eks
+
+  # Enable trivy-operator cluster compliance scanning so the report-only
+  # compliance spec in the common suite gets CIS/NSA/PSS findings to report.
+  # See: https://github.com/giantswarm/roadmap/issues/2624
+  apps:
+    securityBundle:
+      values:
+        apps:
+          trivy:
+            enabled: true
+          trivyOperator:
+            enabled: true
+        userConfig:
+          trivyOperator:
+            configMap:
+              values:
+                trivy-operator:
+                  compliance:
+                    # The default ('* */6 * * *') only fires during hours 0/6/12/18,
+                    # so reports would usually still be empty during a test run.
+                    cron: "*/5 * * * *"
+                  operator:
+                    clusterComplianceEnabled: true
+                    # Scanners that feed the CIS/NSA/PSS compliance reports.
+                    configAuditScannerEnabled: true
+                    infraAssessmentScannerEnabled: true
+                    rbacAssessmentScannerEnabled: true
+                    # Not needed for compliance reports; avoids vulnerability scan
+                    # jobs for every workload in the test cluster.
+                    vulnerabilityScannerEnabled: false
