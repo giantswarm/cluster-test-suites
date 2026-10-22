@@ -21,10 +21,19 @@ global:
     securityBundle:
       values:
         apps:
-          trivy:
-            enabled: true
+          # The trivy server app stays disabled: it is only needed for
+          # vulnerability scanning, which is turned off below. It also
+          # requires a 5Gi PVC and 200m CPU the small test clusters cannot
+          # always provide.
           trivyOperator:
             enabled: true
+            # The security-bundle defaults this to [cilium, kyverno-crds,
+            # trivy]. With the trivy server disabled its HelmRelease never
+            # exists, so drop it from the dependencies or trivy-operator
+            # would wait for it forever.
+            dependsOn:
+              - cilium
+              - kyverno-crds
         userConfig:
           trivyOperator:
             configMap:
