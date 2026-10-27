@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
 
+### Removed
+
+- Remove unused `default-apps_values.yaml` files.
+
 ## [7.7.5] - 2026-10-25
 
 ### Changed
