@@ -19,10 +19,10 @@ type TestConfig struct {
 	// namespace. Our own coredns-app names it `coredns`, but managed control
 	// planes ship their own DNS add-on (AKS names the Service `kube-dns`).
 	DNSServiceName string
-	// IgnoredRestartedPodsLabelFilters is a slice of label filters for Pods that should be
+	// IgnoredRestartedPods is a slice of label filters for Pods that should be
 	// ignored when testing if they have been restarted. This is useful for Pods
 	// over which we have little control, like those shipped by managed control planes.
-	IgnoredRestartedPodsLabelFilters LabelFilter
+	IgnoredRestartedPods LabelFilter
 }
 
 // LabelFilter represents a map of labels with a set of possible values.
