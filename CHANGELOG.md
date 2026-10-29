@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- AKS: Add `byo-cni` suite for clusters that run Giant Swarm's Cilium with AKS BYO CNI.
 - AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
 
 ### Removed
