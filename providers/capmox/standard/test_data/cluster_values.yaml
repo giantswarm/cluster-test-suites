@@ -1,1 +1,40 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  # Enable trivy-operator cluster compliance scanning so the report-only
+  # compliance spec in the common suite gets CIS/NSA/PSS findings to report.
+  # See: https://github.com/giantswarm/roadmap/issues/2624
+  apps:
+    securityBundle:
+      values:
+        apps:
+          # The trivy server app stays disabled: it is only needed for
+          # vulnerability scanning, which is turned off below. It also
+          # requires a 5Gi PVC and 200m CPU the small test clusters cannot
+          # always provide.
+          trivyOperator:
+            enabled: true
+            # The security-bundle defaults this to [cilium, kyverno-crds,
+            # trivy]. With the trivy server disabled its HelmRelease never
+            # exists, so drop it from the dependencies or trivy-operator
+            # would wait for it forever.
+            dependsOn:
+              - cilium
+              - kyverno-crds
+        userConfig:
+          trivyOperator:
+            configMap:
+              values:
+                trivy-operator:
+                  compliance:
+                    # The default ('* */6 * * *') only fires during hours 0/6/12/18,
+                    # so reports would usually still be empty during a test run.
+                    cron: "*/5 * * * *"
+                  operator:
+                    clusterComplianceEnabled: true
+                    # Scanners that feed the CIS/NSA/PSS compliance reports.
+                    configAuditScannerEnabled: true
+                    infraAssessmentScannerEnabled: true
+                    rbacAssessmentScannerEnabled: true
+                    # Not needed for compliance reports; avoids vulnerability scan
+                    # jobs for every workload in the test cluster.
+                    vulnerabilityScannerEnabled: false

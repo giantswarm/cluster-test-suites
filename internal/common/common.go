@@ -56,4 +56,5 @@ func Run(cfg *TestConfig) {
 	runHelloWorldGateway(cfg.GatewayAPISupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
+	runCompliance(cfg)
 }
