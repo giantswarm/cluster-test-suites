@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enable trivy-operator with cluster compliance scanning in the test cluster values of the capa, capz, capv, capvcd, capmox and eks standard suites (AKS is left out for now) so the compliance spec gets findings to report. The trivy server app and the vulnerability scanner stay disabled (not needed for compliance reports), and the compliance cron is tightened to every 5 minutes so reports are available within the test window.
 - capz/standard: Run with 3 worker nodes instead of 2 — the default pool has no CPU headroom left for the compliance scanners.
 - eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
+- CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
+
+### Fixed
+
+- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 
 ## [7.8.1] - 2026-11-02
 
