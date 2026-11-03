@@ -15,6 +15,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 
+## [7.8.1] - 2026-11-02
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.8.0] - 2026-10-29
+
+### Added
+
+- AKS: Add `byo-cni` suite for clusters that run Giant Swarm's Cilium with AKS BYO CNI.
+- AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
+
+### Removed
+
+- Remove unused `default-apps_values.yaml` files.
+
+## [7.7.5] - 2026-10-25
+
+### Changed
+
+- Go: Update dependencies.
+
 ## [7.7.4] - 2026-10-20
 
 ### Changed
@@ -1577,7 +1600,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.1...HEAD
+[7.8.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.0...v7.8.1
+[7.8.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.5...v7.8.0
+[7.7.5]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.4...v7.7.5
 [7.7.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.3...v7.7.4
 [7.7.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.2...v7.7.3
 [7.7.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...v7.7.2
