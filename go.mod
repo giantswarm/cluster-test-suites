@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/aquasecurity/trivy-operator v0.35.0
+	github.com/aquasecurity/trivy-operator v0.36.1
 	github.com/cert-manager/cert-manager v1.21.3
 	github.com/fluxcd/helm-controller/api v1.7.1
 	github.com/giantswarm/apiextensions-application v0.6.2
@@ -38,14 +38,14 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
-	github.com/aquasecurity/go-npm-version v0.0.2 // indirect
+	github.com/aquasecurity/go-npm-version v0.0.3-0.20261005070944-1f16ed76cf11 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.2-0.20260224065243-f9bba28c51a4 // indirect
 	github.com/aquasecurity/go-version v0.0.1 // indirect
 	github.com/aquasecurity/table v1.11.0 // indirect
 	github.com/aquasecurity/tml v0.6.1 // indirect
-	github.com/aquasecurity/trivy v0.75.0 // indirect
-	github.com/aquasecurity/trivy-checks v1.12.2-0.20260908095928-2d1b9bec7d6f // indirect
-	github.com/aquasecurity/trivy-db v0.0.0-20261001090913-650c4091f951 // indirect
+	github.com/aquasecurity/trivy v0.76.1 // indirect
+	github.com/aquasecurity/trivy-checks v1.12.2-0.20261012053351-ac85645895ed // indirect
+	github.com/aquasecurity/trivy-db v0.0.0-20261012084708-cbebf2ecd6df // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beevik/etree v1.8.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
