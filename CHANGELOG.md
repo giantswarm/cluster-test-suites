@@ -7,10 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ### Changed
 
 - Bump `crust-gather` to `0.18.0`. A collection that hits its `--duration` deadline now
   writes and pushes what it already gathered, instead of discarding the whole archive.
+  
+### Added
+
+- Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
+- Enable trivy-operator with cluster compliance scanning in the test cluster values of the capa, capz, capv, capvcd, capmox and eks standard suites (AKS is left out for now) so the compliance spec gets findings to report. The trivy server app and the vulnerability scanner stay disabled (not needed for compliance reports), and the compliance cron is tightened to every 5 minutes so reports are available within the test window.
+- capz/standard: Run with 3 worker nodes instead of 2 — the default pool has no CPU headroom left for the compliance scanners.
+- eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
+- CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
+
+### Fixed
+
+- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
+
+## [7.8.1] - 2026-11-02
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.8.0] - 2026-10-29
+
+### Added
+
+- AKS: Add `byo-cni` suite for clusters that run Giant Swarm's Cilium with AKS BYO CNI.
+- AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
+
+### Removed
+
+- Remove unused `default-apps_values.yaml` files.
+
+## [7.7.5] - 2026-10-25
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.7.4] - 2026-10-20
+
+### Changed
+
+- Go: Update dependencies.
+- CAPA: Use `c6g.xlarge` to mitigate [flatcar/Flatcar#2446](https://github.com/flatcar/Flatcar/issues/2446).
+
+## [7.7.3] - 2026-10-16
+
+### Changed
+
+- Go: Update `cluster-standup-teardown` to v6.1.1.
+
+## [7.7.2] - 2026-10-14
+
+### Changed
+
+- Gateway e2e: Check the `gateway-api-bundle` v2 child HelmReleases instead of Apps.
+
+## [7.7.1] - 2026-10-14
+
+### Changed
+
+- Docs: Update links.
+- Allow ignoring restarted pods by label selector.
+- Ignore restarts of Azure Workload Identity webhook.
+- Fail `entrypoint.sh` when the given path contains no test suite, instead of running every provider's suites.
+- Remove the leftover `providers/capa/karpenter` test data. The suite was merged into `capa/standard`.
+
+## [7.7.0] - 2026-10-13
+
+### Changed
+
+- Cluster Builder: Rework instance sizing.
+
+## [7.6.2] - 2026-10-12
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.6.1] - 2026-10-01
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.6.0] - 2026-09-30
+
+### Changed
+
+- The `cluster values` spec now looks up the cluster DNS Service by a provider-specific name
+  (`TestConfig.DNSServiceName`, defaulting to `coredns`). AKS ships its own managed DNS add-on,
+  where the Service is named `kube-dns`.
+- aks: Raise the timeouts for cluster creation and deletion — node readiness during standup
+  (40m), the `Cluster Available` condition (40m), the post-upgrade worker node check (30m) and
+  the `AfterSuite` teardown (90m).
+- Suites can now override the `AfterSuite` teardown timeout via `suite.WithTeardownTimeout`
+  (default remains 1h).
+- aks: The AKS test cluster now comes up with a single `System` node pool, following the removal of
+  the extra `User` pool from the cluster builder defaults in `cluster-standup-teardown` v6.0.8. Both
+  AKS suites now wait for 1 worker node instead of 2.
+- Go: Update dependencies.
+- Go: Update `cluster-standup-teardown` to v6.0.9.
 
 ## [7.5.4] - 2026-09-02
 
@@ -39,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing. 
+- crust-gather: retry cluster snapshot collection up to 3 times so a transient connect error, API 429, or a resource that gets replaced mid-collection no longer discards an otherwise-complete WC or MC archive. If all retries fail, make one final attempt without pod logs so a persistently unreachable node yields a resource/events-only archive instead of nothing.
 - Bump crust-gather to v0.17.0.
 - Go: Update dependencies.
 
@@ -53,6 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add support for the `aks` (Azure managed clusters) cluster provider, with `standard` and `upgrade` test suites.
 - Integrate crust-gather to automatically collect cluster snapshots (WC and MC) when tests fail, pushing them to an OCI registry for offline debugging.
 
 ### Changed
@@ -327,7 +429,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use api version `v2` when querying Helm custom resources. 
+- Use api version `v2` when querying Helm custom resources.
 
 ## [1.99.0] - 2025-10-02
 
@@ -353,7 +455,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.97.0] - 2025-08-30
 
-### Changed 
+### Changed
 
 - Added logging for automatic node roll detection.
 
@@ -1508,7 +1610,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.1...HEAD
+[7.8.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.0...v7.8.1
+[7.8.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.5...v7.8.0
+[7.7.5]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.4...v7.7.5
+[7.7.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.3...v7.7.4
+[7.7.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.2...v7.7.3
+[7.7.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...v7.7.2
+[7.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.0...v7.7.1
+[7.7.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.2...v7.7.0
+[7.6.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.1...v7.6.2
+[7.6.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.6.0...v7.6.1
+[7.6.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.4...v7.6.0
 [7.5.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.3...v7.5.4
 [7.5.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.2...v7.5.3
 [7.5.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.5.1...v7.5.2

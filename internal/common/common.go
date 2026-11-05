@@ -11,7 +11,22 @@ type TestConfig struct {
 	SecurityBundleInstalled      bool
 	GatewayAPISupported          bool
 	ARMNodePoolEnabled           bool
+	// APIServerDNSRecordSupported indicates whether our DNS controllers set up
+	// an A record for the Kubernetes API endpoint. Managed control planes (e.g.
+	// AKS) provide their own API endpoint, so no such record is created.
+	APIServerDNSRecordSupported bool
+	// DNSServiceName is the name of the cluster DNS Service in the kube-system
+	// namespace. Our own coredns-app names it `coredns`, but managed control
+	// planes ship their own DNS add-on (AKS names the Service `kube-dns`).
+	DNSServiceName string
+	// IgnoredRestartedPodsLabelFilters is a slice of label filters for Pods that should be
+	// ignored when testing if they have been restarted. This is useful for Pods
+	// over which we have little control, like those shipped by managed control planes.
+	IgnoredRestartedPodsLabelFilters LabelFilter
 }
+
+// LabelFilter represents a map of labels with a set of possible values.
+type LabelFilter map[string][]string
 
 func NewTestConfigWithDefaults() *TestConfig {
 	return &TestConfig{
@@ -25,18 +40,21 @@ func NewTestConfigWithDefaults() *TestConfig {
 		SecurityBundleInstalled:      true,
 		GatewayAPISupported:          true,
 		ARMNodePoolEnabled:           false,
+		APIServerDNSRecordSupported:  true,
+		DNSServiceName:               "coredns",
 	}
 }
 
 func Run(cfg *TestConfig) {
 	RunApps(cfg)
 	runBasic(cfg)
-	runClusterValues()
+	runClusterValues(cfg)
 	runCertManager(cfg.CertManagerSupported)
-	runDNS(cfg.BastionSupported)
+	runDNS(cfg)
 	runMetrics(cfg)
 	runTeleport(cfg.TeleportSupported)
 	runHelloWorldGateway(cfg.GatewayAPISupported)
 	runScale(cfg.AutoScalingSupported)
 	runStorage()
+	runCompliance(cfg)
 }

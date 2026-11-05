@@ -10,11 +10,12 @@
 global:
   nodePools:
     np-arm64:
+      # Revert to t4g.xlarge once https://github.com/flatcar/Flatcar/issues/2446 is resolved and https://github.com/flatcar/scripts/pull/4314 is released.
+      instanceType: c6g.xlarge
       architecture: arm64
-      instanceType: m7g.xlarge
       minSize: 1
       maxSize: 1
       customNodeTaints:
-        - effect: NoSchedule
-          key: kubernetes.io/arch
+        - key: kubernetes.io/arch
           value: arm64
+          effect: NoSchedule
