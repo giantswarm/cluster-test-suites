@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Bump `crust-gather` to `0.18.0`. A collection that hits its `--duration` deadline now
+  writes and pushes what it already gathered, instead of discarding the whole archive.
+
 ## [7.5.4] - 2026-09-02
 
 ### Added
