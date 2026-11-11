@@ -1,0 +1,24 @@
+# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  connectivity:
+    network:
+      dnsServiceIP: 172.16.0.10
+      pods:
+        cidrBlocks:
+          - 100.64.0.0/16
+      services:
+        cidrBlocks:
+          - 172.16.0.0/16
+  controlPlane:
+    networking:
+      networkPlugin: azure
+      networkPluginMode: overlay
+      networkDataplane: cilium
+      networkPolicy: cilium
+      advancedNetworking:
+        enabled: true
+        observability:
+          enabled: true
+        security:
+          enabled: true
+          advancedNetworkPolicies: L7

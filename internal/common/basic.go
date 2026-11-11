@@ -184,6 +184,9 @@ func runBasic(cfg *TestConfig) {
 			filterLabels := []string{
 				fmt.Sprintf("app.kubernetes.io/name notin (%s)", strings.Join(excludedAppNames, ", ")),
 			}
+			for label, values := range cfg.IgnoredRestartedPodsLabelFilters {
+				filterLabels = append(filterLabels, fmt.Sprintf("%s notin (%s)", label, strings.Join(values, ",")))
+			}
 
 			Eventually(
 				wait.ConsistentWaitCondition(
