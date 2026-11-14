@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Changed
+
+- Bump `crust-gather` to `0.18.0`. A collection that hits its `--duration` deadline now
+  writes and pushes what it already gathered, instead of discarding the whole archive.
+  
 ### Added
 
 - Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
