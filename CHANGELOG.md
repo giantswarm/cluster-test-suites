@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
+- Keep the VPN proxy for a cluster whose API server endpoint is a public DNS name pointing at a private address. The endpoint name is now resolved, and every returned address is checked against the RFC1918 ranges. A name that no longer resolves falls back to a short list of domains known to serve private addresses. Azure private clusters, such as the ones in the `capz-private` and `capv-on-capz` suites, could not produce a `crust-gather` snapshot without this.
 
 ## [7.8.1] - 2026-11-02
 
