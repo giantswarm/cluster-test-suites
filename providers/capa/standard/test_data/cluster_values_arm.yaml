@@ -10,7 +10,8 @@
 global:
   nodePools:
     np-arm64:
-      instanceType: t4g.xlarge
+      # Revert to t4g.xlarge once https://github.com/flatcar/Flatcar/issues/2446 is resolved and https://github.com/flatcar/scripts/pull/4314 is released.
+      instanceType: c6g.xlarge
       architecture: arm64
       minSize: 1
       maxSize: 1

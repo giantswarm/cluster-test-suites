@@ -8,11 +8,12 @@ import (
 
 	"github.com/giantswarm/cluster-standup-teardown/v6/pkg/clusterbuilder/providers/capz"
 
+	capzsuite "github.com/giantswarm/cluster-test-suites/v7/internal/capz"
 	"github.com/giantswarm/cluster-test-suites/v7/internal/suite"
 )
 
 func TestCAPZUpgrade(t *testing.T) {
-	suite.Setup(true, &capz.ClusterBuilder{})
+	suite.SetupWithOptions(true, &capz.ClusterBuilder{}, []suite.Option{capzsuite.WithLegacyNodePoolReplicas(true)})
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CAPZ Upgrade Suite")

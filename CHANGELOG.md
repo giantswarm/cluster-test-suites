@@ -9,11 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
+- Enable trivy-operator with cluster compliance scanning in the test cluster values of the capa, capz, capv, capvcd, capmox and eks standard suites (AKS is left out for now) so the compliance spec gets findings to report. The trivy server app and the vulnerability scanner stay disabled (not needed for compliance reports), and the compliance cron is tightened to every 5 minutes so reports are available within the test window.
+- capz/standard: Run with 3 worker nodes instead of 2 — the default pool has no CPU headroom left for the compliance scanners.
+- eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
+- CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
 - eks: Add a Karpenter node pool to the standard suite and enable the scale test, with a fixed-size managed node group so that only Karpenter can add nodes.
 
 ### Changed
 
 - Skip Karpenter-backed MachinePools in the "all machine pools ready and running" check, since they have zero replicas while no pods are pending.
+
+### Fixed
+
+- CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
+
+## [7.8.1] - 2026-11-02
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.8.0] - 2026-10-29
+
+### Added
+
+- AKS: Add `byo-cni` suite for clusters that run Giant Swarm's Cilium with AKS BYO CNI.
+- AKS: Add `overlay-acns` suite for Azure CNI Overlay with custom pod and service CIDRs and ACNS.
+
+### Removed
+
+- Remove unused `default-apps_values.yaml` files.
+
+## [7.7.5] - 2026-10-25
+
+### Changed
+
+- Go: Update dependencies.
+
+## [7.7.4] - 2026-10-20
+
+### Changed
+
+- Go: Update dependencies.
+- CAPA: Use `c6g.xlarge` to mitigate [flatcar/Flatcar#2446](https://github.com/flatcar/Flatcar/issues/2446).
 
 ## [7.7.3] - 2026-10-16
 
@@ -1570,7 +1609,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.3...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.1...HEAD
+[7.8.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.0...v7.8.1
+[7.8.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.5...v7.8.0
+[7.7.5]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.4...v7.7.5
+[7.7.4]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.3...v7.7.4
 [7.7.3]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.2...v7.7.3
 [7.7.2]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.1...v7.7.2
 [7.7.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.0...v7.7.1

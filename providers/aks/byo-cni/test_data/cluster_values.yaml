@@ -1,0 +1,9 @@
+# Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
+global:
+  connectivity:
+    cni:
+      managed: true
+    network:
+      pods:
+        cidrBlocks:
+          - 100.64.0.0/16

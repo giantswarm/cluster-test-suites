@@ -17,4 +17,6 @@ const (
 	ClusterConnection TestKey = "clusterConnectionTimeout"
 	// GatewayAppReady is used by the hello-world gateway app readiness checks
 	GatewayAppReady TestKey = "gatewayAppReadyTimeout"
+	// ComplianceReports is used by "reports Trivy Operator compliance benchmark findings"
+	ComplianceReports TestKey = "complianceReportsTimeout"
 )
