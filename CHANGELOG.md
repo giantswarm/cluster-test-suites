@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
 - eks: Add a Karpenter node pool to the standard suite and enable the scale test, with a fixed-size managed node group so that only Karpenter can add nodes.
 - eks/standard: Run the observability-bundle, metrics, cert-manager, and Gateway API tests, since EKS releases from v36.1.0 ship these apps.
+- eks/upgrade: Run the observability-bundle, security-bundle, metrics, cert-manager, and Gateway API tests. EKS releases from v34.0.1 on ship these apps.
 
 ### Changed
 
