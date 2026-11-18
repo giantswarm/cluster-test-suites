@@ -13,7 +13,6 @@ var _ = Describe("Common tests", func() {
 	// EKS doesn't have most of the Giant Swarm apps deployed, but the
 	// security-bundle is part of EKS releases.
 	cfg.ObservabilityBundleInstalled = false
-	cfg.ExternalDnsSupported = false
 	cfg.AutoScalingSupported = false
 	cfg.CertManagerSupported = false
 	cfg.GatewayAPISupported = false
