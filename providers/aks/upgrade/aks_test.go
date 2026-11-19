@@ -29,7 +29,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// The cluster-autoscaler is not deployed on AKS (autoscaling is handled by the managed node pools).
 	ccfg.AutoScalingSupported = false
 	// Disabled until wildcard ingress support is added (same as CAPZ).
-	ccfg.ExternalDnsSupported = false
 	ccfg.GatewayAPISupported = false
 	// AKS has a managed control plane with its own Kubernetes API endpoint, so
 	// our DNS controllers don't set up an A record for it.

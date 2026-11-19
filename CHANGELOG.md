@@ -15,9 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
 - CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
 
-### Fixed
+### Changed
 
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
+- Go: Update dependencies.
+
+### Removed
+
+- Remove the `ExternalDnsSupported` test config toggle, which no test reads.
 
 ## [7.8.1] - 2026-11-02
 
