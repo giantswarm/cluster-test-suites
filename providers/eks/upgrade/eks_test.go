@@ -22,7 +22,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// EKS doesn't have any of the Giant Swarm apps deployed
 	ccfg.ObservabilityBundleInstalled = false
 	ccfg.SecurityBundleInstalled = false
-	ccfg.ExternalDnsSupported = false
 	ccfg.AutoScalingSupported = false
 	ccfg.CertManagerSupported = false
 	ccfg.GatewayAPISupported = false

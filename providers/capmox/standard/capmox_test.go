@@ -10,7 +10,5 @@ var _ = XDescribe("Common tests", func() {
 	cfg := common.NewTestConfigWithDefaults()
 	// No autoscaling on-prem
 	cfg.AutoScalingSupported = false
-	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
-	cfg.ExternalDnsSupported = false
 	common.Run(cfg)
 })

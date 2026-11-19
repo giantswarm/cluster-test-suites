@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 - Go: Update dependencies.
 
+### Removed
+
+- Remove the `ExternalDnsSupported` test config toggle, which no test reads.
+
 ## [7.8.1] - 2026-11-02
 
 ### Changed
