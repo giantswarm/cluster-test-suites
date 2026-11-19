@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -17,9 +18,12 @@ import (
 	"github.com/giantswarm/clustertest/v5/pkg/wait"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck
 	. "github.com/onsi/gomega"    //nolint:staticcheck
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
@@ -158,9 +162,13 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 		})
 
 		It("gateway giantswarm-default should be programmed", func() {
+			const gatewayName = "giantswarm-default"
+			const gatewayNamespace = "envoy-gateway-system"
+
 			wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
 			Expect(err).ShouldNot(HaveOccurred())
 
+			// Return the reason as error, so that Gomega prints the last one on timeout
 			Eventually(func() (bool, error) {
 				gateway := &unstructured.Unstructured{}
 				gateway.SetGroupVersionKind(schema.GroupVersionKind{
@@ -168,7 +176,7 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 					Version: "v1",
 					Kind:    "Gateway",
 				})
-				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: "giantswarm-default", Namespace: "envoy-gateway-system"}, gateway)
+				err := wcClient.Get(state.GetContext(), types.NamespacedName{Name: gatewayName, Namespace: gatewayNamespace}, gateway)
 				if err != nil {
 					logger.Log("Failed to get Gateway: %v", err)
 					return false, err
@@ -176,8 +184,8 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 
 				conditions, found, err := unstructured.NestedSlice(gateway.Object, "status", "conditions")
 				if err != nil || !found || len(conditions) == 0 {
-					logger.Log("Gateway 'giantswarm-default' has no status conditions yet")
-					return false, nil
+					logger.Log("Gateway '%s' has no status conditions yet", gatewayName)
+					return false, fmt.Errorf("gateway %q has no status conditions yet", gatewayName)
 				}
 
 				for _, c := range conditions {
@@ -192,12 +200,13 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 					}
 				}
 
-				logger.Log("Gateway 'giantswarm-default' is not yet Programmed")
-				return false, nil
+				statusDescription := describeGatewayStatus(gateway)
+				logger.Log("Gateway '%s' is not yet Programmed: %s", gatewayName, statusDescription)
+				return false, fmt.Errorf("gateway %q is not Programmed: %s", gatewayName, statusDescription)
 			}).
-				WithTimeout(10 * time.Minute).
-				WithPolling(10 * time.Second).
-				Should(BeTrue())
+				WithTimeout(10*time.Minute).
+				WithPolling(10*time.Second).
+				Should(BeTrue(), gatewayNotProgrammedFailureHandler(gatewayNamespace))
 		})
 
 		// FlakeAttempts: depends on external/split-horizon DNS propagation.
@@ -413,6 +422,120 @@ func runHelloWorldGateway(gatewayAPISupported bool) {
 				Expect(err).ShouldNot(HaveOccurred())
 			}
 		})
+	})
+}
+
+func describeCondition(condition interface{}) (description string, isTrue bool) {
+	conditionMap, ok := condition.(map[string]interface{})
+	if !ok {
+		return fmt.Sprintf("unparsable condition %v", condition), false
+	}
+	conditionType, _ := conditionMap["type"].(string)
+	conditionStatus, _ := conditionMap["status"].(string)
+	conditionReason, _ := conditionMap["reason"].(string)
+	conditionMessage, _ := conditionMap["message"].(string)
+	return fmt.Sprintf("%s=%s (%s): %s", conditionType, conditionStatus, conditionReason, conditionMessage), conditionStatus == "True"
+}
+
+// describeGatewayStatus lists the Gateway and listener conditions that are not True
+func describeGatewayStatus(gateway *unstructured.Unstructured) string {
+	var ret []string
+
+	conditions, _, _ := unstructured.NestedSlice(gateway.Object, "status", "conditions")
+	hasProgrammedCondition := false
+	for _, condition := range conditions {
+		if conditionMap, ok := condition.(map[string]interface{}); ok && conditionMap["type"] == "Programmed" {
+			hasProgrammedCondition = true
+		}
+		description, isTrue := describeCondition(condition)
+		if !isTrue {
+			ret = append(ret, "gateway "+description)
+		}
+	}
+	if !hasProgrammedCondition {
+		ret = append(ret, "gateway has no Programmed condition")
+	}
+
+	listeners, _, _ := unstructured.NestedSlice(gateway.Object, "status", "listeners")
+	for _, listener := range listeners {
+		listenerMap, ok := listener.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		listenerName, _ := listenerMap["name"].(string)
+		listenerConditions, _ := listenerMap["conditions"].([]interface{})
+		for _, condition := range listenerConditions {
+			description, isTrue := describeCondition(condition)
+			if !isTrue {
+				ret = append(ret, fmt.Sprintf("listener %q %s", listenerName, description))
+			}
+		}
+	}
+
+	return strings.Join(ret, "; ")
+}
+
+// gatewayNotProgrammedFailureHandler logs the objects that usually explain why a Gateway is not
+// Programmed: the Envoy Service without a load balancer address, unavailable Envoy replicas, or a
+// GatewayClass that was not accepted
+func gatewayNotProgrammedFailureHandler(gatewayNamespace string) failurehandler.FailureHandler {
+	return failurehandler.Wrap(func() {
+		ctx := state.GetContext()
+
+		wcClient, err := state.GetFramework().WC(state.GetCluster().Name)
+		if err != nil {
+			logger.Log("Failed to get client for workload cluster - %v", err)
+			return
+		}
+
+		services := &corev1.ServiceList{}
+		err = wcClient.List(ctx, services, ctrl.InNamespace(gatewayNamespace))
+		if err != nil {
+			logger.Log("Failed to list Services in namespace '%s' - %v", gatewayNamespace, err)
+		}
+		for i := range services.Items {
+			service := &services.Items[i]
+			logger.Log("Service '%s': Type='%s', LoadBalancerClass='%s', Annotations='%v', LoadBalancerIngress='%v'",
+				service.Name, service.Spec.Type, ptr.Deref(service.Spec.LoadBalancerClass, ""), service.Annotations, service.Status.LoadBalancer.Ingress)
+
+			events, err := wcClient.GetEventsForResource(ctx, service)
+			if err != nil {
+				logger.Log("Failed to get Events for Service '%s' - %v", service.Name, err)
+				continue
+			}
+			for _, event := range events.Items {
+				logger.Log("Service '%s' Event: Type='%s', Reason='%s', Message='%s'", service.Name, event.Type, event.Reason, event.Message)
+			}
+		}
+
+		deployments := &appsv1.DeploymentList{}
+		err = wcClient.List(ctx, deployments, ctrl.InNamespace(gatewayNamespace))
+		if err != nil {
+			logger.Log("Failed to list Deployments in namespace '%s' - %v", gatewayNamespace, err)
+		}
+		for _, deployment := range deployments.Items {
+			logger.Log("Deployment '%s': ReadyReplicas='%d', Replicas='%d'", deployment.Name, deployment.Status.ReadyReplicas, deployment.Status.Replicas)
+		}
+
+		gatewayClasses := &unstructured.UnstructuredList{}
+		gatewayClasses.SetGroupVersionKind(schema.GroupVersionKind{
+			Group:   "gateway.networking.k8s.io",
+			Version: "v1",
+			Kind:    "GatewayClassList",
+		})
+		err = wcClient.List(ctx, gatewayClasses)
+		if err != nil {
+			logger.Log("Failed to list GatewayClasses - %v", err)
+		}
+		for _, gatewayClass := range gatewayClasses.Items {
+			conditions, _, _ := unstructured.NestedSlice(gatewayClass.Object, "status", "conditions")
+			var descriptions []string
+			for _, condition := range conditions {
+				description, _ := describeCondition(condition)
+				descriptions = append(descriptions, description)
+			}
+			logger.Log("GatewayClass '%s' conditions: %s", gatewayClass.GetName(), strings.Join(descriptions, "; "))
+		}
 	})
 }
 
