@@ -15,10 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
 - CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
 
-### Fixed
+### Changed
 
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 - Keep the VPN proxy for a cluster whose API server endpoint is a public DNS name pointing at a private address. The endpoint name is now resolved, and every returned address is checked against the RFC1918 ranges. A name that no longer resolves falls back to a short list of domains known to serve private addresses. Azure private clusters, such as the ones in the `capz-private` and `capv-on-capz` suites, could not produce a `crust-gather` snapshot without this.
+- Go: Update dependencies.
+
 
 ## [7.8.1] - 2026-11-02
 
