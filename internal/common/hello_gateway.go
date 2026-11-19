@@ -495,8 +495,8 @@ func gatewayNotProgrammedFailureHandler(gatewayNamespace string) failurehandler.
 		}
 		for i := range services.Items {
 			service := &services.Items[i]
-			logger.Log("Service '%s': Type='%s', LoadBalancerClass='%s', Annotations='%v', LoadBalancerIngress='%v'",
-				service.Name, service.Spec.Type, ptr.Deref(service.Spec.LoadBalancerClass, ""), service.Annotations, service.Status.LoadBalancer.Ingress)
+			logger.Log("Service '%s': Type='%s', LoadBalancerClass='%s', LoadBalancerIngress='%v', Annotations='%v'",
+				service.Name, service.Spec.Type, ptr.Deref(service.Spec.LoadBalancerClass, ""), service.Status.LoadBalancer.Ingress, service.Annotations)
 
 			events, err := wcClient.GetEventsForResource(ctx, service)
 			if err != nil {
