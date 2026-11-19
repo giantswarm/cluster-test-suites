@@ -482,7 +482,7 @@ func collectCrustGatherSnapshots(suiteSlug string) {
 
 // writeCAPIKubeconfig reads the CAPI kubeconfig secret for the given cluster from the MC
 // and writes it to a temp file. Returns the file path, whether the API server endpoint is
-// private (RFC1918 or private DNS), and any error. Caller is responsible for cleanup.
+// private, and any error. Caller is responsible for cleanup.
 func writeCAPIKubeconfig(ctx context.Context, clusterName, namespace string) (string, bool, error) {
 	var secret corev1.Secret
 	err := state.GetFramework().MC().Get(ctx, cr.ObjectKeyFromObject(&corev1.Secret{
@@ -661,39 +661,129 @@ func attemptCrustGather(label string, attemptNum int, kubeconfig, reference, use
 	return cmd.Run()
 }
 
-// hasPrivateEndpoint reports whether the kubeconfig's API server resolves to a
-// private (non-routable) address: an RFC1918 IP or a private DNS name such as
-// AWS internal load balancers ("internal-*"), ".internal", or ".local" hostnames.
-// Private clusters require the VPN proxy to be kept in the subprocess environment.
+// endpointLookupTimeout bounds each DNS lookup made by the hasPrivateEndpoint function.
+// The check runs on the teardown path, so a slow resolver must not stall snapshot collection.
+const endpointLookupTimeout = 2 * time.Second
+
+// hostResolver resolves a hostname to its addresses. The hasPrivateEndpointWithResolver
+// function takes one so tests do not depend on live DNS.
+type hostResolver func(ctx context.Context, host string) ([]net.IP, error)
+
+// privateDomainSuffixes lists domains that serve public names for private addresses. The
+// hasPrivateEndpointWithResolver function reads them only when a lookup fails, so a deleted
+// workload cluster that no longer resolves still keeps the proxy.
+var privateDomainSuffixes = []string{
+	"azuretest.gigantic.io",
+}
+
+// lookupHostAddresses is the hostResolver used outside tests.
+func lookupHostAddresses(ctx context.Context, host string) ([]net.IP, error) {
+	addrs, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+	if err != nil {
+		return nil, err
+	}
+	ips := make([]net.IP, 0, len(addrs))
+	for _, addr := range addrs {
+		ips = append(ips, addr.IP)
+	}
+	return ips, nil
+}
+
+// hasPrivateEndpoint reports whether the kubeconfig's API server sits on a private
+// (non-routable) address. A private cluster needs the VPN proxy kept in the subprocess
+// environment.
 func hasPrivateEndpoint(kubeconfigData []byte) bool {
+	return hasPrivateEndpointWithResolver(kubeconfigData, lookupHostAddresses)
+}
+
+// hasPrivateEndpointWithResolver is the hasPrivateEndpoint function with an injectable
+// resolver. A hostname that matches no naming rule is resolved, because an Azure endpoint
+// such as "apiserver.<cluster>.azuretest.gigantic.io" is a public name for an RFC1918
+// address. What the resolver answers wins, and the privateDomainSuffixes slice is read
+// only when it answers nothing.
+func hasPrivateEndpointWithResolver(kubeconfigData []byte, resolve hostResolver) bool {
 	cfg, err := clientcmd.Load(kubeconfigData)
 	if err != nil {
 		return false
 	}
-	privateRanges := []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}
+
+	// Names that the rules below do not settle are resolved in a second pass. A kubeconfig
+	// with several cluster entries counts as private when any one entry is private.
+	var unsettled []string
 	for _, cluster := range cfg.Clusters {
 		u, err := url.Parse(cluster.Server)
 		if err != nil {
 			continue
 		}
 		host := u.Hostname()
+		if host == "" {
+			continue
+		}
+		// A literal address is already the answer, so it is never looked up.
 		if ip := net.ParseIP(host); ip != nil {
-			for _, cidr := range privateRanges {
-				_, network, _ := net.ParseCIDR(cidr)
-				if network.Contains(ip) {
-					return true
-				}
-			}
-		} else {
-			lower := strings.ToLower(host)
-			if strings.HasPrefix(lower, "internal-") ||
-				strings.HasSuffix(lower, ".internal") ||
-				strings.HasSuffix(lower, ".local") {
+			if ip.IsPrivate() {
 				return true
 			}
+			continue
+		}
+		if hasPrivateHostname(host) {
+			return true
+		}
+		unsettled = append(unsettled, host)
+	}
+
+	for _, host := range unsettled {
+		private, resolved := resolvesToPrivateAddress(host, resolve)
+		if private {
+			return true
+		}
+		if !resolved && hasPrivateDomainSuffix(host) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// hasPrivateHostname reports whether the host follows a naming convention reserved for
+// private endpoints, such as an AWS internal load balancer.
+func hasPrivateHostname(host string) bool {
+	lower := strings.ToLower(host)
+	return strings.HasPrefix(lower, "internal-") ||
+		strings.HasSuffix(lower, ".internal") ||
+		strings.HasSuffix(lower, ".local")
+}
+
+// hasPrivateDomainSuffix reports whether the host sits inside a domain listed in the
+// privateDomainSuffixes slice.
+func hasPrivateDomainSuffix(host string) bool {
+	lower := strings.ToLower(host)
+	for _, suffix := range privateDomainSuffixes {
+		if lower == suffix || strings.HasSuffix(lower, "."+suffix) {
+			return true
 		}
 	}
 	return false
+}
+
+// resolvesToPrivateAddress reports whether the host resolves to at least one RFC1918
+// address, and whether the lookup answered at all. One private address is enough, because
+// the dialer may pick it and only the proxy can reach it.
+func resolvesToPrivateAddress(host string, resolve hostResolver) (private, resolved bool) {
+	ctx, cancel := context.WithTimeout(context.Background(), endpointLookupTimeout)
+	defer cancel()
+
+	ips, err := resolve(ctx, host)
+	if err != nil {
+		logger.Log("crust-gather: could not resolve API endpoint %s, falling back to its domain: %v", host, err)
+		return false, false
+	}
+	for _, ip := range ips {
+		if ip.IsPrivate() {
+			return true, true
+		}
+	}
+	return false, true
 }
 
 func removeProxyEnv(env []string) []string {
