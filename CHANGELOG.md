@@ -21,9 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Skip Karpenter-backed MachinePools in the "all machine pools ready and running" check, since they have zero replicas while no pods are pending.
-
-### Changed
-
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
 - Go: Update dependencies.
 
