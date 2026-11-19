@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CAPA: Add `clusterwide-deny` suite, which turns on the network-policies clusterwide deny on a running cluster and runs the common checks under it. Releases with network-policies older than 0.6.0 skip it before a cluster is built.
 - Report Trivy Operator compliance benchmark findings (CIS, NSA, PSS) from the workload cluster in the common test suite. Report-only: findings are logged but never fail the suite, and the check skips gracefully when the security-bundle or trivy-operator compliance scanning is not enabled.
 - Enable trivy-operator with cluster compliance scanning in the test cluster values of the capa, capz, capv, capvcd, capmox and eks standard suites (AKS is left out for now) so the compliance spec gets findings to report. The trivy server app and the vulnerability scanner stay disabled (not needed for compliance reports), and the compliance cron is tightened to every 5 minutes so reports are available within the test window.
 - capz/standard: Run with 3 worker nodes instead of 2 — the default pool has no CPU headroom left for the compliance scanners.
