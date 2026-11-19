@@ -14,6 +14,38 @@ global:
   # release under test supports it (E2E_RELEASE_VERSION >= v35.0.0). Keep this file
   # schema-compatible with older cluster-aws versions so release-test-suites runs on
   # older releases (e.g. v33.x, v34.x) don't break.
+  nodePools:
+    nodepool-0:
+      minSize: 1
+      maxSize: 1
+    np-karpntr:
+      type: karpenter
+      requirements:
+        - key: karpenter.k8s.aws/instance-hypervisor
+          operator: In
+          values:
+            - nitro
+        - key: kubernetes.io/os
+          operator: In
+          values:
+            - linux
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+            - amd64
+        - key: karpenter.k8s.aws/instance-cpu
+          operator: In
+          values:
+            - "4"
+            - "8"
+            - "16"
+            - "32"
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values:
+            - on-demand
+            - spot
+
   # Enable trivy-operator cluster compliance scanning so the report-only
   # compliance spec in the common suite gets CIS/NSA/PSS findings to report.
   # See: https://github.com/giantswarm/roadmap/issues/2624
@@ -52,35 +84,3 @@ global:
                     # Not needed for compliance reports; avoids vulnerability scan
                     # jobs for every workload in the test cluster.
                     vulnerabilityScannerEnabled: false
-
-  nodePools:
-    nodepool-0:
-      minSize: 1
-      maxSize: 1
-    np-karpntr:
-      type: karpenter
-      requirements:
-        - key: karpenter.k8s.aws/instance-hypervisor
-          operator: In
-          values:
-            - nitro
-        - key: kubernetes.io/os
-          operator: In
-          values:
-            - linux
-        - key: kubernetes.io/arch
-          operator: In
-          values:
-            - amd64
-        - key: karpenter.k8s.aws/instance-cpu
-          operator: In
-          values:
-            - "4"
-            - "8"
-            - "16"
-            - "32"
-        - key: karpenter.sh/capacity-type
-          operator: In
-          values:
-            - on-demand
-            - spot
