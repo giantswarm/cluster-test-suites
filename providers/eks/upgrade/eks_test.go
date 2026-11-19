@@ -16,6 +16,5 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	ccfg := common.NewTestConfigWithDefaults()
 	// EKS does not have metrics for k8s control plane components.
 	ccfg.ControlPlaneMetricsSupported = false
-	ccfg.AutoScalingSupported = false
 	common.Run(ccfg)
 })
