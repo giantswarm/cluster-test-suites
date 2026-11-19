@@ -19,6 +19,5 @@ var _ = Describe("Common tests", func() {
 	cfg := common.NewTestConfigWithDefaults()
 	// EKS does not have metrics for k8s control plane components.
 	cfg.ControlPlaneMetricsSupported = false
-	cfg.ExternalDnsSupported = false
 	common.Run(cfg)
 })
