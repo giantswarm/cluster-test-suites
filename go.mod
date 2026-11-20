@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/aquasecurity/trivy-operator v0.36.1
 	github.com/cert-manager/cert-manager v1.21.3
-	github.com/fluxcd/helm-controller/api v1.7.1
+	github.com/fluxcd/helm-controller/api v1.7.2
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.1.5
 	github.com/giantswarm/clustertest/v5 v5.6.7
