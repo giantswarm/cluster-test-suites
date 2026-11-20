@@ -13,9 +13,13 @@ import (
 )
 
 func TestCAPAClusterwideDeny(t *testing.T) {
-	// Releases without the clusterwide deny skip before a cluster is built.
 	suite.SetupWithOptions(false, &capa.ClusterBuilder{}, []suite.Option{
+		// Releases without the clusterwide deny skip before a cluster is built.
 		suite.WithSkipBeforeStandup(common.SkipWithoutClusterwideDeny),
+		// The cluster is created with the clusterwide deny on.
+		suite.WithExtraClusterValues(func() (string, error) {
+			return common.ClusterwideDenyClusterValues, nil
+		}),
 	})
 
 	RegisterFailHandler(Fail)

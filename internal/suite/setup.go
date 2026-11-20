@@ -56,8 +56,9 @@ type Options struct {
 	TeardownTimeout time.Duration
 
 	// SkipBeforeStandupFn, if set, is called with the cluster about to be created. A
-	// non-empty reason skips the whole suite before any cluster is built. Use
-	// WithSkipBeforeStandup to set this.
+	// non-empty reason skips the whole suite before any cluster is built. It isn't
+	// called for an existing cluster (E2E_WC_NAME). Use WithSkipBeforeStandup to set
+	// this.
 	SkipBeforeStandupFn func(cluster *application.Cluster) (reason string, err error)
 }
 
@@ -72,6 +73,7 @@ func WithExtraClusterValues(fn func() (string, error)) Option {
 
 // WithSkipBeforeStandup registers a check that can skip the whole suite before the test
 // cluster is created, e.g. when the release under test doesn't ship what the suite tests.
+// It isn't called for an existing cluster (E2E_WC_NAME).
 // An error is logged and the suite runs, so a failing lookup never hides a test.
 func WithSkipBeforeStandup(fn func(cluster *application.Cluster) (reason string, err error)) Option {
 	return func(o *Options) { o.SkipBeforeStandupFn = fn }
@@ -337,7 +339,8 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 // loadOrBuildCluster mirrors cb.LoadOrBuildCluster but allows appending an extra YAML
 // overlay (via Options.ExtraClusterValuesFn) to the cluster values. Used by suites that
 // need to apply overrides conditionally — e.g. release-version-gated nodepool fields
-// that only exist in newer schemas.
+// that only exist in newer schemas. The bool reports whether the cluster is being built
+// (false for an existing cluster loaded through E2E_WC_NAME).
 func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.ClusterBuilder, o *Options) (*application.Cluster, bool) {
 	cluster, err := framework.LoadCluster()
 	Expect(err).NotTo(HaveOccurred())

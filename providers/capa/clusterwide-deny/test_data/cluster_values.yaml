@@ -1,6 +1,6 @@
 # Values provided here merge on top of the default values found in https://github.com/giantswarm/cluster-standup-teardown
-# The cluster is created with the clusterwide deny off, the suite turns it on for
-# the running cluster (see internal/common/clusterwidedeny.go).
+# The clusterwide deny values come from common.ClusterwideDenyClusterValues, see
+# capa_suite_test.go.
 global:
   providerSpecific:
     awsClusterRoleIdentityName: giantswarm-grizzly-wc-e2e
