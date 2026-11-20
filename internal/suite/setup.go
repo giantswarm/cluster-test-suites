@@ -54,6 +54,12 @@ type Options struct {
 	// Defaults to DefaultTeardownTimeout when unset. Providers whose clusters take longer
 	// to delete (e.g. AKS) can raise it with WithTeardownTimeout.
 	TeardownTimeout time.Duration
+
+	// SkipBeforeStandupFn, if set, is called with the cluster about to be created. A
+	// non-empty reason skips the whole suite before any cluster is built. It isn't
+	// called for an existing cluster (E2E_WC_NAME). Use WithSkipBeforeStandup to set
+	// this.
+	SkipBeforeStandupFn func(cluster *application.Cluster) (reason string, err error)
 }
 
 // Option mutates Options.
@@ -63,6 +69,14 @@ type Option func(*Options)
 // to merge on top of ./test_data/cluster_values.yaml.
 func WithExtraClusterValues(fn func() (string, error)) Option {
 	return func(o *Options) { o.ExtraClusterValuesFn = fn }
+}
+
+// WithSkipBeforeStandup registers a check that can skip the whole suite before the test
+// cluster is created, e.g. when the release under test doesn't ship what the suite tests.
+// It isn't called for an existing cluster (E2E_WC_NAME).
+// An error is logged and the suite runs, so a failing lookup never hides a test.
+func WithSkipBeforeStandup(fn func(cluster *application.Cluster) (reason string, err error)) Option {
+	return func(o *Options) { o.SkipBeforeStandupFn = fn }
 }
 
 // WithTeardownTimeout overrides how long the AfterSuite cleanup is allowed to take.
@@ -193,7 +207,19 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 		Expect(err).NotTo(HaveOccurred())
 		state.SetFramework(framework)
 
-		cluster := loadOrBuildCluster(framework, clusterBuilder, o)
+		cluster, built := loadOrBuildCluster(framework, clusterBuilder, o)
+
+		// Only for a cluster about to be built: an existing cluster (E2E_WC_NAME) runs
+		// whatever release it was created with, which GetRelease can't tell. Before
+		// state.SetCluster, so AfterSuite has nothing to clean up after a skip.
+		if built && o.SkipBeforeStandupFn != nil {
+			reason, err := o.SkipBeforeStandupFn(cluster)
+			if err != nil {
+				logger.Log("Could not check whether to skip the suite before standup, running it: %s", err)
+			} else if reason != "" {
+				Skip(reason)
+			}
+		}
 		state.SetCluster(cluster)
 
 		// We'll use this to track if the BeforeSuite failed and if we should do extra debug logging
@@ -313,13 +339,14 @@ func SetupWithOptions(isUpgrade bool, clusterBuilder cb.ClusterBuilder, opts []O
 // loadOrBuildCluster mirrors cb.LoadOrBuildCluster but allows appending an extra YAML
 // overlay (via Options.ExtraClusterValuesFn) to the cluster values. Used by suites that
 // need to apply overrides conditionally — e.g. release-version-gated nodepool fields
-// that only exist in newer schemas.
-func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.ClusterBuilder, o *Options) *application.Cluster {
+// that only exist in newer schemas. The bool reports whether the cluster is being built
+// (false for an existing cluster loaded through E2E_WC_NAME).
+func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.ClusterBuilder, o *Options) (*application.Cluster, bool) {
 	cluster, err := framework.LoadCluster()
 	Expect(err).NotTo(HaveOccurred())
 	if cluster != nil {
 		logger.Log("Using existing cluster %s/%s", cluster.Name, cluster.GetNamespace())
-		return cluster
+		return cluster, false
 	}
 
 	overrides := []string{values.MustLoadValuesFile("./test_data/cluster_values.yaml")}
@@ -345,7 +372,7 @@ func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.Clus
 		cluster = cluster.WithAppVersions("latest")
 	}
 
-	return cluster
+	return cluster, true
 }
 
 // clusterAppOverriddenFromEnv reports whether the given cluster app (e.g. "cluster-aws") has an
