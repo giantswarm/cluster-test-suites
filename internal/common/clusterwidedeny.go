@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -16,12 +15,10 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/yaml"
 
 	"github.com/giantswarm/clustertest/v5/pkg/application"
 	"github.com/giantswarm/clustertest/v5/pkg/client"
-	"github.com/giantswarm/clustertest/v5/pkg/env"
 	"github.com/giantswarm/clustertest/v5/pkg/logger"
 
 	"github.com/giantswarm/cluster-test-suites/v7/internal/helper"
@@ -123,30 +120,13 @@ func RunWithClusterwideDeny(cfg *TestConfig) {
 			}
 		})
 
+		// The deny stays on for AfterSuite, so PV cleanup and cluster deletion run under
+		// it the way a customer deletes a cluster with the deny on.
 		AfterAll(func() {
-			// Nothing to undo after a skip or when the deny never came up. Writing the
-			// switch would also break a cluster whose network-policies has no
-			// clusterWide value yet.
-			if !denyOn {
-				return
-			}
-			ctx := state.GetContext()
 			// AfterAll runs before the last spec's ReportAfterEach, hence both.
-			if anySpecFailed || CurrentSpecReport().Failed() {
-				logClusterwideDenyState(ctx)
+			if denyOn && (anySpecFailed || CurrentSpecReport().Failed()) {
+				logClusterwideDenyState(state.GetContext())
 			}
-			// Turn the deny off before AfterSuite: PV cleanup and cluster deletion need
-			// the storage, load balancer and cloud controllers in the WC to reach the
-			// cloud API, and uninstall hooks need the API server. The crust-gather
-			// snapshot AfterSuite takes on failure shows the cluster with the deny off;
-			// the log above has the state with it on.
-			// A cluster kept for debugging (E2E_WC_KEEP) keeps the deny, like
-			// DeleteCluster keeps the cluster.
-			if keep := strings.ToLower(os.Getenv(env.KeepWorkloadCluster)); keep != "" && keep != "false" {
-				logger.Log("%s is set, leaving the clusterwide deny on", env.KeepWorkloadCluster)
-				return
-			}
-			turnClusterwideDenyOff(ctx)
 		})
 
 		RunApps(cfg)
@@ -251,44 +231,6 @@ func allowAllEgress(ctx context.Context) (bool, error) {
 	return allowAll, err
 }
 
-// turnClusterwideDenyOff sets denyByDefault.clusterWide.enabled to false in the
-// cluster app's user config and waits for the deny to go away. Best effort and
-// bounded: it only logs, since the cluster is deleted either way.
-func turnClusterwideDenyOff(ctx context.Context) {
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
-	defer cancel()
-
-	logger.Log("Turning the clusterwide deny off before teardown")
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		values, cm, err := clusterValues(ctx)
-		if err != nil {
-			return err
-		}
-		if err := unstructured.SetNestedField(values, false, "global", "apps", "networkPolicies", "values", "denyByDefault", "clusterWide", "enabled"); err != nil {
-			return err
-		}
-		out, err := yaml.Marshal(values)
-		if err != nil {
-			return err
-		}
-		cm.Data["values"] = string(out)
-		return state.GetFramework().MC().Update(ctx, cm)
-	})
-	if err != nil {
-		logger.Log("Could not turn the clusterwide deny off before teardown: %s", err)
-		return
-	}
-	g := NewGomega(func(message string, _ ...int) { logger.Log("%s", message) })
-	gone := g.Eventually(ctx, func() (bool, error) { return clusterwidePolicyExists(ctx, clusterwideDenyPolicyName) }).
-		WithPolling(15 * time.Second).
-		Should(BeFalse())
-	if gone {
-		logger.Log("The clusterwide deny is off")
-	} else {
-		logger.Log("The CiliumClusterwideNetworkPolicy %s was still there when the teardown budget ran out; tearing down anyway", clusterwideDenyPolicyName)
-	}
-}
-
 func denyWCClient() (*client.Client, error) {
 	return state.GetFramework().WC(state.GetCluster().Name)
 }
@@ -328,7 +270,7 @@ func expectClusterwideDenyOn(ctx context.Context) {
 }
 
 // logClusterwideDenyState logs the clusterwide policies and the pods that aren't
-// healthy, before the deny is turned off and the failure state changes.
+// healthy, before teardown changes the failure state.
 func logClusterwideDenyState(ctx context.Context) {
 	c, err := denyWCClient()
 	if err != nil {
