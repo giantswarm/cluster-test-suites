@@ -29,7 +29,6 @@ var _ = Describe("Basic upgrade test", Ordered, func() {
 	// No autoscaling on-prem
 	ccfg.AutoScalingSupported = false
 	// Disabled until https://github.com/giantswarm/roadmap/issues/1037
-	ccfg.ExternalDnsSupported = false
 	ccfg.GatewayAPISupported = false
 	common.Run(ccfg)
 })
