@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove the `ExternalDnsSupported` test config toggle, which no test reads.
 
+### Fixed
+
+- Expect between `minSize` and `maxSize` worker nodes for an autoscaled node pool even if it also sets `replicas`, since the cluster autoscaler may scale it down to `minSize`
+
 ## [7.8.1] - 2026-11-02
 
 ### Changed
