@@ -18,7 +18,6 @@ var _ = Describe("Common tests", func() {
 	cfg := common.NewTestConfigWithDefaults()
 	cfg.AutoScalingSupported = capz.AutoScalingSupported()
 	// Disabled until wildcard ingress support is added
-	cfg.ExternalDnsSupported = false
 	cfg.GatewayAPISupported = false
 	common.Run(cfg)
 })

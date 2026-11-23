@@ -4,7 +4,6 @@ type TestConfig struct {
 	AutoScalingSupported         bool
 	BastionSupported             bool
 	TeleportSupported            bool
-	ExternalDnsSupported         bool
 	CertManagerSupported         bool
 	ControlPlaneMetricsSupported bool
 	ObservabilityBundleInstalled bool
@@ -33,7 +32,6 @@ func NewTestConfigWithDefaults() *TestConfig {
 		AutoScalingSupported:         true,
 		BastionSupported:             false,
 		TeleportSupported:            true,
-		ExternalDnsSupported:         true,
 		CertManagerSupported:         true,
 		ControlPlaneMetricsSupported: true,
 		ObservabilityBundleInstalled: true,

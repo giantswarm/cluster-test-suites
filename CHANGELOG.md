@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - capz/standard: Run with 3 worker nodes instead of 2 — the default pool has no CPU headroom left for the compliance scanners.
 - eks/standard: Run the security-bundle app checks. The `SecurityBundleInstalled = false` flag was stale — EKS releases ship the security-bundle.
 - CAPZ: Enable autoscaling tests for releases with autoscaling support (v35.2.1+ on v35, v36.1.1+ on v36, and v37+).
+- eks: Add a Karpenter node pool to the standard suite and enable the scale test, with a fixed-size managed node group so that only Karpenter can add nodes.
+- eks/standard: Run the observability-bundle, metrics, cert-manager, and Gateway API tests, since EKS releases from v36.1.0 ship these apps.
+- eks/upgrade: Run the observability-bundle, security-bundle, metrics, cert-manager, and Gateway API tests. EKS releases from v34.0.1 on ship these apps.
+- eks: Deploy `aws-lb-controller-bundle` in the Gateway API tests, since the Envoy Service of the Gateway uses the `service.k8s.aws/nlb` load balancer class, which only the AWS Load Balancer Controller serves.
 
 ### Changed
 
@@ -21,7 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Skip Karpenter-backed MachinePools in the "all machine pools ready and running" check, since they have zero replicas while no pods are pending.
+- Report why the `giantswarm-default` Gateway is not Programmed, and log its Envoy Services, Deployments, and GatewayClasses if the check times out.
 - CAPZ: Set `replicas: 2` on the default node pool when the cluster is created with a release without autoscaling support.
+- Go: Update dependencies.
+
+### Removed
+
+- Remove the `ExternalDnsSupported` test config toggle, which no test reads.
 
 ## [7.8.1] - 2026-11-02
 
