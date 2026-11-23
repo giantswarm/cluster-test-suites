@@ -9,7 +9,7 @@ require (
 	github.com/fluxcd/helm-controller/api v1.7.2
 	github.com/giantswarm/apiextensions-application v0.6.2
 	github.com/giantswarm/cluster-standup-teardown/v6 v6.1.5
-	github.com/giantswarm/clustertest/v5 v5.6.8-0.20261123175119-c7bc57360960
+	github.com/giantswarm/clustertest/v5 v5.6.7
 	github.com/giantswarm/k8smetadata v0.26.0
 	github.com/gravitational/teleport/api v0.0.0-20260825163510-1283425b60ec
 	github.com/onsi/ginkgo/v2 v2.34.0
@@ -73,7 +73,7 @@ require (
 	github.com/fluxcd/pkg/apis/acl v0.12.0 // indirect
 	github.com/fluxcd/pkg/apis/kustomize v1.23.0 // indirect
 	github.com/fluxcd/pkg/apis/meta v1.39.0 // indirect
-	github.com/fluxcd/source-controller/api v1.10.2 // indirect
+	github.com/fluxcd/source-controller/api v1.10.1 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
 	github.com/giantswarm/gitsemver/v3 v3.1.3 // indirect

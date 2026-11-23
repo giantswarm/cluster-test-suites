@@ -295,21 +295,15 @@ func AreAllPodsInSuccessfulPhaseWithFilter(ctx context.Context, wcClient *client
 func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values *application.ClusterValues) func() error {
 	minNodes := 0
 	maxNodes := 0
-	for poolName, pool := range values.NodePools {
-		if (pool.MinSize == nil) != (pool.MaxSize == nil) {
-			return func() error {
-				return fmt.Errorf("node pool %q must set both `minSize` and `maxSize`, or neither", poolName)
-			}
-		}
-
-		// MachineDeployment node pool without autoscaling
-		if pool.Replicas > 0 && pool.MinSize == nil {
+	for _, pool := range values.NodePools {
+		// MachineDeployment node pool without autoscaling. An unset `maxSize` parses as 0.
+		if pool.Replicas > 0 && pool.MaxSize == 0 {
 			minNodes += pool.Replicas
 			maxNodes += pool.Replicas
 			continue
 		}
 
-		if pool.MinSize == nil && pool.MaxSize == nil {
+		if pool.MinSize == 0 && pool.MaxSize == 0 {
 			// It's a Karpenter node pool — nodes are provisioned on-demand when pods are pending.
 			// We don't require Karpenter nodes in this basic check since they only appear when
 			// workloads overflow the ASG pool. Karpenter is validated later by the scale test
@@ -318,9 +312,9 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 			continue
 		}
 
-		// MachinePool node pool, or autoscaler-controlled MachineDeployment
-		minNodes += *pool.MinSize
-		maxNodes += *pool.MaxSize
+		// MachinePool node pool, or autoscaled MachineDeployment
+		minNodes += pool.MinSize
+		maxNodes += pool.MaxSize
 	}
 	expectedNodes := wait.Range{
 		Min: minNodes,
