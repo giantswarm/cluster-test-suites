@@ -163,7 +163,7 @@ func runBasic(cfg *TestConfig) {
 		It("has all of its Pods in the Running state", func() {
 			Eventually(
 				wait.ConsistentWaitCondition(
-					AreAllPodsInSuccessfulPhaseWithFilter(state.GetContext(), wcClient, armExcludedPodLabels(cfg)),
+					AreAllPodsInSuccessfulPhaseWithFilter(state.GetContext(), wcClient, nil),
 					10,
 					time.Second,
 				)).
@@ -176,15 +176,8 @@ func runBasic(cfg *TestConfig) {
 		})
 
 		It("doesn't have restarting pods", func() {
-			// Excluding cluster-autoscaler as we have a specific test case for ensuring it is functioning
-			// Excluding karpenter because it's deployed using a HelmRelease and its pods run on the control plane. Because of this the pod is scheduled pretty early in the cluster creation process.
-			// Meanwhile, IRSA resources are getting created, but it takes a while. karpenter uses IRSA and can't run until IRSA is ready. Eventually, IRSA is ready, and the pod works normally.
-			excludedAppNames := []string{"cluster-autoscaler-app", "karpenter"}
-			excludedAppNames = append(excludedAppNames, armExcludedAppNames(cfg)...)
-			filterLabels := []string{
-				fmt.Sprintf("app.kubernetes.io/name notin (%s)", strings.Join(excludedAppNames, ", ")),
-			}
-			for label, values := range cfg.IgnoredRestartedPodsLabelFilters {
+			filterLabels := make([]string, 0)
+			for label, values := range cfg.IgnoredRestartedPods {
 				filterLabels = append(filterLabels, fmt.Sprintf("%s notin (%s)", label, strings.Join(values, ",")))
 			}
 
@@ -230,34 +223,6 @@ func runBasic(cfg *TestConfig) {
 				Should(Succeed())
 		})
 	})
-}
-
-// armExcludedAppNames returns the `app.kubernetes.io/name` values to exclude from pod
-// health checks when an arm64 node pool is present. The released net-exporter and
-// cert-exporter app versions aren't multi-arch yet, so their DaemonSet pods crashloop on
-// arm64 nodes. cluster-test-suites always pulls the latest release, which lags the fixed
-// app versions, so exclude them until those versions ship.
-//
-// TODO(arm64): temporary. Remove this exclusion (and the ARMNodePoolEnabled plumbing)
-// once release v35 ships the multi-arch net-exporter and cert-exporter versions.
-// See: https://github.com/giantswarm/roadmap/issues/4302
-func armExcludedAppNames(cfg *TestConfig) []string {
-	if !cfg.ARMNodePoolEnabled {
-		return nil
-	}
-	// net-exporter pods use `app.kubernetes.io/name: net-exporter`; cert-exporter's
-	// DaemonSet pods use `app.kubernetes.io/name: cert-exporter-daemonset`.
-	return []string{"net-exporter", "cert-exporter-daemonset"}
-}
-
-// armExcludedPodLabels returns label selectors filtering out the arm64-incompatible apps,
-// or an empty slice when there's nothing to exclude (so checks behave as before).
-func armExcludedPodLabels(cfg *TestConfig) []string {
-	names := armExcludedAppNames(cfg)
-	if len(names) == 0 {
-		return nil
-	}
-	return []string{fmt.Sprintf("app.kubernetes.io/name notin (%s)", strings.Join(names, ", "))}
 }
 
 // AreAllPodsInSuccessfulPhaseWithFilter checks that all Pods (minus those matched by the
