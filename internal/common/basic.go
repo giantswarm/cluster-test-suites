@@ -296,8 +296,8 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 	minNodes := 0
 	maxNodes := 0
 	for _, pool := range values.NodePools {
-		// MachineDeployment node pool
-		if pool.Replicas > 0 {
+		// MachineDeployment node pool without autoscaling. An unset `maxSize` parses as 0.
+		if pool.Replicas > 0 && pool.MaxSize == 0 {
 			minNodes += pool.Replicas
 			maxNodes += pool.Replicas
 			continue
@@ -312,7 +312,7 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 			continue
 		}
 
-		// MachinePool node pool
+		// MachinePool node pool, or autoscaled MachineDeployment
 		minNodes += pool.MinSize
 		maxNodes += pool.MaxSize
 	}
@@ -336,7 +336,7 @@ func CheckWorkerNodesReady(ctx context.Context, wcClient *client.Client, values 
 	}
 }
 
-// CheckMachinePoolsReadyAndRunning checks if all MachinePool resources are in Running phase with all replicas available.
+// CheckMachinePoolsReadyAndRunning checks if all non-Karpenter MachinePool resources are in Running phase with all replicas available.
 func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Client, clusterName string, clusterNamespace string) func() error {
 	return func() error {
 		machinePools := &capi.MachinePoolList{}
@@ -358,6 +358,12 @@ func CheckMachinePoolsReadyAndRunning(ctx context.Context, mcClient *client.Clie
 
 		allReady := true
 		for _, mp := range machinePools.Items {
+			// Karpenter pools have zero replicas until pods are pending. The scale test covers them.
+			if mp.Spec.Template.Spec.InfrastructureRef.Kind == "KarpenterMachinePool" {
+				logger.Log("MachinePool '%s/%s': skipping Karpenter node pool", mp.Namespace, mp.Name)
+				continue
+			}
+
 			phase := capi.MachinePoolPhase(mp.Status.Phase)
 			isRunning := phase == capi.MachinePoolPhaseRunning
 
