@@ -51,13 +51,9 @@ global:
           # always provide.
           trivyOperator:
             enabled: true
-            # The security-bundle defaults this to [cilium, kyverno-crds,
-            # trivy]. With the trivy server disabled its HelmRelease never
-            # exists, so drop it from the dependencies or trivy-operator
-            # would wait for it forever.
-            dependsOn:
-              - cilium
-              - kyverno-crds
+            # The suite setup drops trivy from the dependencies of
+            # trivy-operator (internal/suite/trivy.go), as the form of
+            # `dependsOn` depends on the security-bundle version.
         userConfig:
           trivyOperator:
             configMap:

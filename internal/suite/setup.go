@@ -31,10 +31,11 @@ import (
 	capi "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	cr "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/giantswarm/cluster-test-suites/v7/internal/state"
 )
 
 // Options controls optional Setup behavior.
@@ -349,7 +350,8 @@ func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.Clus
 		return cluster, false
 	}
 
-	overrides := []string{values.MustLoadValuesFile("./test_data/cluster_values.yaml")}
+	clusterValues := values.MustLoadValuesFile("./test_data/cluster_values.yaml")
+	overrides := []string{clusterValues}
 	if o != nil && o.ExtraClusterValuesFn != nil {
 		extra, err := o.ExtraClusterValuesFn()
 		Expect(err).NotTo(HaveOccurred())
@@ -360,6 +362,22 @@ func loadOrBuildCluster(framework *clustertest.Framework, clusterBuilder cb.Clus
 
 	cluster = clusterBuilder.NewClusterApp("", "", overrides)
 	cluster = cb.ApplyAppOverridesFromEnv(cluster)
+
+	// The form of the security-bundle's `dependsOn` depends on its version, which is only
+	// known from the release of the cluster built above, so build the cluster again with it.
+	if enablesTrivyOperator(clusterValues) {
+		dependsOn := trivyOperatorDependsOnMap
+		version, err := securityBundleVersion(cluster)
+		if err == nil {
+			dependsOn, err = trivyOperatorDependsOnValues(version)
+		}
+		if err != nil {
+			logger.Log("Could not tell which form of dependsOn the security-bundle takes, using the map: %s", err)
+			dependsOn = trivyOperatorDependsOnMap
+		}
+		cluster = clusterBuilder.NewClusterApp("", "", append(overrides, dependsOn))
+		cluster = cb.ApplyAppOverridesFromEnv(cluster)
+	}
 
 	// Cluster Test Suites intentionally test against the latest provider cluster chart to
 	// surface chart issues as early as possible. clustertest only keeps the release's pinned

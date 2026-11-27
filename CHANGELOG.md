@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Standard suites: Drop trivy from the dependencies of trivy-operator in the form the security-bundle of the release under test accepts. security-bundle 2.5.0 turned `dependsOn` into a map and rejects the list the test values had, so the bundle and everything depending on `kyverno-crds` was never installed.
+
 ## [7.9.0] - 2026-11-23
 
 ### Added
