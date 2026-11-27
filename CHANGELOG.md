@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.9.1] - 2026-11-27
+
 ### Fixed
 
 - Standard suites: Drop trivy from the dependencies of trivy-operator in the form the security-bundle of the release under test accepts. security-bundle 2.5.0 turned `dependsOn` into a map and rejects the list the test values had, so the bundle and everything depending on `kyverno-crds` was never installed.
@@ -1625,7 +1627,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example common tests
 - Dockerfile for running tests in CI
 
-[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.9.0...HEAD
+[Unreleased]: https://github.com/giantswarm/cluster-test-suites/compare/v7.9.1...HEAD
+[7.9.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.9.0...v7.9.1
 [7.9.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.1...v7.9.0
 [7.8.1]: https://github.com/giantswarm/cluster-test-suites/compare/v7.8.0...v7.8.1
 [7.8.0]: https://github.com/giantswarm/cluster-test-suites/compare/v7.7.5...v7.8.0
