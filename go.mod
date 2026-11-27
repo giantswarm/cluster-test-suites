@@ -14,10 +14,10 @@ require (
 	github.com/gravitational/teleport/api v0.0.0-20260825163510-1283425b60ec
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
-	k8s.io/api v0.37.2
-	k8s.io/apiextensions-apiserver v0.37.2
-	k8s.io/apimachinery v0.37.2
-	k8s.io/client-go v0.37.2
+	k8s.io/api v0.37.3
+	k8s.io/apiextensions-apiserver v0.37.3
+	k8s.io/apimachinery v0.37.3
+	k8s.io/client-go v0.37.3
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 	sigs.k8s.io/cluster-api v1.14.4
 	sigs.k8s.io/cluster-api/api v1.14.4
@@ -229,14 +229,14 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v4 v4.3.2 // indirect
-	k8s.io/apiserver v0.37.2 // indirect
+	k8s.io/apiserver v0.37.3 // indirect
 	k8s.io/cli-runtime v0.37.2 // indirect
 	k8s.io/cluster-bootstrap v0.37.2 // indirect
-	k8s.io/component-base v0.37.2 // indirect
+	k8s.io/component-base v0.37.3 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/kubectl v0.37.2 // indirect
-	k8s.io/streaming v0.37.2 // indirect
+	k8s.io/streaming v0.37.3 // indirect
 	oras.land/oras-go/v2 v2.7.0 // indirect
 	sigs.k8s.io/e2e-framework v0.7.0 // indirect
 	sigs.k8s.io/gateway-api v1.7.0 // indirect
